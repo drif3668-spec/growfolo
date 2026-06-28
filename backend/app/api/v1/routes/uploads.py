@@ -18,7 +18,7 @@ async def upload_payment_proof(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> Order:
-    order = db.get(Order, order_id)
+    order = db.get(Order, str(order_id))
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
@@ -36,4 +36,3 @@ async def upload_payment_proof(
     db.commit()
     db.refresh(order)
     return order
-

@@ -6,8 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = "Growfolo API"
     app_env: str = "development"
-    database_url: str
-    jwt_secret: str
+    database_url: str = "sqlite:///./growfolo.db"
+    jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7
     frontend_url: str = "http://localhost:3000"
@@ -25,4 +25,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

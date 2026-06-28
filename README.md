@@ -1,14 +1,15 @@
 # Growfolo.io
 
-Professional scalable store starter for Growfolo.io.
+Growfolo is a local-development ecommerce starter for digital products, subscriptions, orders, checkout, payment proof uploads, admin workflows, and Resend email integration.
 
 ## Stack
 
 - Frontend: Next.js, TypeScript, TailwindCSS, Framer Motion, Three.js
 - Backend: Python FastAPI
-- Database: PostgreSQL
-- Email: Resend
-- Containers: Docker Compose
+- Local database: SQLite
+- Production-ready path later: PostgreSQL
+
+This setup runs directly on your machine with normal frontend and backend commands.
 
 ## Project Structure
 
@@ -16,36 +17,33 @@ Professional scalable store starter for Growfolo.io.
 growfolo/
   frontend/          Next.js storefront and admin panel
   backend/           FastAPI API service
-  infra/             Database bootstrap and infrastructure files
-  docker-compose.yml Local development stack
+  backend/growfolo.db Local SQLite database created automatically
   .env.example       Shared environment reference
 ```
 
-## Quick Start
+## Environment
 
-1. Copy environment files:
+Root example:
 
 ```bash
 cp .env.example .env
-cp frontend/.env.example frontend/.env.local
-cp backend/.env.example backend/.env
 ```
 
-2. Start the full stack:
+Frontend example:
 
 ```bash
-docker compose up --build
+cd frontend
+cp .env.example .env.local
 ```
 
-3. Open:
+Backend example:
 
-- Storefront: http://localhost:3000
-- API: http://localhost:8000
-- API docs: http://localhost:8000/docs
+```bash
+cd backend
+cp .env.example .env
+```
 
-## Local Development
-
-Frontend:
+## Run Frontend
 
 ```bash
 cd frontend
@@ -53,22 +51,55 @@ npm install
 npm run dev
 ```
 
-Backend:
+Open:
+
+```text
+http://localhost:3000
+```
+
+## Run Backend
 
 ```bash
 cd backend
-python -m venv .venv
-.venv\Scripts\activate
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn main:app --reload --port 8000
 ```
 
-## Core Domains
+Open:
 
-- Authentication and admin access
-- Products catalog
-- Orders
-- Checkout
-- Payment proof uploads
-- Resend transactional emails
+```text
+http://localhost:8000/docs
+```
 
+## Database
+
+The backend uses SQLite by default:
+
+```text
+backend/growfolo.db
+```
+
+The database tables are created automatically when FastAPI starts.
+
+Default backend database URL:
+
+```text
+sqlite:///./growfolo.db
+```
+
+## Local API
+
+- `GET /api/v1/products`
+- `GET /api/v1/products/{product_id}`
+- `POST /api/v1/products`
+- `GET /api/v1/orders`
+- `GET /api/v1/orders/{order_id}`
+- `POST /api/v1/orders`
+- `POST /api/v1/checkout`
+- `POST /api/v1/uploads/payment-proof/{order_id}`
+
+## Production Note
+
+For official deployment, switch `DATABASE_URL` from SQLite to PostgreSQL and add migrations before launch.

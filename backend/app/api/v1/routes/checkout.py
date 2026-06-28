@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("", response_model=OrderRead)
 def create_checkout(payload: CheckoutRequest, db: Session = Depends(get_db)) -> Order:
-    product_ids = [item.product_id for item in payload.items]
+    product_ids = [str(item.product_id) for item in payload.items]
     products = list(db.scalars(select(Product).where(Product.id.in_(product_ids))))
     product_map = {product.id: product for product in products}
 
@@ -23,7 +23,7 @@ def create_checkout(payload: CheckoutRequest, db: Session = Depends(get_db)) -> 
     order = Order(customer_name=payload.customer_name, customer_email=payload.customer_email)
     total = 0.0
     for item in payload.items:
-        product = product_map[item.product_id]
+        product = product_map[str(item.product_id)]
         line_total = float(product.price) * item.quantity
         total += line_total
         order.items.append(OrderItem(product_id=product.id, quantity=item.quantity, unit_price=product.price))
@@ -34,4 +34,3 @@ def create_checkout(payload: CheckoutRequest, db: Session = Depends(get_db)) -> 
     db.refresh(order)
     send_order_confirmation(order.customer_email, str(order.id))
     return order
-

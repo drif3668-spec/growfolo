@@ -21,7 +21,8 @@ coverage/
 
 # Uploads and local data
 backend/uploads/
-postgres_data/
+backend/growfolo.db
+*.db
 
 # Logs
 *.log
@@ -34,4 +35,3 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
-

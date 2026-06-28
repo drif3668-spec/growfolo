@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.session import Base, engine
+import app.models  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,11 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
+app.mount("/uploads", StaticFiles(directory=settings.upload_path), name="uploads")
 app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
-
