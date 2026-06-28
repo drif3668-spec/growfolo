@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Bot,
   Brain,
   Code2,
   Cuboid,
@@ -10,7 +9,6 @@ import {
   Medal,
   PenTool,
   Play,
-  Send,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
@@ -66,7 +64,6 @@ export default function HomePage() {
         <NewsletterSection />
         <Footer />
       </div>
-      <GrowBot />
     </main>
   );
 }
@@ -225,28 +222,6 @@ function Footer() {
       </div>
       <p className="mt-8 text-center text-xs text-white/35">جميع الحقوق محفوظة GrowFolo © 2026</p>
     </footer>
-  );
-}
-
-function GrowBot() {
-  return (
-    <aside className="fixed bottom-4 left-4 z-50 hidden w-72 overflow-hidden rounded-3xl border border-purple-500/35 bg-[#090812]/95 shadow-[0_0_34px_rgba(168,85,247,0.35)] backdrop-blur md:block">
-      <div className="flex items-center gap-3 border-b border-white/10 p-4">
-        <div className="grid size-11 place-items-center rounded-2xl bg-purple-700 text-white"><Bot size={24} /></div>
-        <div>
-          <strong>GrowBot</strong>
-          <p className="text-xs text-white/65"><span className="inline-block size-2 rounded-full bg-lime-400" /> متصل الآن</p>
-        </div>
-      </div>
-      <div className="p-4 text-sm leading-7 text-white">
-        <div className="rounded-2xl bg-white/8 p-3">مرحبا! كيف يمكنني مساعدتك اليوم؟<br /><span className="text-xs text-white/45">06.30 PM</span></div>
-      </div>
-      <div className="flex items-center gap-2 border-t border-white/10 p-3">
-        <input className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-black/45 px-3 py-2 text-sm outline-none placeholder:text-white/40" placeholder="اكتب رسالتك..." />
-        <button className="grid size-10 place-items-center rounded-2xl bg-purple-700"><Send size={18} /></button>
-      </div>
-      <div className="border-t border-white/10 py-2 text-center text-xs font-bold text-white">اضغط هنا للدردشة 💬</div>
-    </aside>
   );
 }
 
