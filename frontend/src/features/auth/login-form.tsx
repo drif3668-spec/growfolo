@@ -142,6 +142,13 @@ export function LoginForm() {
             إنشاء حساب
           </a>
         </p>
+
+        <a
+          href="/"
+          className="neon-button mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 font-black text-black"
+        >
+          ← العودة للرئيسية
+        </a>
       </form>
     </div>
   );
