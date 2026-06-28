@@ -1,15 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, Search, ShoppingCart, Sparkle, UserRound } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, Search, ShoppingCart, Sparkle, UserRound, ChevronDown } from "lucide-react";
 import { SidebarMenu } from "@/components/layout/sidebar-menu";
+import { CartSidebar } from "@/components/cart/cart-sidebar";
+import { useCart } from "@/context/cart-context";
+import { useCurrency } from "@/context/currency-context";
 
 export function SiteHeader() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currencyDropOpen, setCurrencyDropOpen] = useState(false);
+  const currencyDropRef = useRef<HTMLDivElement>(null);
+
+  const { count, openSidebar } = useCart();
+  const { currencies, selected, setSelected } = useCurrency();
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (currencyDropRef.current && !currencyDropRef.current.contains(e.target as Node)) {
+        setCurrencyDropOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   return (
     <>
+      <CartSidebar />
       <SidebarMenu open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <header className="sticky top-0 z-40 bg-[#050508]/88 px-4 pb-3 pt-1 backdrop-blur-xl">
@@ -50,19 +69,50 @@ export function SiteHeader() {
           </Link>
 
           <nav className="flex items-center gap-3 md:gap-5">
-            <Link href="/checkout" className="relative flex items-center gap-2 text-sm font-semibold text-white">
+            {/* Currency button */}
+            <div className="relative" ref={currencyDropRef}>
+              <button
+                onClick={() => setCurrencyDropOpen(v => !v)}
+                className="hidden items-center gap-1.5 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10 transition-colors sm:flex"
+                aria-label="العملة"
+              >
+                <span>{selected.flag}</span>
+                <span>{selected.code}</span>
+                <ChevronDown size={14} className={`transition-transform ${currencyDropOpen ? "rotate-180" : ""}`} />
+              </button>
+              {currencyDropOpen && (
+                <div className="absolute left-0 top-full mt-2 z-50 w-56 rounded-2xl border border-white/10 bg-[#12101a] shadow-2xl overflow-hidden">
+                  <div className="max-h-64 overflow-y-auto py-1">
+                    {currencies.map(c => (
+                      <button
+                        key={c.code}
+                        onClick={() => { setSelected(c); setCurrencyDropOpen(false); }}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-white/8 ${selected.code === c.code ? "text-purple-400" : "text-white/80"}`}
+                      >
+                        <span>{c.flag}</span>
+                        <span className="font-mono font-bold">{c.code}</span>
+                        <span className="text-white/50 text-xs">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Cart button */}
+            <button
+              onClick={openSidebar}
+              className="relative flex items-center gap-2 text-sm font-semibold text-white"
+              aria-label="السلة"
+            >
               <span className="relative">
                 <ShoppingCart size={25} />
-                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-lime-400 text-xs text-black">
-                  0
+                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-lime-400 text-xs text-black font-bold">
+                  {count}
                 </span>
               </span>
-              <span className="hidden leading-5 sm:block">
-                السلة
-                <br />
-                <b>0 دج</b>
-              </span>
-            </Link>
+            </button>
+
             <Link
               href="/login"
               className="flex items-center gap-2 text-sm font-semibold text-white hover:text-purple-300 transition-colors"

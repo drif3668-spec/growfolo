@@ -1,12 +1,14 @@
+"use client";
 import type { LucideIcon } from "lucide-react";
 import {
-  Brain, Code2, Cuboid, Gamepad2, Headphones, Mail, Medal,
+  Brain, Code2, Gamepad2, Headphones, Mail, Medal,
   PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
   Users, Wrench, Zap, BadgeCheck, Globe, Rocket
 } from "lucide-react";
 import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
+import { useCart } from "@/context/cart-context";
 
 const features = [
   { title: "تسليم فوري", text: "تسليم الخدمة بسرعة 1 دقيقة", icon: Zap },
@@ -25,11 +27,11 @@ const categories = [
 ];
 
 const products = [
-  { name: "ChatGPT Plus", logo: "◎", discount: "-40%", price: "$5.99", oldPrice: "$9.99", buyers: "12K", color: "from-emerald-400 to-teal-600" },
-  { name: "Adobe Creative Cloud", logo: "∞", discount: "-35%", price: "$34.99", oldPrice: "$53.99", buyers: "8K", color: "from-pink-500 via-orange-400 to-cyan-400" },
-  { name: "Netflix Premium", logo: "▶", discount: "-50%", price: "$4.99", oldPrice: "$9.99", buyers: "15K", color: "from-red-800 to-red-600" },
-  { name: "Canva Pro", logo: "Cv", discount: "-40%", price: "$2.99", oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
-  { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19.00", oldPrice: "$240.00", buyers: "18K", color: "from-purple-500 to-fuchsia-700" },
+  { name: "ChatGPT Plus", logo: "◎", discount: "-40%", price: "$5.99", price_num: 5.99, oldPrice: "$9.99", buyers: "12K", color: "from-emerald-400 to-teal-600" },
+  { name: "Adobe Creative Cloud", logo: "∞", discount: "-35%", price: "$34.99", price_num: 34.99, oldPrice: "$53.99", buyers: "8K", color: "from-pink-500 via-orange-400 to-cyan-400" },
+  { name: "Netflix Premium", logo: "▶", discount: "-50%", price: "$4.99", price_num: 4.99, oldPrice: "$9.99", buyers: "15K", color: "from-red-800 to-red-600" },
+  { name: "Canva Pro", logo: "Cv", discount: "-40%", price: "$2.99", price_num: 2.99, oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
+  { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19.00", price_num: 19.00, oldPrice: "$240.00", buyers: "18K", color: "from-purple-500 to-fuchsia-700" },
 ];
 
 const globalStats = [
@@ -53,6 +55,19 @@ const BRANDS = [
   { name: "Adobe", emoji: "🅰" },
   { name: "ElevenLabs", emoji: "🔊" },
 ];
+
+function AddToCartBtn({ product }: { product: { name: string; price_num: number; logo: string; color: string } }) {
+  const { addItem } = useCart();
+  return (
+    <button
+      onClick={() => addItem({ id: product.name, name: product.name, price: product.price_num, logo: product.logo, color: product.color })}
+      className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)] hover:scale-110 transition-transform"
+      aria-label="إضافة للسلة"
+    >
+      <ShoppingCart size={17} />
+    </button>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -145,9 +160,7 @@ function ProductsSection() {
             </div>
             <div className="mt-4 flex items-center justify-between">
               <span className="flex items-center gap-1 text-xs text-yellow-400"><Star size={14} fill="currentColor" /> 4.9 ({p.buyers})</span>
-              <a href="/checkout" className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)]" aria-label="شراء">
-                <ShoppingCart size={17} />
-              </a>
+              <AddToCartBtn product={p} />
             </div>
           </article>
         ))}

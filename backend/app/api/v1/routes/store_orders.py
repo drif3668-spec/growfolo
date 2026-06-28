@@ -158,3 +158,8 @@ def update_status(order_id: str, payload: StatusUpdate, db: Session = Depends(ge
         send_order_rejected(order_dict)
 
     return order
+
+
+@router.get("/customer/{email}", response_model=list[OrderOut])
+def get_customer_orders(email: str, db: Session = Depends(get_db)) -> list[Order]:
+    return list(db.scalars(select(Order).where(Order.customer_email == email).order_by(Order.created_at.desc())))
