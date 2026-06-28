@@ -57,6 +57,20 @@ Open:
 http://localhost:3000
 ```
 
+If another project already uses port `3000`, run Growfolo on a dedicated port:
+
+```bash
+cd frontend
+npm install
+npm run dev:growfolo
+```
+
+Open:
+
+```text
+http://localhost:3001
+```
+
 ## Run Backend
 
 ```bash
@@ -71,6 +85,20 @@ Open:
 
 ```text
 http://localhost:8000/docs
+```
+
+If another project already uses port `8000`, run Growfolo API on:
+
+```bash
+cd backend
+venv\Scripts\activate
+uvicorn main:app --reload --port 8001
+```
+
+Open:
+
+```text
+http://localhost:8001/docs
 ```
 
 ## Database

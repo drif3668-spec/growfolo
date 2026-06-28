@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.tools/
 .venv/
 venv/
 __pycache__/
@@ -11,6 +12,7 @@ out/
 dist/
 build/
 coverage/
+*.tsbuildinfo
 
 # Environment
 .env

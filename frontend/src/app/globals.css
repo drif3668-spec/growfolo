@@ -66,3 +66,31 @@ input {
   letter-spacing: -0.04em;
   text-shadow: 0 0 18px rgba(168, 85, 247, 0.75), 0 0 20px rgba(132, 204, 22, 0.45);
 }
+
+@keyframes chat-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(168, 85, 247, 0),
+      0 0 20px rgba(168, 85, 247, 0.45),
+      0 0 40px rgba(59, 130, 246, 0.25),
+      0 8px 32px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(168, 85, 247, 0.08),
+      0 0 36px rgba(168, 85, 247, 0.7),
+      0 0 70px rgba(59, 130, 246, 0.4),
+      0 8px 40px rgba(0, 0, 0, 0.55);
+    transform: scale(1.055);
+  }
+}
+
+.chat-breathe {
+  animation: chat-breathe 2.8s ease-in-out infinite;
+}
+
+.chat-breathe:hover {
+  animation-play-state: paused;
+  transform: scale(1.12) !important;
+}

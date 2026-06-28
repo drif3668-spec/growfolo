@@ -39,7 +39,7 @@ const categories = [
 const products = [
   { name: "ChatGPT Plus", logo: "◎", discount: "-40%", price: "$5.99", oldPrice: "$9.99", buyers: "12K", color: "from-emerald-400 to-teal-600" },
   { name: "Adobe Creative Cloud", logo: "∞", discount: "-35%", price: "$34.99", oldPrice: "$53.99", buyers: "8K", color: "from-pink-500 via-orange-400 to-cyan-400" },
-  { name: "Netflix Premium", logo: "N", discount: "-50%", price: "$4.99", oldPrice: "$9.99", buyers: "15K", color: "from-black to-red-700" },
+  { name: "Netflix Premium", logo: "▶", discount: "-50%", price: "$4.99", oldPrice: "$9.99", buyers: "15K", color: "from-red-800 to-red-600" },
   { name: "Canva Pro", logo: "Canva", discount: "-40%", price: "$2.99", oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
   { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19,00", oldPrice: "$29.90", buyers: "18K", color: "from-purple-500 to-fuchsia-700" }
 ];

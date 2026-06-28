@@ -38,7 +38,7 @@ const CURRENCIES = [
 
 const MOCK_CART = [
   { id: "p1", name: "ChatGPT Plus", subtitle: "اشتراك شهري", price: 5.99, qty: 1, color: "from-emerald-400 to-teal-600", logo: "◎" },
-  { id: "p2", name: "Netflix Premium", subtitle: "اشتراك شهري", price: 4.99, qty: 1, color: "from-black to-red-700", logo: "N" },
+  { id: "p2", name: "Netflix Premium", subtitle: "اشتراك شهري", price: 4.99, qty: 1, color: "from-red-800 to-red-600", logo: "▶" },
   { id: "p3", name: "Canva Pro", subtitle: "اشتراك شهري", price: 2.99, qty: 2, color: "from-cyan-400 to-blue-700", logo: "Cv" },
 ];
 

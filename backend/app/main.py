@@ -11,9 +11,20 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.app_name)
 
+# In development allow all common localhost ports; in production use settings.frontend_url only.
+if settings.app_env == "development":
+    cors_origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ]
+else:
+    cors_origins = [settings.frontend_url]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
