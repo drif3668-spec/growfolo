@@ -1,30 +1,18 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Brain,
-  Code2,
-  Cuboid,
-  Gamepad2,
-  Headphones,
-  Mail,
-  Medal,
-  PenTool,
-  Play,
-  ShieldCheck,
-  ShoppingBag,
-  ShoppingCart,
-  Star,
-  Users,
-  Wrench,
-  Zap
+  Brain, Code2, Cuboid, Gamepad2, Headphones, Mail, Medal,
+  PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
+  Users, Wrench, Zap, BadgeCheck, Globe, Rocket
 } from "lucide-react";
 import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
 
 const features = [
   { title: "تسليم فوري", text: "تسليم الخدمة بسرعة 1 دقيقة", icon: Zap },
   { title: "ضمان كامل", text: "ضمان الاسترجاع الحق حتى 35 يوم", icon: ShieldCheck },
   { title: "دعم 24/7", text: "فريق دعم على مدار الساعة", icon: Headphones },
-  { title: "أسعار مميزة", text: "أفضل الأسعار في السوق", icon: Medal }
+  { title: "أسعار مميزة", text: "أفضل الأسعار في السوق", icon: Medal },
 ];
 
 const categories = [
@@ -33,22 +21,37 @@ const categories = [
   { title: "الترفيه والمشاهدة", icon: Play },
   { title: "الإبداع والتصميم", icon: PenTool },
   { title: "البرامج والتطبيقات", icon: Code2 },
-  { title: "الألعاب والبطاقات", icon: Gamepad2 }
+  { title: "الألعاب والبطاقات", icon: Gamepad2 },
 ];
 
 const products = [
   { name: "ChatGPT Plus", logo: "◎", discount: "-40%", price: "$5.99", oldPrice: "$9.99", buyers: "12K", color: "from-emerald-400 to-teal-600" },
   { name: "Adobe Creative Cloud", logo: "∞", discount: "-35%", price: "$34.99", oldPrice: "$53.99", buyers: "8K", color: "from-pink-500 via-orange-400 to-cyan-400" },
   { name: "Netflix Premium", logo: "▶", discount: "-50%", price: "$4.99", oldPrice: "$9.99", buyers: "15K", color: "from-red-800 to-red-600" },
-  { name: "Canva Pro", logo: "Canva", discount: "-40%", price: "$2.99", oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
-  { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19,00", oldPrice: "$29.90", buyers: "18K", color: "from-purple-500 to-fuchsia-700" }
+  { name: "Canva Pro", logo: "Cv", discount: "-40%", price: "$2.99", oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
+  { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19.00", oldPrice: "$240.00", buyers: "18K", color: "from-purple-500 to-fuchsia-700" },
 ];
 
-const stats = [
-  { value: "+369,784", label: "عميل سعيد", icon: Users },
-  { value: "5/5", label: "تقييم العملاء", icon: Star },
-  { value: "+10,000", label: "منتج رقمي", icon: Cuboid },
-  { value: "+99,9%", label: "معدل رضا العملاء", icon: ShieldCheck }
+const globalStats = [
+  { value: "+250,000", label: "عميل سعيد", icon: Users },
+  { value: "4.98 ⭐", label: "تقييم العملاء", icon: Star },
+  { value: "+650,000", label: "طلب مكتمل", icon: Rocket },
+  { value: "+90", label: "دولة حول العالم", icon: Globe },
+];
+
+const BRANDS = [
+  { name: "ChatGPT", emoji: "🤖" },
+  { name: "Claude", emoji: "✳" },
+  { name: "Gemini", emoji: "♊" },
+  { name: "Perplexity", emoji: "🔵" },
+  { name: "Midjourney", emoji: "🎨" },
+  { name: "Cursor", emoji: "⚡" },
+  { name: "GitHub Copilot", emoji: "🐙" },
+  { name: "Canva", emoji: "🖌" },
+  { name: "Netflix", emoji: "▶" },
+  { name: "Spotify", emoji: "🎵" },
+  { name: "Adobe", emoji: "🅰" },
+  { name: "ElevenLabs", emoji: "🔊" },
 ];
 
 export default function HomePage() {
@@ -60,7 +63,10 @@ export default function HomePage() {
         <FeatureStrip />
         <CategoriesSection />
         <ProductsSection />
-        <StatsStrip />
+        <StatsSection />
+        <ReviewsCarousel />
+        <TrustSection />
+        <BrandsStrip />
         <NewsletterSection />
         <Footer />
       </div>
@@ -84,8 +90,7 @@ function HeroSection() {
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
           <a href="#products" className="neon-button inline-flex items-center gap-3 rounded-2xl px-7 py-4 font-bold text-black">
-            تصفح المنتجات
-            <ShoppingBag size={20} />
+            تصفح المنتجات <ShoppingBag size={20} />
           </a>
           <a href="#about" className="inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-black/45 px-7 py-4 font-bold text-white shadow-[0_0_24px_rgba(168,85,247,0.16)]">
             تعرف علينا
@@ -100,9 +105,7 @@ function HeroSection() {
 function FeatureStrip() {
   return (
     <section className="glass-panel grid gap-4 rounded-3xl p-5 md:grid-cols-4">
-      {features.map((feature) => (
-        <IconBlock key={feature.title} {...feature} />
-      ))}
+      {features.map((f) => <IconBlock key={f.title} {...f} />)}
     </section>
   );
 }
@@ -112,13 +115,12 @@ function CategoriesSection() {
     <section className="py-10">
       <SectionTitle title="تصفح الأقسام" />
       <div className="relative mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        {categories.map((category) => (
-          <article key={category.title} className="glass-panel group grid min-h-40 place-items-center rounded-3xl p-5 text-center">
-            <category.icon className="mb-5 size-14 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.75)] group-hover:text-lime-400" />
-            <h3 className="font-bold text-white">{category.title}</h3>
+        {categories.map((c) => (
+          <article key={c.title} className="glass-panel group grid min-h-40 place-items-center rounded-3xl p-5 text-center">
+            <c.icon className="mb-5 size-14 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.75)] group-hover:text-lime-400" />
+            <h3 className="font-bold text-white">{c.title}</h3>
           </article>
         ))}
-        <button className="absolute -left-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-white/5 text-3xl text-white lg:grid">›</button>
       </div>
     </section>
   );
@@ -129,48 +131,80 @@ function ProductsSection() {
     <section id="products" className="pb-10">
       <SectionTitle title="أحدث المنتجات 🔥" />
       <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {products.map((product) => (
-          <article key={product.name} className="glass-panel relative overflow-hidden rounded-3xl p-4">
-            <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{product.discount}</span>
-            <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${product.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
-              {product.logo}
+        {products.map((p) => (
+          <article key={p.name} className="glass-panel relative overflow-hidden rounded-3xl p-4">
+            <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{p.discount}</span>
+            <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${p.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
+              {p.logo}
             </div>
-            <h3 className="mt-5 text-center text-sm font-bold text-white">{product.name}</h3>
+            <h3 className="mt-5 text-center text-sm font-bold text-white">{p.name}</h3>
             <p className="mt-2 text-center text-xs leading-5 text-white/70">اشتراك رسمي<br />تسليم فوري</p>
             <div className="mt-4 flex items-end justify-between gap-2">
-              <span className="text-2xl font-black text-white">{product.price}</span>
-              <span className="text-sm text-white/40 line-through">{product.oldPrice}</span>
+              <span className="text-2xl font-black text-white">{p.price}</span>
+              <span className="text-sm text-white/40 line-through">{p.oldPrice}</span>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <span className="flex items-center gap-1 text-xs text-yellow-400"><Star size={14} fill="currentColor" /> 4.9 ({product.buyers})</span>
-              <button className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)]" aria-label="إضافة للسلة">
+              <span className="flex items-center gap-1 text-xs text-yellow-400"><Star size={14} fill="currentColor" /> 4.9 ({p.buyers})</span>
+              <a href="/checkout" className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)]" aria-label="شراء">
                 <ShoppingCart size={17} />
-              </button>
+              </a>
             </div>
           </article>
         ))}
-        <button className="absolute -right-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-white/5 text-3xl text-white lg:grid">‹</button>
-        <button className="absolute -left-3 top-1/2 hidden size-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-white/5 text-3xl text-white lg:grid">›</button>
       </div>
     </section>
   );
 }
 
-function StatsStrip() {
+function StatsSection() {
   return (
-    <section className="glass-panel grid gap-5 rounded-3xl p-6 md:grid-cols-[repeat(4,1fr)_1.35fr]">
-      {stats.map((stat) => (
-        <div key={stat.label} className="flex items-center gap-4">
-          <stat.icon className="size-11 text-lime-400 drop-shadow-[0_0_12px_rgba(132,204,22,0.75)]" />
+    <section className="glass-panel grid gap-5 rounded-3xl p-6 md:grid-cols-4">
+      {globalStats.map((s) => (
+        <div key={s.label} className="flex items-center gap-4">
+          <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-purple-500/20 bg-purple-500/10">
+            <s.icon className="size-8 text-lime-400 drop-shadow-[0_0_12px_rgba(132,204,22,0.75)]" />
+          </div>
           <div>
-            <strong className="block text-2xl">{stat.value}</strong>
-            <span className="text-sm text-white/70">{stat.label}</span>
+            <strong className="block text-2xl text-white">{s.value}</strong>
+            <span className="text-sm text-white/60">{s.label}</span>
           </div>
         </div>
       ))}
-      <div className="flex items-center gap-4 border-white/10 md:border-r md:pr-5">
-        <div className="grid size-16 place-items-center rounded-2xl bg-white text-3xl font-black text-purple-600">A</div>
-        <div className="text-sm leading-7 text-white/75">موثّق في منصة الأعمال<br />Saudi Business Center</div>
+    </section>
+  );
+}
+
+function TrustSection() {
+  return (
+    <section className="my-10 text-center">
+      <h2 className="text-4xl font-black text-white md:text-5xl">
+        يثق بنا <span className="neon-text">آلاف العملاء</span> حول العالم.
+      </h2>
+      <p className="mt-4 text-white/55">خدمة سريعة · اشتراكات أصلية · دعم 24/7</p>
+      <a href="/checkout" className="neon-button mt-8 inline-flex items-center gap-3 rounded-2xl px-10 py-4 font-black text-black text-lg">
+        ابدأ الآن ←
+      </a>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
+        {["ضمان استرجاع الأموال حتى 30 يوم", "تفعيل فوري خلال دقائق", "دعم على مدار الساعة 24/7", "دفع 100% آمن · حماية بياناتك", "اشتراكات أصلية 100% بدون مشاركة"].map((t) => (
+          <span key={t} className="flex items-center gap-1.5">
+            <BadgeCheck size={15} className="text-lime-400" /> {t}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function BrandsStrip() {
+  return (
+    <section className="glass-panel overflow-hidden rounded-3xl py-5">
+      <div className="flex animate-none items-center gap-8 overflow-x-auto px-6 pb-2 [scrollbar-width:none]">
+        {BRANDS.map((b) => (
+          <div key={b.name} className="flex shrink-0 flex-col items-center gap-2">
+            <div className="grid size-12 place-items-center rounded-2xl bg-white/8 text-2xl">{b.emoji}</div>
+            <span className="text-xs text-white/50">{b.name}</span>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -203,19 +237,14 @@ function Footer() {
           <p className="mt-4 max-w-sm text-sm leading-8 text-white/65">
             متجر رقمي يقدم لك أفضل الخدمات والاشتراكات الأصلية، كل ما تحتاج لتجربة رقمية متكاملة ومتميزة
           </p>
-          <div className="mt-5 flex gap-2">
-            {["f", "▶", "♪", "X", "◎"].map((item) => (
-              <span key={item} className="grid size-9 place-items-center rounded-full bg-white/8 text-sm text-white">{item}</span>
-            ))}
-          </div>
         </div>
         <FooterColumn title="روابط سريعة" links={["المدونة", "الصفحة التعريفية", "سياسة الخصوصية", "الاستبدال والاسترجاع"]} />
         <FooterColumn title="خدمة العملاء" links={["تواصل معنا", "الأسئلة الشائعة", "تتبع الطلب", "شروط الخدمة"]} />
         <div>
           <h3 className="mb-4 font-black">طرق الدفع</h3>
-          <div className="grid max-w-48 grid-cols-2 gap-3">
-            {["Pay", "VISA", "VISA", "Mastercard"].map((item, index) => (
-              <span key={`${item}-${index}`} className="rounded-lg bg-white px-3 py-2 text-center text-sm font-black text-black">{item}</span>
+          <div className="flex flex-wrap gap-2 text-sm">
+            {["USDT", "BNB", "BaridiMob", "Mobilis", "InstaPay"].map((m) => (
+              <span key={m} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-white/70">{m}</span>
             ))}
           </div>
         </div>
@@ -253,9 +282,7 @@ function FooterColumn({ title, links }: { title: string; links: string[] }) {
     <div>
       <h3 className="mb-4 font-black">{title}</h3>
       <ul className="grid gap-3 text-sm text-white/62">
-        {links.map((link) => (
-          <li key={link}>{link}</li>
-        ))}
+        {links.map((l) => <li key={l}>{l}</li>)}
       </ul>
     </div>
   );

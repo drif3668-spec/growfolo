@@ -1,0 +1,160 @@
+from __future__ import annotations
+
+import shutil
+from datetime import datetime, timedelta
+from pathlib import Path
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.db.session import get_db
+from app.models.order import Order
+from app.services.email import send_order_activated, send_order_received, send_order_rejected
+
+router = APIRouter()
+
+EXPIRE_MINUTES = 35
+
+
+# ── Schemas ────────────────────────────────────────────────────────────────
+
+class OrderCreate(BaseModel):
+    customer_name: str
+    customer_email: str
+    customer_whatsapp: str
+    customer_country: str
+    customer_telegram: str | None = None
+    customer_notes: str | None = None
+    product_name: str
+    product_price: float
+    payment_method: str
+
+
+class StatusUpdate(BaseModel):
+    status: str
+    admin_notes: str | None = None
+
+
+class OrderOut(BaseModel):
+    id: str
+    customer_name: str
+    customer_email: str
+    customer_whatsapp: str | None
+    customer_country: str | None
+    customer_telegram: str | None
+    customer_notes: str | None
+    product_name: str
+    product_price: float
+    payment_method: str | None
+    payment_proof_url: str | None
+    status: str
+    admin_notes: str | None
+    created_at: datetime
+    expires_at: datetime | None
+
+    class Config:
+        from_attributes = True
+
+
+# ── Endpoints ──────────────────────────────────────────────────────────────
+
+@router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
+def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
+    now = datetime.utcnow()
+    order = Order(
+        customer_name=payload.customer_name,
+        customer_email=payload.customer_email,
+        customer_whatsapp=payload.customer_whatsapp,
+        customer_country=payload.customer_country,
+        customer_telegram=payload.customer_telegram,
+        customer_notes=payload.customer_notes,
+        product_name=payload.product_name,
+        product_price=payload.product_price,
+        payment_method=payload.payment_method,
+        total=payload.product_price,
+        status="pending_proof",
+        created_at=now,
+        expires_at=now + timedelta(minutes=EXPIRE_MINUTES),
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    send_order_received({
+        "id": order.id,
+        "customer_name": order.customer_name,
+        "customer_email": order.customer_email,
+        "product_name": order.product_name,
+        "product_price": float(order.product_price),
+        "payment_method": order.payment_method,
+    })
+
+    return order
+
+
+@router.get("", response_model=list[OrderOut])
+def list_orders(db: Session = Depends(get_db)) -> list[Order]:
+    return list(db.scalars(select(Order).order_by(Order.created_at.desc())))
+
+
+@router.get("/{order_id}", response_model=OrderOut)
+def get_order(order_id: str, db: Session = Depends(get_db)) -> Order:
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+    return order
+
+
+@router.post("/{order_id}/proof", response_model=OrderOut)
+def upload_proof(order_id: str, file: UploadFile = File(...), db: Session = Depends(get_db)) -> Order:
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+
+    ext = Path(file.filename or "proof.jpg").suffix or ".jpg"
+    filename = f"proof_{order_id}{ext}"
+    dest = settings.upload_path / filename
+
+    with dest.open("wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    order.payment_proof_url = f"/uploads/{filename}"
+    order.status = "processing"
+    db.commit()
+    db.refresh(order)
+    return order
+
+
+@router.patch("/{order_id}/status", response_model=OrderOut)
+def update_status(order_id: str, payload: StatusUpdate, db: Session = Depends(get_db)) -> Order:
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+
+    order.status = payload.status
+    if payload.admin_notes is not None:
+        order.admin_notes = payload.admin_notes
+
+    db.commit()
+    db.refresh(order)
+
+    order_dict = {
+        "id": order.id,
+        "customer_name": order.customer_name,
+        "customer_email": order.customer_email,
+        "product_name": order.product_name,
+        "product_price": float(order.product_price),
+        "payment_method": order.payment_method,
+        "admin_notes": order.admin_notes,
+    }
+
+    if payload.status == "activated":
+        send_order_activated(order_dict)
+    elif payload.status == "rejected":
+        send_order_rejected(order_dict)
+
+    return order
