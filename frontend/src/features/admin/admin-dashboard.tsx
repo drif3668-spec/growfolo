@@ -5,6 +5,7 @@ import {
   MessageCircle, Package, ReceiptText, Send, ShieldCheck,
   Users, CheckCircle, RefreshCw, Eye, Clock, ExternalLink,
   ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, ToggleLeft, ToggleRight, Pencil, X,
+  Gift, Tag, Percent, Copy, Truck,
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -18,10 +19,24 @@ type Order = {
   customer_country: string | null; customer_telegram: string | null; customer_notes: string | null;
   product_name: string; product_price: number; payment_method: string | null;
   payment_proof_url: string | null; status: string; admin_notes: string | null;
+  tracking_stage: number; tracking_notes: string | null;
   created_at: string; expires_at: string | null;
 };
 
-type NavSection = "orders" | "products" | "banners" | "chat" | "settings";
+type DiscountCode = {
+  id: number; code: string; percent: number; order_id: string | null;
+  description: string | null; expires_at: string | null;
+  max_uses: number; used_count: number; is_active: boolean; created_at: string;
+};
+
+type DiscountForm = {
+  code: string; percent: number; order_id: string; description: string;
+  expires_at: string; max_uses: number;
+};
+
+const EMPTY_DC: DiscountForm = { code: "", percent: 35, order_id: "", description: "", expires_at: "", max_uses: 1 };
+
+type NavSection = "orders" | "products" | "banners" | "chat" | "settings" | "discounts";
 
 type BannerSlide = {
   id: number; image_url: string; title: string | null; description: string | null;
@@ -148,6 +163,16 @@ export function AdminDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusNote, setStatusNote] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [trackingStage, setTrackingStage] = useState(1);
+  const [trackingNote, setTrackingNote] = useState("");
+  const [updatingTracking, setUpdatingTracking] = useState(false);
+
+  /* ── Discounts state ────────────────────────────────────────────────── */
+  const [discounts, setDiscounts] = useState<DiscountCode[]>([]);
+  const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [dcForm, setDcForm] = useState<DiscountForm>(EMPTY_DC);
+  const [dcSaving, setDcSaving] = useState(false);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   /* ── Chat state ─────────────────────────────────────────────────────── */
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -171,6 +196,72 @@ export function AdminDashboard() {
   }, []);
 
   useEffect(() => { if (nav === "orders") loadOrders(); }, [nav, loadOrders]);
+
+  /* ── Load discounts ───────────────────────────────────────────────── */
+  const loadDiscounts = useCallback(async () => {
+    setDiscountsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/discounts`);
+      if (res.ok) setDiscounts(await res.json());
+    } catch {} finally { setDiscountsLoading(false); }
+  }, []);
+
+  useEffect(() => { if (nav === "discounts") loadDiscounts(); }, [nav, loadDiscounts]);
+
+  async function saveDiscount() {
+    setDcSaving(true);
+    try {
+      const body = {
+        code: dcForm.code.trim() || undefined,
+        percent: dcForm.percent,
+        order_id: dcForm.order_id.trim() || undefined,
+        description: dcForm.description.trim() || undefined,
+        expires_at: dcForm.expires_at || undefined,
+        max_uses: dcForm.max_uses,
+      };
+      const res = await fetch(`${API_URL}/api/v1/discounts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) { setDcForm(EMPTY_DC); await loadDiscounts(); }
+      else { const err = await res.json(); alert(err.detail ?? "خطأ"); }
+    } catch {} finally { setDcSaving(false); }
+  }
+
+  async function deleteDiscount(id: number) {
+    if (!confirm("حذف الكود؟")) return;
+    await fetch(`${API_URL}/api/v1/discounts/${id}`, { method: "DELETE" });
+    setDiscounts((p) => p.filter((d) => d.id !== id));
+  }
+
+  async function toggleDiscount(id: number) {
+    const res = await fetch(`${API_URL}/api/v1/discounts/${id}/toggle`, { method: "PATCH" });
+    if (res.ok) { const updated: DiscountCode = await res.json(); setDiscounts((p) => p.map((d) => d.id === id ? updated : d)); }
+  }
+
+  function copyCode(id: number, code: string) {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedId(id); setTimeout(() => setCopiedId(null), 2000);
+    });
+  }
+
+  /* ── Update tracking ──────────────────────────────────────────────── */
+  const updateTracking = async (orderId: string) => {
+    setUpdatingTracking(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/store-orders/${orderId}/tracking`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tracking_stage: trackingStage, tracking_notes: trackingNote || null }),
+      });
+      if (res.ok) {
+        const updated: Order = await res.json();
+        setOrders((p) => p.map((o) => o.id === orderId ? updated : o));
+        setSelectedOrder(updated);
+      }
+    } catch {} finally { setUpdatingTracking(false); }
+  };
 
   /* ── Update order status ───────────────────────────────────────────── */
   const updateStatus = async (orderId: string, status: string) => {
@@ -244,6 +335,7 @@ export function AdminDashboard() {
     { id: "banners" as NavSection, label: "البانرات", icon: ImageIcon, badge: 0 },
     { id: "products" as NavSection, label: "المنتجات", icon: Package, badge: 0 },
     { id: "chat" as NavSection, label: "الشات المباشر", icon: MessageCircle, badge: sessions.filter((s) => !s.is_resolved).length },
+    { id: "discounts" as NavSection, label: "أكواد الخصم", icon: Gift, badge: 0 },
     { id: "settings" as NavSection, label: "الإعدادات", icon: ShieldCheck, badge: 0 },
   ];
 
@@ -311,7 +403,7 @@ export function AdminDashboard() {
                     return (
                       <button
                         key={order.id}
-                        onClick={() => setSelectedOrder(order)}
+                        onClick={() => { setSelectedOrder(order); setTrackingStage(order.tracking_stage || 1); setTrackingNote(""); }}
                         className={`flex w-full items-center gap-3 border-b border-white/5 px-5 py-4 text-right transition-colors hover:bg-white/4 ${selectedOrder?.id === order.id ? "bg-purple-600/10" : ""}`}
                       >
                         <div className="min-w-0 flex-1">
@@ -379,6 +471,56 @@ export function AdminDashboard() {
                         <ExternalLink size={14} /> عرض إثبات الدفع
                       </a>
                     )}
+
+                    {/* ── Tracking stage ────────────────────────────── */}
+                    <div className="mb-4 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-black text-purple-300">
+                        <Truck size={14} /> مرحلة تتبع الطلب
+                      </div>
+                      <div className="mb-2 flex gap-1.5">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => setTrackingStage(n)}
+                            className="flex-1 rounded-xl py-2 text-xs font-black transition-all"
+                            style={{
+                              background: trackingStage === n
+                                ? (n === 5 ? "rgba(200,230,0,0.3)" : "rgba(168,85,247,0.4)")
+                                : (selectedOrder.tracking_stage >= n ? "rgba(168,85,247,0.15)" : "rgba(255,255,255,0.05)"),
+                              color: trackingStage === n
+                                ? (n === 5 ? "#c8e600" : "#c084fc")
+                                : (selectedOrder.tracking_stage >= n ? "rgba(192,132,252,0.7)" : "rgba(255,255,255,0.25)"),
+                              border: `1px solid ${trackingStage === n ? "rgba(168,85,247,0.5)" : "rgba(255,255,255,0.06)"}`,
+                            }}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mb-2 text-[10px] text-center text-white/35">
+                        الحالية: المرحلة {selectedOrder.tracking_stage} ← المختارة: {trackingStage}
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={trackingNote}
+                        onChange={(e) => setTrackingNote(e.target.value)}
+                        placeholder="ملاحظة للمتابعة (اختياري)..."
+                        className="mb-2 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/25 focus:border-purple-500/40"
+                      />
+                      <button
+                        onClick={() => updateTracking(selectedOrder.id)}
+                        disabled={updatingTracking}
+                        className="w-full rounded-xl py-2 text-xs font-black transition-all disabled:opacity-50"
+                        style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.5), rgba(99,102,241,0.5))", border: "1px solid rgba(168,85,247,0.3)" }}
+                      >
+                        {updatingTracking ? "جارٍ التحديث..." : "تحديث مرحلة التتبع"}
+                      </button>
+                      {selectedOrder.tracking_notes && (
+                        <div className="mt-2 rounded-xl bg-white/4 px-3 py-2 text-[10px] text-white/45">
+                          📝 {selectedOrder.tracking_notes}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Admin notes */}
                     <label className="mb-3 grid gap-1.5 text-xs font-semibold text-white/55">
@@ -672,6 +814,173 @@ export function AdminDashboard() {
           )}
           {nav === "settings" && (
             <div className="py-12 text-center text-white/30">قسم الإعدادات — قريباً</div>
+          )}
+
+          {/* ── DISCOUNTS ────────────────────────────────────────── */}
+          {nav === "discounts" && (
+            <>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-black">أكواد الخصم</h2>
+                <button onClick={loadDiscounts} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                  <RefreshCw size={14} className={discountsLoading ? "animate-spin" : ""} /> تحديث
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="mb-5 grid gap-3 sm:grid-cols-4">
+                {[
+                  { label: "إجمالي الأكواد", val: discounts.length, color: "text-white" },
+                  { label: "مفعّلة", val: discounts.filter((d) => d.is_active).length, color: "text-lime-400" },
+                  { label: "مستخدمة كلياً", val: discounts.filter((d) => d.used_count >= d.max_uses).length, color: "text-orange-400" },
+                  { label: "مرتبطة بطلبات", val: discounts.filter((d) => d.order_id).length, color: "text-purple-400" },
+                ].map(({ label, val, color }) => (
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
+                    <p className="text-xs text-white/40">{label}</p>
+                    <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Create form */}
+              <div className="mb-6 rounded-3xl border border-lime-500/15 bg-lime-500/4 p-5">
+                <div className="mb-4 flex items-center gap-2 text-sm font-black text-lime-400">
+                  <Plus size={16} /> إنشاء كود خصم جديد
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    الكود (فارغ = توليد تلقائي)
+                    <input
+                      value={dcForm.code}
+                      onChange={(e) => setDcForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
+                      placeholder="GF-SUMMER35"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/40"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    نسبة الخصم %
+                    <input
+                      type="number" min={1} max={100}
+                      value={dcForm.percent}
+                      onChange={(e) => setDcForm((p) => ({ ...p, percent: Number(e.target.value) }))}
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    الحد الأقصى للاستخدام
+                    <input
+                      type="number" min={1}
+                      value={dcForm.max_uses}
+                      onChange={(e) => setDcForm((p) => ({ ...p, max_uses: Number(e.target.value) }))}
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    رقم الطلب (اختياري)
+                    <input
+                      value={dcForm.order_id}
+                      onChange={(e) => setDcForm((p) => ({ ...p, order_id: e.target.value }))}
+                      placeholder="UUID الطلب"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/20 focus:border-lime-500/40 font-mono"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    تاريخ الانتهاء (اختياري)
+                    <input
+                      type="datetime-local"
+                      value={dcForm.expires_at}
+                      onChange={(e) => setDcForm((p) => ({ ...p, expires_at: e.target.value }))}
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    وصف (اختياري)
+                    <input
+                      value={dcForm.description}
+                      onChange={(e) => setDcForm((p) => ({ ...p, description: e.target.value }))}
+                      placeholder="مثال: هدية المرحلة 5"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/40"
+                    />
+                  </label>
+                </div>
+                <button
+                  onClick={saveDiscount} disabled={dcSaving}
+                  className="mt-4 neon-button flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-black disabled:opacity-50"
+                >
+                  {dcSaving ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
+                  {dcSaving ? "جارٍ الإنشاء..." : "إنشاء الكود"}
+                </button>
+              </div>
+
+              {/* List */}
+              {discounts.length === 0 && !discountsLoading && (
+                <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                  لا توجد أكواد — أنشئ أول كود الآن
+                </div>
+              )}
+              <div className="grid gap-3">
+                {discounts.map((dc) => (
+                  <div
+                    key={dc.id}
+                    className={`flex flex-wrap items-center gap-4 rounded-3xl border p-4 ${dc.is_active ? "border-white/10 bg-white/3" : "border-white/5 bg-white/1 opacity-50"}`}
+                  >
+                    {/* Code badge */}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="flex items-center gap-2 rounded-2xl px-4 py-2.5"
+                        style={{
+                          background: dc.is_active ? "rgba(200,230,0,0.1)" : "rgba(255,255,255,0.05)",
+                          border: `1px solid ${dc.is_active ? "rgba(200,230,0,0.25)" : "rgba(255,255,255,0.08)"}`,
+                        }}
+                      >
+                        <Tag size={13} className={dc.is_active ? "text-lime-400" : "text-white/30"} />
+                        <span className={`font-mono text-sm font-black tracking-widest ${dc.is_active ? "text-lime-400" : "text-white/40"}`}>
+                          {dc.code}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => copyCode(dc.id, dc.code)}
+                        className="grid size-8 place-items-center rounded-xl bg-white/6 text-white/40 hover:bg-white/12"
+                      >
+                        {copiedId === dc.id ? <CheckCircle size={13} className="text-lime-400" /> : <Copy size={13} />}
+                      </button>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        <span className="font-black text-white"><Percent size={11} className="inline mb-0.5" /> {dc.percent}%</span>
+                        <span className="text-white/40">الاستخدام: {dc.used_count}/{dc.max_uses}</span>
+                        {dc.order_id && <span className="font-mono text-white/35 text-[10px] truncate max-w-[120px]">📦 {dc.order_id.slice(0, 12)}...</span>}
+                        {dc.expires_at && <span className="text-white/35">ينتهي: {new Date(dc.expires_at).toLocaleDateString("ar-DZ")}</span>}
+                        {dc.description && <span className="text-white/50 italic">{dc.description}</span>}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-3">
+                        <span className={`text-[10px] font-bold ${dc.is_active ? "text-lime-400" : "text-white/30"}`}>
+                          {dc.is_active ? "● مفعّل" : "○ معطّل"}
+                        </span>
+                        {dc.used_count >= dc.max_uses && <span className="text-[10px] text-orange-400">✦ استُنفد</span>}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleDiscount(dc.id)}
+                        className="rounded-xl bg-white/8 px-3 py-1.5 text-xs text-white/60 hover:bg-white/15 hover:text-white"
+                      >
+                        {dc.is_active ? <ToggleRight size={15} className="text-lime-400" /> : <ToggleLeft size={15} />}
+                      </button>
+                      <button
+                        onClick={() => deleteDiscount(dc.id)}
+                        className="grid size-8 place-items-center rounded-xl bg-red-500/12 text-red-400 hover:bg-red-500/22"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

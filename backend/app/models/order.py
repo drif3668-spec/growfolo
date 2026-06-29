@@ -32,6 +32,10 @@ class Order(Base):
     status: Mapped[str] = mapped_column(String(40), default="new")
     admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Tracking stage 1-5
+    tracking_stage: Mapped[int] = mapped_column(Integer, default=1)
+    tracking_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

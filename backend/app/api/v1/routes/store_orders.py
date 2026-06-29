@@ -39,6 +39,11 @@ class StatusUpdate(BaseModel):
     admin_notes: str | None = None
 
 
+class TrackingUpdate(BaseModel):
+    tracking_stage: int
+    tracking_notes: str | None = None
+
+
 class OrderOut(BaseModel):
     id: str
     customer_name: str
@@ -53,8 +58,22 @@ class OrderOut(BaseModel):
     payment_proof_url: str | None
     status: str
     admin_notes: str | None
+    tracking_stage: int
+    tracking_notes: str | None
     created_at: datetime
     expires_at: datetime | None
+
+    class Config:
+        from_attributes = True
+
+
+class TrackingOut(BaseModel):
+    id: str
+    product_name: str
+    status: str
+    tracking_stage: int
+    tracking_notes: str | None
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -99,6 +118,27 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
 @router.get("", response_model=list[OrderOut])
 def list_orders(db: Session = Depends(get_db)) -> list[Order]:
     return list(db.scalars(select(Order).order_by(Order.created_at.desc())))
+
+
+@router.get("/track/{order_id}", response_model=TrackingOut)
+def track_order(order_id: str, db: Session = Depends(get_db)) -> Order:
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+    return order
+
+
+@router.patch("/{order_id}/tracking", response_model=OrderOut)
+def update_tracking(order_id: str, payload: TrackingUpdate, db: Session = Depends(get_db)) -> Order:
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="الطلب غير موجود")
+    order.tracking_stage = max(1, min(5, payload.tracking_stage))
+    if payload.tracking_notes is not None:
+        order.tracking_notes = payload.tracking_notes
+    db.commit()
+    db.refresh(order)
+    return order
 
 
 @router.get("/{order_id}", response_model=OrderOut)

@@ -294,7 +294,7 @@ function Footer() {
         <FooterColumn title="خدمة العملاء" links={[
           { label: "تواصل معنا",    href: "#" },
           { label: "الأسئلة الشائعة", href: "#" },
-          { label: "تتبع الطلب",    href: "#" },
+          { label: "تتبع الطلب",    href: "/track-order" },
           { label: "شروط الخدمة",  href: "#" },
         ]} />
         <div>
