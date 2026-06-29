@@ -20,7 +20,12 @@ class Settings(BaseSettings):
     @property
     def upload_path(self) -> Path:
         path = Path(self.upload_dir)
-        path.mkdir(parents=True, exist_ok=True)
+        try:
+            path.mkdir(parents=True, exist_ok=True)
+        except (PermissionError, OSError):
+            # Serverless / read-only filesystem — fall back to /tmp
+            path = Path("/tmp/uploads")
+            path.mkdir(parents=True, exist_ok=True)
         return path
 
 

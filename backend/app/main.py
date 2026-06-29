@@ -129,7 +129,9 @@ _seed_blog()
 
 app = FastAPI(title=settings.app_name)
 
-# In development allow all common localhost ports; in production use settings.frontend_url only.
+# Development: allow all localhost ports. Production: allow configured frontend URL.
+# On Vercel, frontend and API share the same domain, so CORS is same-origin and
+# the middleware becomes a no-op — but we keep it for external clients.
 if settings.app_env == "development":
     cors_origins = [
         "http://localhost:3000",
@@ -138,17 +140,25 @@ if settings.app_env == "development":
         "http://127.0.0.1:3001",
     ]
 else:
+    # Accept the configured frontend URL plus any Vercel preview domains
     cors_origins = [settings.frontend_url]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # covers preview deployments
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.mount("/uploads", StaticFiles(directory=settings.upload_path), name="uploads")
+# Serve uploaded files. On Vercel the filesystem is read-only except /tmp,
+# so the directory may land in /tmp/uploads — mount it gracefully.
+try:
+    app.mount("/uploads", StaticFiles(directory=str(settings.upload_path)), name="uploads")
+except Exception:
+    pass  # skip static mount in serverless environments
+
 app.include_router(api_router, prefix="/api/v1")
 
 
