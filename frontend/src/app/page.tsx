@@ -1,7 +1,7 @@
 "use client";
 import type { LucideIcon } from "lucide-react";
 import {
-  Brain, Code2, Gamepad2, Headphones, Mail, Medal,
+  Brain, Code2, Eye, Gamepad2, Headphones, Mail, Medal,
   PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
   Users, Wrench, Zap, BadgeCheck, Globe, Rocket
 } from "lucide-react";
@@ -9,7 +9,9 @@ import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
 import { BannerCarousel } from "@/components/sections/banner-carousel";
+import { AdsShowcase } from "@/components/sections/ads-showcase";
 import { useCart } from "@/context/cart-context";
+import { PRODUCTS } from "@/data/products";
 
 const features = [
   { title: "تسليم فوري", text: "تسليم الخدمة بسرعة 1 دقيقة", icon: Zap },
@@ -27,13 +29,11 @@ const categories = [
   { title: "الألعاب والبطاقات", icon: Gamepad2 },
 ];
 
-const products = [
-  { name: "ChatGPT Plus", logo: "◎", discount: "-40%", price: "$5.99", price_num: 5.99, oldPrice: "$9.99", buyers: "12K", color: "from-emerald-400 to-teal-600" },
-  { name: "Adobe Creative Cloud", logo: "∞", discount: "-35%", price: "$34.99", price_num: 34.99, oldPrice: "$53.99", buyers: "8K", color: "from-pink-500 via-orange-400 to-cyan-400" },
-  { name: "Netflix Premium", logo: "▶", discount: "-50%", price: "$4.99", price_num: 4.99, oldPrice: "$9.99", buyers: "15K", color: "from-red-800 to-red-600" },
-  { name: "Canva Pro", logo: "Cv", discount: "-40%", price: "$2.99", price_num: 2.99, oldPrice: "$4.99", buyers: "6K", color: "from-cyan-400 to-blue-700" },
-  { name: "Claude Pro", logo: "✳", discount: "-30%", price: "$19.00", price_num: 19.00, oldPrice: "$240.00", buyers: "18K", color: "from-purple-500 to-fuchsia-700" },
-];
+const products = PRODUCTS.map(p => ({
+  id: p.id, name: p.name, logo: p.logo, discount: p.discount,
+  price: `$${p.price}`, price_num: p.price, oldPrice: `$${p.oldPrice}`,
+  buyers: p.buyers, color: p.color, rating: p.rating,
+}));
 
 const globalStats = [
   { value: "+250,000", label: "عميل سعيد", icon: Users },
@@ -57,11 +57,11 @@ const BRANDS = [
   { name: "ElevenLabs", emoji: "🔊" },
 ];
 
-function AddToCartBtn({ product }: { product: { name: string; price_num: number; logo: string; color: string } }) {
+function AddToCartBtn({ product }: { product: { id: string; name: string; price_num: number; logo: string; color: string } }) {
   const { addItem } = useCart();
   return (
     <button
-      onClick={() => addItem({ id: product.name, name: product.name, price: product.price_num, logo: product.logo, color: product.color })}
+      onClick={() => addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color })}
       className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)] hover:scale-110 transition-transform"
       aria-label="إضافة للسلة"
     >
@@ -75,6 +75,7 @@ export default function HomePage() {
     <main className="min-h-screen overflow-hidden bg-[#050508] text-white">
       <SiteHeader />
       <BannerCarousel />
+      <AdsShowcase />
       <div className="mx-auto max-w-7xl px-4 pb-10">
         <HeroSection />
         <FeatureStrip />
@@ -161,8 +162,15 @@ function ProductsSection() {
               <span className="text-sm text-white/40 line-through">{p.oldPrice}</span>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <span className="flex items-center gap-1 text-xs text-yellow-400"><Star size={14} fill="currentColor" /> 4.9 ({p.buyers})</span>
-              <AddToCartBtn product={p} />
+              <span className="flex items-center gap-1 text-xs text-yellow-400">
+                <Star size={14} fill="currentColor" /> {p.rating} ({p.buyers})
+              </span>
+              <div className="flex items-center gap-1.5">
+                <a href={`/products/${p.id}`} className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/12 transition-colors" aria-label="تفاصيل">
+                  <Eye size={15} />
+                </a>
+                <AddToCartBtn product={p} />
+              </div>
             </div>
           </article>
         ))}
