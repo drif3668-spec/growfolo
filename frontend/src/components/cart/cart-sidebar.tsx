@@ -4,17 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { X, Minus, Plus, Trash2, ShoppingCart, Clock, ChevronDown, Search } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useCurrency, type Currency } from "@/context/currency-context";
+import { PaymentMethodImage } from "@/components/payments/payment-method-image";
+import { PAYMENT_METHODS } from "@/lib/payment-methods";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-const PAYMENT_METHODS = [
-  { id: "usdt", label: "USDT TRC20", icon: "₮", color: "#26a17b" },
-  { id: "bnb", label: "BNB BEP20", icon: "◈", color: "#f3ba2f" },
-  { id: "baridimob", label: "BaridiMob", icon: "🏦", color: "#f5c518" },
-  { id: "mobilis", label: "Flexy Mobilis", icon: "📲", color: "#22c55e" },
-  { id: "vodafone", label: "Vodafone Cash", icon: "📱", color: "#ef4444" },
-  { id: "instapay", label: "InstaPay", icon: "⚡", color: "#a855f7" },
-];
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending_proof: { label: "بانتظار إثبات الدفع", color: "text-yellow-400 bg-yellow-400/10" },
@@ -269,9 +262,11 @@ export function CartSidebar() {
                     <button
                       key={m.id}
                       onClick={() => setPayMethod(m.id)}
-                      className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-all ${payMethod === m.id ? "border-purple-500 bg-purple-500/15 text-white" : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"}`}
+                      className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all ${payMethod === m.id ? "border-purple-500 bg-purple-500/15 text-white" : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"}`}
                     >
-                      <span className="text-base">{m.icon}</span>
+                      <span className="grid h-10 w-16 shrink-0 place-items-center">
+                        <PaymentMethodImage method={m} />
+                      </span>
                       {m.label}
                     </button>
                   ))}

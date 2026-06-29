@@ -7,9 +7,12 @@ import {
 } from "lucide-react";
 import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
+import { PaymentMethodImage } from "@/components/payments/payment-method-image";
+import { PAYMENT_METHODS } from "@/lib/payment-methods";
 import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
 import { BannerCarousel } from "@/components/sections/banner-carousel";
 import { AdsShowcase } from "@/components/sections/ads-showcase";
+import { AdsSectionSlider } from "@/components/sections/ads-section-slider";
 import { useCart } from "@/context/cart-context";
 import { PRODUCTS } from "@/data/products";
 
@@ -34,6 +37,10 @@ const products = PRODUCTS.map(p => ({
   price: `$${p.price}`, price_num: p.price, oldPrice: `$${p.oldPrice}`,
   buyers: p.buyers, color: p.color, rating: p.rating,
 }));
+
+const AI_PACKAGE_IDS = ["claude-pro-yearly", "claude-max-5x-yearly", "claude-max-20x-yearly"];
+const latestProducts = products.filter((p) => !AI_PACKAGE_IDS.includes(p.id));
+const aiPackageProducts = products.filter((p) => AI_PACKAGE_IDS.includes(p.id));
 
 const globalStats = [
   { value: "+250,000", label: "عميل سعيد", icon: Users },
@@ -81,6 +88,7 @@ export default function HomePage() {
         <FeatureStrip />
         <CategoriesSection />
         <ProductsSection />
+        <AiPackagesSection />
         <StatsSection />
         <ReviewsCarousel />
         <TrustSection />
@@ -149,33 +157,48 @@ function ProductsSection() {
     <section id="products" className="pb-10">
       <SectionTitle title="أحدث المنتجات 🔥" />
       <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {products.map((p) => (
-          <article key={p.name} className="glass-panel relative overflow-hidden rounded-3xl p-4">
-            <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{p.discount}</span>
-            <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${p.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
-              {p.logo}
-            </div>
-            <h3 className="mt-5 text-center text-sm font-bold text-white">{p.name}</h3>
-            <p className="mt-2 text-center text-xs leading-5 text-white/70">اشتراك رسمي<br />تسليم فوري</p>
-            <div className="mt-4 flex items-end justify-between gap-2">
-              <span className="text-2xl font-black text-white">{p.price}</span>
-              <span className="text-sm text-white/40 line-through">{p.oldPrice}</span>
-            </div>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="flex items-center gap-1 text-xs text-yellow-400">
-                <Star size={14} fill="currentColor" /> {p.rating} ({p.buyers})
-              </span>
-              <div className="flex items-center gap-1.5">
-                <a href={`/products/${p.id}`} className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/12 transition-colors" aria-label="تفاصيل">
-                  <Eye size={15} />
-                </a>
-                <AddToCartBtn product={p} />
-              </div>
-            </div>
-          </article>
-        ))}
+        {latestProducts.map((p) => <ProductCard key={p.id} product={p} />)}
       </div>
     </section>
+  );
+}
+
+function AiPackagesSection() {
+  return (
+    <section className="pb-10">
+      <SectionTitle title="قسم الذكاء الاصطناعي" />
+      <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {aiPackageProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+      </div>
+    </section>
+  );
+}
+
+function ProductCard({ product: p }: { product: (typeof products)[number] }) {
+  return (
+    <article className="glass-panel relative overflow-hidden rounded-3xl p-4">
+      <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{p.discount}</span>
+      <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${p.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
+        {p.logo}
+      </div>
+      <h3 className="mt-5 text-center text-sm font-bold text-white">{p.name}</h3>
+      <p className="mt-2 text-center text-xs leading-5 text-white/70">اشتراك رسمي<br />تسليم فوري</p>
+      <div className="mt-4 flex items-end justify-between gap-2">
+        <span className="text-2xl font-black text-white">{p.price}</span>
+        <span className="text-sm text-white/40 line-through">{p.oldPrice}</span>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <span className="flex items-center gap-1 text-xs text-yellow-400">
+          <Star size={14} fill="currentColor" /> {p.rating} ({p.buyers})
+        </span>
+        <div className="flex items-center gap-1.5">
+          <a href={`/products/${p.id}`} className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/12 transition-colors" aria-label="تفاصيل">
+            <Eye size={15} />
+          </a>
+          <AddToCartBtn product={p} />
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -207,6 +230,7 @@ function TrustSection() {
       <a href="/checkout" className="neon-button mt-8 inline-flex items-center gap-3 rounded-2xl px-10 py-4 font-black text-black text-lg">
         ابدأ الآن ←
       </a>
+      <AdsSectionSlider />
       <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
         {["ضمان استرجاع الأموال حتى 30 يوم", "تفعيل فوري خلال دقائق", "دعم على مدار الساعة 24/7", "دفع 100% آمن · حماية بياناتك", "اشتراكات أصلية 100% بدون مشاركة"].map((t) => (
           <span key={t} className="flex items-center gap-1.5">
@@ -265,9 +289,11 @@ function Footer() {
         <FooterColumn title="خدمة العملاء" links={["تواصل معنا", "الأسئلة الشائعة", "تتبع الطلب", "شروط الخدمة"]} />
         <div>
           <h3 className="mb-4 font-black">طرق الدفع</h3>
-          <div className="flex flex-wrap gap-2 text-sm">
-            {["USDT", "BNB", "BaridiMob", "Mobilis", "InstaPay"].map((m) => (
-              <span key={m} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-white/70">{m}</span>
+          <div className="grid max-w-64 grid-cols-2 gap-2">
+            {PAYMENT_METHODS.map((method) => (
+              <span key={method.id} className="grid min-h-12 place-items-center rounded-lg border border-white/10 bg-white/5 px-2 py-1.5">
+                <PaymentMethodImage method={method} />
+              </span>
             ))}
           </div>
         </div>

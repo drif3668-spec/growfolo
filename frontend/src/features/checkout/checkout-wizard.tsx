@@ -2,74 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Copy, Upload, ArrowRight, Clock, CheckCircle } from "lucide-react";
+import { PaymentMethodImage } from "@/components/payments/payment-method-image";
+import { PaymentMethodShowcase } from "@/components/payments/payment-method-showcase";
+import { PAYMENT_METHODS } from "@/lib/payment-methods";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const EXPIRE_MS = 35 * 60 * 1000;
 const LS_KEY = "gf_order_v2";
-
-/* ── Payment method data ────────────────────────────────────────────────── */
-const METHODS = [
-  {
-    id: "usdt",
-    label: "USDT TRC20",
-    icon: "₮",
-    color: "#26a17b",
-    bg: "rgba(38,161,123,0.12)",
-    border: "rgba(38,161,123,0.35)",
-    fields: [{ label: "الشبكة", value: "TRC20 (TRON)" }, { label: "عنوان المحفظة", value: "TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }],
-    steps: ["افتح محفظتك (Trust Wallet / Binance)", "أرسل USDT على شبكة TRC20 فقط", "انسخ hash المعاملة وأرسل الوصل"],
-  },
-  {
-    id: "bnb",
-    label: "BNB BEP20",
-    icon: "◈",
-    color: "#f3ba2f",
-    bg: "rgba(243,186,47,0.10)",
-    border: "rgba(243,186,47,0.30)",
-    fields: [{ label: "الشبكة", value: "BEP20 (BSC)" }, { label: "عنوان المحفظة", value: "0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }],
-    steps: ["افتح محفظتك (Trust Wallet / MetaMask)", "أرسل BNB على شبكة BSC فقط", "أرسل hash المعاملة"],
-  },
-  {
-    id: "baridimob",
-    label: "BaridiMob",
-    icon: "🏦",
-    color: "#f5c518",
-    bg: "rgba(245,197,24,0.10)",
-    border: "rgba(245,197,24,0.28)",
-    fields: [{ label: "رقم CCP", value: "00123456789 — مفتاح: 12" }, { label: "الاسم", value: "Growfolo Store" }],
-    steps: ["افتح تطبيق BaridiMob", "اختر تحويل CCP وأدخل الرقم والمفتاح", "أرسل صورة التأكيد"],
-  },
-  {
-    id: "mobilis",
-    label: "Flexy Mobilis",
-    icon: "📲",
-    color: "#22c55e",
-    bg: "rgba(34,197,94,0.10)",
-    border: "rgba(34,197,94,0.28)",
-    fields: [{ label: "رقم Mobilis", value: "07XXXXXXXX" }],
-    steps: ["اشتر رصيد Flexy من نقطة البيع", "أرسل الرصيد على الرقم أعلاه", "أرسل إثبات الإرسال"],
-  },
-  {
-    id: "vodafone",
-    label: "Vodafone Cash",
-    icon: "📱",
-    color: "#ef4444",
-    bg: "rgba(239,68,68,0.10)",
-    border: "rgba(239,68,68,0.28)",
-    fields: [{ label: "رقم Vodafone Cash", value: "01XXXXXXXXX" }],
-    steps: ["افتح تطبيق Vodafone Cash", "اختر تحويل أموال وأدخل الرقم والمبلغ", "أرسل لقطة الشاشة"],
-  },
-  {
-    id: "instapay",
-    label: "InstaPay",
-    icon: "⚡",
-    color: "#a855f7",
-    bg: "rgba(168,85,247,0.10)",
-    border: "rgba(168,85,247,0.28)",
-    fields: [{ label: "معرف InstaPay", value: "growfolo@instapay" }],
-    steps: ["افتح تطبيق InstaPay", "ابحث عن المعرف أعلاه وأدخل المبلغ", "أرسل صورة الإيصال"],
-  },
-];
 
 /* ── Saved state shape ──────────────────────────────────────────────────── */
 type SavedState = {
@@ -232,7 +171,7 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
     }
   };
 
-  const selectedMethod = METHODS.find((m) => m.id === method);
+  const selectedMethod = PAYMENT_METHODS.find((m) => m.id === method);
 
   /* ── DONE screen ──────────────────────────────────────────────────────── */
   if (done) {
@@ -252,6 +191,9 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
         >
           العودة للرئيسية
         </button>
+        <div className="mt-8 w-full max-w-5xl px-2">
+          <PaymentMethodShowcase />
+        </div>
       </div>
     );
   }
@@ -342,19 +284,21 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
 
           <h2 className="mb-4 mt-7 text-lg font-black text-white">طريقة الدفع</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {METHODS.map((m) => (
+            {PAYMENT_METHODS.map((m) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => { setMethod(m.id); setStep(2); }}
-                className="flex items-center gap-3 rounded-2xl border p-4 text-right transition-all hover:scale-[1.02]"
+                className="flex min-h-24 items-center gap-3 rounded-2xl border p-3 text-right transition-all hover:scale-[1.02]"
                 style={{
                   borderColor: method === m.id ? m.color : "rgba(255,255,255,0.10)",
                   background: method === m.id ? m.bg : "rgba(255,255,255,0.03)",
                   boxShadow: method === m.id ? `0 0 18px ${m.color}30` : "none",
                 }}
               >
-                <span className="text-2xl">{m.icon}</span>
+                <span className="grid h-14 w-24 shrink-0 place-items-center rounded-xl bg-black/18">
+                  <PaymentMethodImage method={m} />
+                </span>
                 <div>
                   <p className="text-sm font-black" style={{ color: method === m.id ? m.color : "#fff" }}>{m.label}</p>
                 </div>
@@ -436,8 +380,10 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
           {err && <p className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">{err}</p>}
 
           <button onClick={submitProof} disabled={!proof || uploading} className="neon-button mt-5 w-full rounded-2xl py-4 font-black text-black disabled:opacity-50">
-            {uploading ? "جارٍ الرفع..." : "تأكيد الدفع →"}
+            {uploading ? "جارٍ الرفع..." : "تم الدفع ✓"}
           </button>
+
+          <PaymentMethodShowcase />
 
           <button onClick={() => { clear(); setStep(1); setOrderId(null); setStartedAt(null); setMethod(null); }} className="mt-3 w-full rounded-2xl py-2.5 text-sm text-white/35 hover:text-white/60">
             ← بدء من جديد

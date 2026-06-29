@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Copy, Check, Upload, CheckCircle } from "lucide-react";
+import { PaymentMethodImage } from "@/components/payments/payment-method-image";
+import { PaymentMethodShowcase } from "@/components/payments/payment-method-showcase";
+import { PAYMENT_METHOD_MAP } from "@/lib/payment-methods";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TIMER_MINUTES = 45;
@@ -100,7 +103,7 @@ export default function PayPage() {
       if (raw) {
         const data: CheckoutData = JSON.parse(raw);
         setCheckoutData(data);
-        if (data.paymentMethod) setPayMethod(data.paymentMethod);
+        if (data.paymentMethod && PAYMENT_METHOD_MAP[data.paymentMethod]) setPayMethod(data.paymentMethod);
       }
       const savedEmail = localStorage.getItem("gf_my_email");
       if (savedEmail) setEmail(savedEmail);
@@ -229,10 +232,13 @@ export default function PayPage() {
           <a href="/" className="neon-button inline-block rounded-2xl px-8 py-4 font-black text-black">
             العودة للمتجر
           </a>
+          <PaymentMethodShowcase />
         </div>
       </div>
     );
   }
+
+  const selectedMethod = PAYMENT_METHOD_MAP[payMethod] ?? PAYMENT_METHOD_MAP.usdt;
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black text-white" dir="rtl">
@@ -317,11 +323,17 @@ export default function PayPage() {
           }}
         >
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-purple-500/8 via-transparent to-cyan-500/8 pointer-events-none" />
-          <h2 className="mb-4 text-base font-black text-white">
-            تفاصيل الدفع — {PAYMENT_LABELS[payMethod] ?? payMethod}
-          </h2>
+          <div className="relative mb-5 flex flex-col items-center gap-3 rounded-2xl border border-white/8 bg-black/20 p-4 text-center sm:flex-row sm:text-right">
+            <div className="grid h-24 w-44 place-items-center rounded-2xl bg-white/[0.03]">
+              <PaymentMethodImage method={selectedMethod} size="large" />
+            </div>
+            <div>
+              <p className="text-xs text-white/40">طريقة الدفع المختارة</p>
+              <h2 className="text-base font-black text-white">تفاصيل الدفع — {selectedMethod.label}</h2>
+            </div>
+          </div>
           <div className="flex flex-col gap-3">
-            {(PAYMENT_INFO[payMethod] ?? []).map(field => (
+            {selectedMethod.fields.map(field => (
               <div key={field.label} className="rounded-xl bg-white/5 p-3">
                 <p className="mb-1 text-xs text-white/40">{field.label}</p>
                 <div className="flex items-center justify-between gap-2">
@@ -469,6 +481,7 @@ export default function PayPage() {
               </span>
             ) : "تم الدفع ✓"}
           </button>
+          <PaymentMethodShowcase />
         </form>
       </div>
     </div>

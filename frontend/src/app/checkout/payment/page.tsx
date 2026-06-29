@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Copy, Check, Upload, ExternalLink } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+import { PaymentMethodImage } from "@/components/payments/payment-method-image";
 
 type Method = {
   id: string;
@@ -17,17 +18,9 @@ type Method = {
 
 const METHODS: Method[] = [
   {
-    id: "vodafone",
-    label: "Vodafone Cash",
-    logo: "📱",
-    color: "text-red-400",
-    bg: "from-red-900/30 to-red-800/10 border-red-500/20",
-    description: "أرسل المبلغ على رقم فودافون كاش",
-  },
-  {
     id: "instapay",
     label: "InstaPay",
-    logo: "⚡",
+    logo: "/payment-methods/instapay.png",
     color: "text-blue-400",
     bg: "from-blue-900/30 to-blue-800/10 border-blue-500/20",
     description: "تحويل فوري عبر InstaPay",
@@ -35,7 +28,7 @@ const METHODS: Method[] = [
   {
     id: "baridimob",
     label: "BaridiMob",
-    logo: "🏦",
+    logo: "/payment-methods/baridimob.png",
     color: "text-yellow-400",
     bg: "from-yellow-900/30 to-yellow-800/10 border-yellow-500/20",
     description: "تحويل عبر تطبيق BaridiMob",
@@ -43,7 +36,7 @@ const METHODS: Method[] = [
   {
     id: "flexy",
     label: "Flexy Mobilis",
-    logo: "📲",
+    logo: "/payment-methods/mobilis.png",
     color: "text-green-400",
     bg: "from-green-900/30 to-green-800/10 border-green-500/20",
     description: "دفع عبر Flexy Mobilis",
@@ -51,7 +44,7 @@ const METHODS: Method[] = [
   {
     id: "usdt",
     label: "USDT (TRC20)",
-    logo: "₮",
+    logo: "/payment-methods/usdt.png",
     color: "text-emerald-400",
     bg: "from-emerald-900/30 to-emerald-800/10 border-emerald-500/20",
     description: "تحويل USDT عبر شبكة TRON",
@@ -59,7 +52,7 @@ const METHODS: Method[] = [
   {
     id: "bnb",
     label: "BNB (BEP20)",
-    logo: "◈",
+    logo: "/payment-methods/bnb.png",
     color: "text-yellow-300",
     bg: "from-yellow-900/30 to-yellow-800/10 border-yellow-400/20",
     description: "تحويل BNB عبر Binance Smart Chain",
@@ -178,7 +171,9 @@ export default function PaymentPage() {
                 selected === m.id ? "ring-2 ring-purple-500 scale-[1.02]" : "hover:scale-[1.01]"
               }`}
             >
-              <span className="text-3xl">{m.logo}</span>
+              <span className="grid h-14 w-full place-items-center">
+                <PaymentMethodImage method={{ label: m.label, image: m.logo }} />
+              </span>
               <span className={`text-base font-black ${m.color}`}>{m.label}</span>
               <span className="text-xs text-white/50">{m.description}</span>
             </button>
