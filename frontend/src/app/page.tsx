@@ -299,6 +299,22 @@ function Footer() {
         </div>
       </div>
       <p className="mt-8 text-center text-xs text-white/35">جميع الحقوق محفوظة GrowFolo © 2026</p>
+      <div className="mx-auto mt-6 flex max-w-md flex-col items-center gap-4">
+        <img
+          src="/app-badges/google-play.png"
+          alt="Get it on Google Play"
+          className="h-auto w-full max-w-[260px] object-contain sm:max-w-[300px]"
+          loading="lazy"
+          draggable={false}
+        />
+        <img
+          src="/app-badges/app-store.png"
+          alt="Download on the App Store"
+          className="h-auto w-full max-w-[260px] object-contain sm:max-w-[300px]"
+          loading="lazy"
+          draggable={false}
+        />
+      </div>
     </footer>
   );
 }

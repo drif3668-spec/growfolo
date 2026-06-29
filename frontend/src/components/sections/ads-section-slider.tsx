@@ -7,6 +7,8 @@ const ADS = [
   { src: "/ads-section/ad-vscode-steps.jpg", alt: "خطوات الربط في VS Code" },
   { src: "/ads-section/ad-claude-lifetime-details.jpg", alt: "تفاصيل Claude Opus Lifetime" },
   { src: "/ads-section/ad-claude-cloud-lifetime.jpg", alt: "Claude Cloud Lifetime Access" },
+  { src: "/ads-section/ad-license-certificate.jpg", alt: "شهادة ترخيص Growfolo الدولية" },
+  { src: "/ads-section/ad-uae-license.jpg", alt: "رخصة تجارية دولية Growfolo" },
 ];
 
 const AUTO_MS = 5000;
