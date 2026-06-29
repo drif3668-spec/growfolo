@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { X, Minus, Plus, Trash2, ShoppingCart, Clock, ChevronDown, Search } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { X, Minus, Plus, Trash2, ShoppingCart, Clock, ChevronDown, Search, Tag, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useCurrency, type Currency } from "@/context/currency-context";
 import { PaymentMethodImage } from "@/components/payments/payment-method-image";
@@ -36,6 +36,15 @@ export function CartSidebar() {
   const [currencyDropOpen, setCurrencyDropOpen] = useState(false);
   const currencyDropRef = useRef<HTMLDivElement>(null);
 
+  // Discount code state
+  const [dcInput, setDcInput] = useState("");
+  const [dcLoading, setDcLoading] = useState(false);
+  const [dcError, setDcError] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; percent: number } | null>(null);
+  const [displayTotal, setDisplayTotal] = useState(0);
+  const [priceAnimating, setPriceAnimating] = useState(false);
+  const animFrameRef = useRef<number | null>(null);
+
   // Orders tab state
   const [email, setEmail] = useState("");
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
@@ -57,6 +66,62 @@ export function CartSidebar() {
   useEffect(() => {
     try { localStorage.setItem("gf_pay_method", payMethod); } catch {}
   }, [payMethod]);
+
+  // Discount derived values
+  const discountAmount  = appliedDiscount ? totalUSD * (appliedDiscount.percent / 100) : 0;
+  const discountedTotal = totalUSD - discountAmount;
+
+  // Animate displayTotal whenever discountedTotal changes
+  useEffect(() => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    const from     = displayTotal || totalUSD;
+    const to       = discountedTotal;
+    if (Math.abs(from - to) < 0.001) { setDisplayTotal(to); return; }
+    const duration = 900;
+    const start    = performance.now();
+    setPriceAnimating(true);
+    function tick(now: number) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      setDisplayTotal(from + (to - from) * ease);
+      if (t < 1) animFrameRef.current = requestAnimationFrame(tick);
+      else { setPriceAnimating(false); setDisplayTotal(to); }
+    }
+    animFrameRef.current = requestAnimationFrame(tick);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discountedTotal]);
+
+  // Apply discount code
+  const applyDiscount = useCallback(async () => {
+    const code = dcInput.trim().toUpperCase();
+    if (!code) return;
+    setDcLoading(true);
+    setDcError("");
+    try {
+      const res = await fetch(`${API_URL}/api/v1/discounts/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      if (res.ok) {
+        const dc = await res.json() as { code: string; percent: number };
+        setAppliedDiscount({ code: dc.code, percent: dc.percent });
+        setDcInput("");
+      } else {
+        const err = await res.json() as { detail?: string };
+        setDcError(err.detail ?? "الكود غير صالح");
+        setAppliedDiscount(null);
+      }
+    } catch { setDcError("خطأ في الاتصال، حاول مجدداً"); }
+    finally { setDcLoading(false); }
+  }, [dcInput]);
+
+  function removeDiscount() {
+    setAppliedDiscount(null);
+    setDcError("");
+    setDcInput("");
+  }
 
   // Close currency dropdown when clicking outside
   useEffect(() => {
@@ -99,7 +164,10 @@ export function CartSidebar() {
   function handleCheckout() {
     const checkoutData = {
       items,
-      total: totalUSD,
+      total: discountedTotal,
+      originalTotal: totalUSD,
+      discountCode: appliedDiscount?.code ?? null,
+      discountPercent: appliedDiscount?.percent ?? null,
       currency: selected.code,
       paymentMethod: payMethod,
     };
@@ -273,13 +341,110 @@ export function CartSidebar() {
                 </div>
               </div>
 
+              {/* Discount code */}
+              <div className="rounded-2xl border border-white/8 bg-white/3 p-3">
+                <p className="mb-2.5 flex items-center gap-1.5 text-xs font-black text-white/50">
+                  <Tag size={12} /> كود الخصم
+                </p>
+
+                {appliedDiscount ? (
+                  /* Applied state */
+                  <div
+                    className="rounded-xl px-3 py-2.5"
+                    style={{
+                      background: "rgba(200,230,0,0.07)",
+                      border: "1px solid rgba(200,230,0,0.25)",
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className="text-lime-400 shrink-0" />
+                        <span className="font-mono text-sm font-black text-lime-400">{appliedDiscount.code}</span>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[10px] font-black"
+                          style={{ background: "rgba(200,230,0,0.15)", color: "#c8e600" }}
+                        >
+                          خصم {appliedDiscount.percent}%
+                        </span>
+                      </div>
+                      <button
+                        onClick={removeDiscount}
+                        className="grid size-6 place-items-center rounded-lg bg-white/8 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                        title="إلغاء الكود"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                    <p className="mt-1 text-[11px] text-lime-400/70">✅ تم تطبيق كود الخصم بنجاح</p>
+                  </div>
+                ) : (
+                  /* Input state */
+                  <div className="flex gap-2">
+                    <input
+                      value={dcInput}
+                      onChange={(e) => { setDcInput(e.target.value.toUpperCase()); setDcError(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && applyDiscount()}
+                      placeholder="أدخل الكود هنا..."
+                      className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50 font-mono tracking-wider"
+                    />
+                    <button
+                      onClick={applyDiscount}
+                      disabled={dcLoading || !dcInput.trim()}
+                      className="shrink-0 rounded-xl px-3 py-2 text-xs font-black text-black transition-all hover:opacity-90 active:scale-95 disabled:opacity-40"
+                      style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)" }}
+                    >
+                      {dcLoading ? <Loader2 size={14} className="animate-spin" /> : "تطبيق"}
+                    </button>
+                  </div>
+                )}
+
+                {dcError && (
+                  <div className="mt-2 flex items-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/8 px-3 py-2 text-xs text-red-400">
+                    <XCircle size={12} className="shrink-0" />
+                    {dcError}
+                  </div>
+                )}
+              </div>
+
               {/* Total and checkout */}
               <div className="mt-auto">
-                <div className="flex items-center justify-between rounded-2xl bg-white/5 p-4 mb-3">
-                  <span className="text-sm text-white/60">المجموع</span>
-                  <span className="text-xl font-black text-white">
-                    {convert(totalUSD)} {selected.code}
-                  </span>
+                <div
+                  className="rounded-2xl p-4 mb-3 transition-all duration-300"
+                  style={{
+                    background: appliedDiscount ? "rgba(200,230,0,0.06)" : "rgba(255,255,255,0.05)",
+                    border: appliedDiscount ? "1px solid rgba(200,230,0,0.2)" : "1px solid transparent",
+                  }}
+                >
+                  {appliedDiscount && (
+                    <>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs text-white/40">المجموع الأصلي</span>
+                        <span className="text-sm text-white/35 line-through">
+                          {convert(totalUSD)} {selected.code}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold" style={{ color: "#c8e600" }}>
+                          خصم {appliedDiscount.percent}%
+                        </span>
+                        <span className="text-sm font-bold" style={{ color: "#c8e600" }}>
+                          − {convert(discountAmount)} {selected.code}
+                        </span>
+                      </div>
+                      <div className="mb-2 h-px bg-white/10" />
+                    </>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white/60">
+                      {appliedDiscount ? "الإجمالي بعد الخصم" : "المجموع"}
+                    </span>
+                    <span
+                      className={`text-xl font-black transition-all ${priceAnimating ? "scale-105" : "scale-100"}`}
+                      style={{ color: appliedDiscount ? "#c8e600" : "white" }}
+                    >
+                      {convert(displayTotal || discountedTotal)} {selected.code}
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={handleCheckout}
