@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const WS_URL = API_URL.replace(/^http/, "ws");
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 type ChatSession = { id: string; name: string; email: string; whatsapp: string; is_resolved: boolean; created_at: string; last_message: string | null };
@@ -199,7 +198,11 @@ export function AdminDashboard() {
   const activeSessionRef = useRef<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [reply, setReply] = useState("");
-  const wsRef = useRef<WebSocket | null>(null);
+  const chatPollRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const chatLastTsRef   = useRef<string | null>(null);
+  const chatKnownIds    = useRef<Set<string>>(new Set());
+  const activeSidRef    = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => { activeSessionRef.current = activeSession; }, [activeSession]);
@@ -310,34 +313,89 @@ export function AdminDashboard() {
 
   useEffect(() => { if (nav === "chat") loadSessions(); }, [nav, loadSessions]);
 
+  // Poll session list every 10 s so new incoming chats appear without refresh
   useEffect(() => {
-    if (nav !== "chat") return;
-    const ws = new WebSocket(`${WS_URL}/api/v1/chat/admin/ws`);
-    ws.onmessage = (e) => {
-      try {
-        const msg: ChatMessage = JSON.parse(e.data as string);
-        setMessages((p) => activeSessionRef.current?.id === msg.session_id ? [...p, msg] : p);
-        setSessions((p) => p.map((s) => s.id === msg.session_id ? { ...s, last_message: msg.content } : s));
-      } catch {}
-    };
-    wsRef.current = ws;
-    return () => ws.close();
+    if (nav !== "chat") {
+      if (sessionsPollRef.current) { clearInterval(sessionsPollRef.current); sessionsPollRef.current = null; }
+      return;
+    }
+    sessionsPollRef.current = setInterval(() => { void loadSessions(); }, 10_000);
+    return () => { if (sessionsPollRef.current) { clearInterval(sessionsPollRef.current); sessionsPollRef.current = null; } };
+  }, [nav, loadSessions]);
+
+  // Stop all chat polling when leaving chat section
+  useEffect(() => {
+    if (nav !== "chat") {
+      if (chatPollRef.current) { clearInterval(chatPollRef.current); chatPollRef.current = null; }
+    }
   }, [nav]);
 
   const openSession = useCallback(async (session: ChatSession) => {
+    // Stop previous session poll
+    if (chatPollRef.current) { clearInterval(chatPollRef.current); chatPollRef.current = null; }
+
     setActiveSession(session);
     setMessages([]);
+    chatKnownIds.current = new Set();
+    chatLastTsRef.current = null;
+    activeSidRef.current = session.id;
+
     try {
       const res = await fetch(`${API_URL}/api/v1/chat/sessions/${session.id}/messages`);
-      if (res.ok) setMessages(await res.json());
+      if (res.ok) {
+        const msgs: ChatMessage[] = await res.json();
+        setMessages(msgs);
+        msgs.forEach(m => chatKnownIds.current.add(m.id));
+        chatLastTsRef.current = msgs.length > 0 ? msgs[msgs.length - 1].created_at : null;
+      }
     } catch {}
+
+    // Start polling this session for new messages every 3 s
+    const sid = session.id;
+    chatPollRef.current = setInterval(async () => {
+      if (activeSidRef.current !== sid) return;
+      try {
+        const since = chatLastTsRef.current;
+        const url = since
+          ? `${API_URL}/api/v1/chat/sessions/${sid}/messages?since=${encodeURIComponent(since)}`
+          : `${API_URL}/api/v1/chat/sessions/${sid}/messages`;
+        const r = await fetch(url);
+        if (!r.ok) return;
+        const msgs: ChatMessage[] = await r.json();
+        if (msgs.length === 0) return;
+        chatLastTsRef.current = msgs[msgs.length - 1].created_at;
+        const newMsgs = msgs.filter(m => !chatKnownIds.current.has(m.id));
+        if (newMsgs.length > 0) {
+          newMsgs.forEach(m => chatKnownIds.current.add(m.id));
+          // Update session list last_message for client messages
+          const clientMsgs = newMsgs.filter(m => !m.is_admin);
+          if (clientMsgs.length > 0) {
+            setSessions(p => p.map(s => s.id === sid ? { ...s, last_message: clientMsgs[clientMsgs.length - 1].content } : s));
+          }
+          setMessages(p => [...p, ...newMsgs]);
+        }
+      } catch {}
+    }, 3_000);
   }, []);
 
-  const sendReply = useCallback(() => {
-    if (!reply.trim() || !activeSession || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ session_id: activeSession.id, content: reply.trim() }));
-    setMessages((p) => [...p, { id: crypto.randomUUID(), content: reply.trim(), is_admin: true, created_at: new Date().toISOString() }]);
+  const sendReply = useCallback(async () => {
+    if (!reply.trim() || !activeSession) return;
+    const content = reply.trim();
     setReply("");
+    try {
+      const res = await fetch(`${API_URL}/api/v1/chat/sessions/${activeSession.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, is_admin: true }),
+      });
+      if (res.ok) {
+        const msg: ChatMessage = await res.json();
+        chatKnownIds.current.add(msg.id);
+        chatLastTsRef.current = msg.created_at;
+        setMessages(p => [...p, msg]);
+        setSessions(p => p.map(s => s.id === activeSession.id ? { ...s, last_message: content } : s));
+      }
+    } catch {}
   }, [reply, activeSession]);
 
   const resolveSession = async (id: string) => {
@@ -873,11 +931,11 @@ export function AdminDashboard() {
                     {!activeSession.is_resolved && (
                       <div className="flex gap-2 border-t border-white/8 p-4">
                         <input value={reply} onChange={(e) => setReply(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
+                          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendReply(); } }}
                           className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/35 focus:border-purple-500/50"
                           placeholder="اكتب ردك..." autoFocus
                         />
-                        <button onClick={sendReply} disabled={!reply.trim()} className="grid size-10 shrink-0 place-items-center rounded-2xl bg-purple-600 text-white disabled:opacity-40">
+                        <button onClick={() => void sendReply()} disabled={!reply.trim()} className="grid size-10 shrink-0 place-items-center rounded-2xl bg-purple-600 text-white disabled:opacity-40">
                           <Send size={16} />
                         </button>
                       </div>

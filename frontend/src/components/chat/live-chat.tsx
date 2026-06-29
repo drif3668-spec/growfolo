@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, X, ChevronLeft } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const WS_URL  = API_URL.replace(/^http/, "ws");
 
 /* ── Brand ────────────────────────────────────────────────────────────── */
 const LIME      = "#c8e600";
@@ -141,17 +140,24 @@ export function LiveChat() {
   const [formErr,      setFormErr]      = useState("");
   const [submitting,   setSubmitting]   = useState(false);
   const [fading,       setFading]       = useState(false);
-  const [visible,      setVisible]      = useState(false); // panel mounted animation
+  const [visible,      setVisible]      = useState(false);
 
-  const wsRef            = useRef<WebSocket | null>(null);
-  const bottomRef        = useRef<HTMLDivElement | null>(null);
-  const inputRef         = useRef<HTMLInputElement | null>(null);
-  const pendingAgentRef  = useRef<Agent | null>(null);
-  const fadeTimer        = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /* Polling state */
+  const pollRef         = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastTsRef       = useRef<string | null>(null);
+  const knownIdsRef     = useRef<Set<string>>(new Set());
+  const activeSidRef    = useRef<string | null>(null);
+  const activeAgentRef  = useRef<Agent | null>(null);
+
+  const bottomRef       = useRef<HTMLDivElement | null>(null);
+  const inputRef        = useRef<HTMLInputElement | null>(null);
+  const pendingAgentRef = useRef<Agent | null>(null);
+  const fadeTimer       = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { activeAgentRef.current = activeAgent; }, [activeAgent]);
 
-  /* Restore last agent from localStorage */
+  /* Restore last agent */
   useEffect(() => {
     if (typeof window === "undefined") return;
     const id = LS.lastAgent();
@@ -164,23 +170,73 @@ export function LiveChat() {
     else { setVisible(false); }
   }, [phase]);
 
-  /* ── WebSocket connect ─────────────────────────────────────────── */
-  const connectWs = useCallback((sid: string, agentId: string) => {
-    wsRef.current?.close();
-    const ws = new WebSocket(`${WS_URL}/api/v1/chat/ws/${sid}`);
-    ws.onmessage = (e) => {
-      try {
-        const msg: Message = JSON.parse(e.data as string);
-        if (msg.content.startsWith("🎯")) return;
-        setMessages(p => [...p, msg]);
-        setMsgCache(prev => ({ ...prev, [agentId]: [...(prev[agentId] ?? []), msg] }));
-        beep(900, 250);
-      } catch { /* ignore */ }
-    };
-    wsRef.current = ws;
+  /* Cleanup polling on unmount */
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
-  /* ── Create new session ────────────────────────────────────────── */
+  /* ── Polling helpers ───────────────────────────────────────────────── */
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }, []);
+
+  const startPolling = useCallback((sid: string, agentId: string) => {
+    stopPolling();
+    activeSidRef.current = sid;
+
+    pollRef.current = setInterval(async () => {
+      if (activeSidRef.current !== sid) return; // stale interval
+      try {
+        const since = lastTsRef.current;
+        const url = since
+          ? `${API_URL}/api/v1/chat/sessions/${sid}/messages?since=${encodeURIComponent(since)}`
+          : `${API_URL}/api/v1/chat/sessions/${sid}/messages`;
+        const r = await fetch(url);
+        if (!r.ok) return;
+
+        const msgs: Message[] = await r.json();
+        if (msgs.length === 0) return;
+
+        // Update since to the latest timestamp seen
+        lastTsRef.current = msgs[msgs.length - 1].created_at;
+
+        // Only show admin messages not already in UI
+        const agent = activeAgentRef.current;
+        const newAdminMsgs = msgs.filter(
+          m => m.is_admin && !knownIdsRef.current.has(m.id) && !m.content.startsWith("🎯")
+        );
+        if (newAdminMsgs.length > 0) {
+          newAdminMsgs.forEach(m => knownIdsRef.current.add(m.id));
+          setMessages(p => [...p, ...newAdminMsgs]);
+          if (agent) {
+            setMsgCache(prev => ({ ...prev, [agentId]: [...(prev[agentId] ?? []), ...newAdminMsgs] }));
+          }
+          beep(900, 250);
+        }
+      } catch { /* network error — retry next tick */ }
+    }, 3000);
+  }, [stopPolling]);
+
+  /* ── Load history + start polling ─────────────────────────────────── */
+  const loadAndPoll = useCallback(async (sid: string, agentId: string) => {
+    try {
+      const r = await fetch(`${API_URL}/api/v1/chat/sessions/${sid}/messages`);
+      if (!r.ok) return;
+      const msgs: Message[] = await r.json();
+      const visible = msgs.filter(m => !m.content.startsWith("🎯"));
+
+      // Seed known IDs and last timestamp from history
+      knownIdsRef.current = new Set(msgs.map(m => m.id));
+      lastTsRef.current = msgs.length > 0 ? msgs[msgs.length - 1].created_at : null;
+
+      setMessages(visible);
+      setMsgCache(p => ({ ...p, [agentId]: visible }));
+    } catch { /* ignore */ }
+
+    startPolling(sid, agentId);
+  }, [startPolling]);
+
+  /* ── Create new session ────────────────────────────────────────────── */
   const createSession = useCallback(async (agent: Agent, info: UserInfo): Promise<boolean> => {
     try {
       const r = await fetch(`${API_URL}/api/v1/chat/sessions`, {
@@ -191,42 +247,30 @@ export function LiveChat() {
       if (!r.ok) return false;
       const { id: sid } = await r.json() as { id: string };
       LS.setSid(agent.id, sid);
-      wsRef.current?.close();
-      const ws = new WebSocket(`${WS_URL}/api/v1/chat/ws/${sid}`);
-      ws.onmessage = (e) => {
-        try {
-          const msg: Message = JSON.parse(e.data as string);
-          if (msg.content.startsWith("🎯")) return;
-          setMessages(p => [...p, msg]);
-          setMsgCache(prev => ({ ...prev, [agent.id]: [...(prev[agent.id] ?? []), msg] }));
-          beep(900, 250);
-        } catch { /* ignore */ }
-      };
-      ws.onopen = () => ws.send(JSON.stringify({ content: `🎯 الوكيل المختار: ${agent.name} | ${agent.dept}` }));
-      wsRef.current = ws;
+
+      // Send the internal agent-marker message (silent)
+      await fetch(`${API_URL}/api/v1/chat/sessions/${sid}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `🎯 الوكيل المختار: ${agent.name} | ${agent.dept}`, is_admin: false }),
+      });
+
+      knownIdsRef.current = new Set();
+      lastTsRef.current   = null;
+      activeSidRef.current = sid;
+      startPolling(sid, agent.id);
       return true;
     } catch { return false; }
-  }, []);
+  }, [startPolling]);
 
-  /* ── Open agent (load history + connect) ──────────────────────── */
+  /* ── Open agent (history + polling) ───────────────────────────────── */
   const openAgent = useCallback(async (agent: Agent) => {
     const sid = LS.sid(agent.id);
-    /* show cached messages instantly */
     setMessages(msgCache[agent.id] ?? []);
-    if (sid) {
-      try {
-        const r = await fetch(`${API_URL}/api/v1/chat/sessions/${sid}/messages`);
-        if (r.ok) {
-          const msgs = (await r.json() as Message[]).filter(m => !m.content.startsWith("🎯"));
-          setMessages(msgs);
-          setMsgCache(p => ({ ...p, [agent.id]: msgs }));
-        }
-      } catch { /* ignore */ }
-      connectWs(sid, agent.id);
-    }
-  }, [msgCache, connectWs]);
+    if (sid) await loadAndPoll(sid, agent.id);
+  }, [msgCache, loadAndPoll]);
 
-  /* ── Select agent from selection screen ───────────────────────── */
+  /* ── Select agent from selection screen ───────────────────────────── */
   const selectAgent = useCallback(async (agent: Agent) => {
     setActiveAgent(agent);
     LS.setAgent(agent.id);
@@ -245,12 +289,12 @@ export function LiveChat() {
     }
   }, [openAgent, createSession]);
 
-  /* ── Switch agent inside chat ──────────────────────────────────── */
+  /* ── Switch agent inside chat ──────────────────────────────────────── */
   const switchAgent = useCallback(async (agent: Agent) => {
     if (agent.id === activeAgent?.id) return;
     if (fadeTimer.current) clearTimeout(fadeTimer.current);
     setFading(true);
-    wsRef.current?.close(); wsRef.current = null;
+    stopPolling();
 
     fadeTimer.current = setTimeout(async () => {
       setActiveAgent(agent);
@@ -267,9 +311,9 @@ export function LiveChat() {
       setFading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }, 220);
-  }, [activeAgent, openAgent, createSession]);
+  }, [activeAgent, openAgent, createSession, stopPolling]);
 
-  /* ── Open floating button ──────────────────────────────────────── */
+  /* ── Open floating button ──────────────────────────────────────────── */
   const openChat = useCallback(async () => {
     const lastId = LS.lastAgent();
     const agent  = lastId ? AGENTS.find(a => a.id === lastId) ?? null : null;
@@ -282,7 +326,7 @@ export function LiveChat() {
     }
   }, [openAgent]);
 
-  /* ── Submit form ───────────────────────────────────────────────── */
+  /* ── Submit form ───────────────────────────────────────────────────── */
   const submitForm = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.whatsapp.trim()) {
@@ -298,20 +342,40 @@ export function LiveChat() {
     setSubmitting(false);
   }, [form, activeAgent, createSession]);
 
-  /* ── Send message ──────────────────────────────────────────────── */
-  const send = useCallback(() => {
-    if (!draft.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+  /* ── Send message ──────────────────────────────────────────────────── */
+  const send = useCallback(async () => {
+    if (!draft.trim() || !activeAgent) return;
+    const sid = LS.sid(activeAgent.id);
+    if (!sid) return;
+
     const content = draft.trim();
-    wsRef.current.send(JSON.stringify({ content }));
-    const msg: Message = { id: crypto.randomUUID(), content, is_admin: false, created_at: new Date().toISOString() };
-    setMessages(p => [...p, msg]);
-    if (activeAgent) setMsgCache(p => ({ ...p, [activeAgent.id]: [...(p[activeAgent.id] ?? []), msg] }));
     setDraft("");
     beep(700, 180);
     inputRef.current?.focus();
+
+    try {
+      const r = await fetch(`${API_URL}/api/v1/chat/sessions/${sid}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, is_admin: false }),
+      });
+      if (r.ok) {
+        const msg: Message = await r.json();
+        knownIdsRef.current.add(msg.id);
+        lastTsRef.current = msg.created_at;
+        setMessages(p => [...p, msg]);
+        setMsgCache(p => ({ ...p, [activeAgent.id]: [...(p[activeAgent.id] ?? []), msg] }));
+      }
+    } catch { /* message will appear on next poll if request eventually succeeds */ }
   }, [draft, activeAgent]);
 
-  const onKey = (e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+  const onKey = (e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } };
+
+  /* ── Close chat ────────────────────────────────────────────────────── */
+  const closeChat = useCallback(() => {
+    stopPolling();
+    setPhase("closed");
+  }, [stopPolling]);
 
   /* ══════════════════════════════════════════════════════════════════
      RENDER — closed
@@ -364,7 +428,7 @@ export function LiveChat() {
     transform: visible ? "translateY(0) scale(1)" : "translateY(14px) scale(.97)",
   };
 
-  /* Shared top-bar ──────────────────────────────────────────────── */
+  /* Shared top-bar */
   const TopBar = ({ back, onBack }: { back?: boolean; onBack?: () => void }) => (
     <div className="flex shrink-0 items-center justify-between px-5 py-4"
       style={{ background: "#111", borderBottom: "1px solid rgba(200,230,0,.12)" }}>
@@ -391,7 +455,7 @@ export function LiveChat() {
           </p>
         </div>
       </div>
-      <button onClick={() => setPhase("closed")}
+      <button onClick={closeChat}
         className="grid size-8 place-items-center rounded-xl text-white/40 hover:bg-white/8 hover:text-white transition-all">
         <X size={15}/>
       </button>
@@ -417,26 +481,22 @@ export function LiveChat() {
         <aside className="fixed bottom-6 left-6 z-50 flex w-[360px] flex-col overflow-hidden" style={panelStyle}>
           <TopBar />
 
-          {/* Header text */}
           <div className="px-5 pt-4 pb-2 shrink-0">
             <p className="text-sm font-black text-white">اختر وكيل الدعم</p>
             <p className="mt-0.5 text-[11px] text-white/40">تحدث مع الوكيل المناسب لطلبك مباشرة</p>
           </div>
 
-          {/* Agent cards */}
           <div className="flex flex-col gap-2.5 overflow-y-auto px-4 pb-4">
             {AGENTS.map((agent, idx) => (
               <button
                 key={agent.id}
-                onClick={() => selectAgent(agent)}
+                onClick={() => void selectAgent(agent)}
                 className="group flex w-full items-start gap-3.5 rounded-2xl border border-white/8 bg-white/3 p-3.5 text-right transition-all duration-200 hover:border-[rgba(200,230,0,.28)] hover:bg-[rgba(200,230,0,.04)]"
                 style={{ animation: `lc-card-in .35s ease both`, animationDelay: `${idx * 70}ms` }}
               >
-                {/* Avatar + status */}
                 <div className="relative shrink-0 mt-0.5">
                   <AgentAvatar agent={agent} size={52} showStatus />
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
                     <p className="font-black text-sm text-white">{agent.name}</p>
@@ -471,7 +531,6 @@ export function LiveChat() {
       <aside className="fixed bottom-6 left-6 z-50 flex w-[360px] flex-col overflow-hidden" style={panelStyle}>
         <TopBar back onBack={() => setPhase("select")} />
 
-        {/* Selected agent banner */}
         {pending && (
           <div className="mx-4 mt-4 flex items-center gap-3 rounded-2xl p-3"
             style={{ background: "rgba(200,230,0,.07)", border: "1px solid rgba(200,230,0,.18)" }}>
@@ -487,7 +546,7 @@ export function LiveChat() {
           </div>
         )}
 
-        <form onSubmit={submitForm} className="flex flex-col gap-3 px-4 py-4">
+        <form onSubmit={e => void submitForm(e)} className="flex flex-col gap-3 px-4 py-4">
           <p className="text-xs text-white/40">أدخل بياناتك لبدء المحادثة</p>
           {([
             { key: "name"     as const, label: "الاسم الكامل",       placeholder: "أحمد محمد",       type: "text"  },
@@ -561,7 +620,7 @@ export function LiveChat() {
                 className="rounded-xl border border-white/8 bg-white/4 px-2.5 py-1.5 text-[10px] font-bold text-white/50 hover:text-white transition-colors">
                 تغيير الوكيل
               </button>
-              <button onClick={() => setPhase("closed")}
+              <button onClick={closeChat}
                 className="mr-1 grid size-8 place-items-center rounded-xl text-white/40 hover:bg-white/8 hover:text-white transition-all">
                 <X size={15}/>
               </button>
@@ -573,7 +632,7 @@ export function LiveChat() {
         <div className="shrink-0 flex items-center gap-3 overflow-x-auto px-4 py-3 [scrollbar-width:none]"
           style={{ borderBottom: "1px solid rgba(255,255,255,.05)" }}>
           {AGENTS.map(agent => (
-            <button key={agent.id} onClick={() => switchAgent(agent)}
+            <button key={agent.id} onClick={() => void switchAgent(agent)}
               className="flex shrink-0 flex-col items-center gap-1.5 transition-all duration-200"
               style={{ opacity: agent.id === activeAgent?.id ? 1 : 0.55 }}>
               <AgentAvatar agent={agent} size={36} active={agent.id === activeAgent?.id} showStatus />
@@ -634,7 +693,7 @@ export function LiveChat() {
             onFocus={e => { e.currentTarget.style.borderColor = `${LIME}44`; }}
             onBlur={e  => { e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; }}
           />
-          <button onClick={send} disabled={!draft.trim()} aria-label="إرسال"
+          <button onClick={() => void send()} disabled={!draft.trim()} aria-label="إرسال"
             className="grid size-10 shrink-0 place-items-center rounded-2xl text-black transition-all hover:opacity-90 active:scale-95 disabled:opacity-30"
             style={{ background: `linear-gradient(135deg,${LIME},${LIME_DARK})`, boxShadow: `0 2px 12px rgba(200,230,0,.3)` }}>
             <Send size={15}/>
