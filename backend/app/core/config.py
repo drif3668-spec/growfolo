@@ -1,5 +1,7 @@
+import sys
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +18,30 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @model_validator(mode="after")
+    def _validate_production(self) -> "Settings":
+        if self.app_env == "production":
+            if self.database_url.startswith("sqlite"):
+                print(
+                    "\n[FATAL] SQLite is not allowed in production.\n"
+                    "Set DATABASE_URL to a PostgreSQL connection string in your environment.\n"
+                    "Example: postgresql://user:pass@host/dbname?sslmode=require\n",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            if self.jwt_secret == "change-me-in-production":
+                print(
+                    "\n[FATAL] JWT_SECRET is set to the default insecure value.\n"
+                    "Generate a strong secret: openssl rand -hex 32\n",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        return self
+
+    @property
+    def is_postgres(self) -> bool:
+        return self.database_url.startswith(("postgresql", "postgres"))
 
     @property
     def upload_path(self) -> Path:

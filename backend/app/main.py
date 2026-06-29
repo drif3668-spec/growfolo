@@ -10,6 +10,33 @@ import app.models  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
+# ── Seed admin user if not present ──────────────────────────────────────
+def _seed_admin() -> None:
+    from sqlalchemy import select
+    from app.core.security import hash_password
+    from app.models.user import User
+
+    db = SessionLocal()
+    try:
+        if db.scalar(select(User).where(User.email == "admin@growfolo.io")):
+            return
+        admin = User(
+            email="admin@growfolo.io",
+            username="admin",
+            full_name="Growfolo Admin",
+            hashed_password=hash_password("Admin@2026"),
+            is_admin=True,
+        )
+        db.add(admin)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        print(f"[WARN] Could not seed admin user: {exc}")
+    finally:
+        db.close()
+
+_seed_admin()
+
 # ── Seed initial blog posts if table is empty ────────────────────────────
 def _seed_blog() -> None:
     from sqlalchemy import select
