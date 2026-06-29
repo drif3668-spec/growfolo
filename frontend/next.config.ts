@@ -3,9 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
   // On Vercel, auto-resolve the API URL from the deployment domain.
   // VERCEL_URL is injected by Vercel at build time (e.g. "growfolo.vercel.app").
   // Locally, NEXT_PUBLIC_API_URL from .env.local takes over (default: localhost:8000).

@@ -4,7 +4,7 @@ from datetime import datetime
 from random import choices
 from string import ascii_uppercase, digits
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -80,13 +80,18 @@ def create_code(payload: DiscountCreate, db: Session = Depends(get_db)) -> Disco
     return dc
 
 
-@router.delete("/{code_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_code(code_id: int, db: Session = Depends(get_db)) -> None:
+@router.delete(
+    "/{code_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_code(code_id: int, db: Session = Depends(get_db)) -> Response:
     dc = db.get(DiscountCode, code_id)
     if not dc:
         raise HTTPException(status_code=404, detail="الكود غير موجود")
     db.delete(dc)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch("/{code_id}/toggle", response_model=DiscountOut)

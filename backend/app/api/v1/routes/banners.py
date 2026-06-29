@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -178,8 +178,12 @@ async def update_banner(
     return slide
 
 
-@router.delete("/{slide_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_banner(slide_id: int, db: Session = Depends(get_db)) -> None:
+@router.delete(
+    "/{slide_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_banner(slide_id: int, db: Session = Depends(get_db)) -> Response:
     slide = db.get(BannerSlide, slide_id)
     if not slide:
         raise HTTPException(status_code=404, detail="Slide not found")
@@ -188,6 +192,7 @@ def delete_banner(slide_id: int, db: Session = Depends(get_db)) -> None:
     old.unlink(missing_ok=True)
     db.delete(slide)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch("/{slide_id}/order", response_model=SlideOut)

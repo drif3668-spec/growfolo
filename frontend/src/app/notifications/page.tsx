@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import {
   ArrowRight, Bell, BellRing, CheckCheck, Search, ShoppingCart,
   Tag, Info, CreditCard, Package, Truck, Star,
@@ -9,7 +10,13 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { useNotifications, type GfNotification, type NotifType } from "@/context/notifications-context";
 
 /* ── Type config ────────────────────────────────────────────────────── */
-const TYPE_CONFIG: Record<NotifType, { icon: React.ComponentType<{ size?: number; className?: string }>, color: string, bg: string }> = {
+type NotificationIcon = React.ComponentType<{
+  size?: number;
+  className?: string;
+  style?: CSSProperties;
+}>;
+
+const TYPE_CONFIG: Record<NotifType, { icon: NotificationIcon, color: string, bg: string }> = {
   order:    { icon: Package,      color: "#a855f7", bg: "rgba(168,85,247,0.12)" },
   payment:  { icon: CreditCard,   color: "#10b981", bg: "rgba(16,185,129,0.12)" },
   status:   { icon: Truck,        color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },

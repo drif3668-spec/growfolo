@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import {
   ArrowRight, BookOpen, Brain, Check, Clock, Copy, Eye,
@@ -16,7 +17,13 @@ interface Post {
   views: number; featured: boolean; created_at: string;
 }
 
-const CATS: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ size?: number }> }> = {
+type CategoryIcon = React.ComponentType<{
+  size?: number;
+  className?: string;
+  style?: CSSProperties;
+}>;
+
+const CATS: Record<string, { label: string; color: string; bg: string; icon: CategoryIcon }> = {
   ai:        { label: "الذكاء الاصطناعي",  color: "#a855f7", bg: "rgba(168,85,247,0.12)", icon: Brain      },
   services:  { label: "الخدمات",           color: "#10b981", bg: "rgba(16,185,129,0.12)", icon: Package     },
   companies: { label: "الشركات العالمية",  color: "#3b82f6", bg: "rgba(59,130,246,0.12)", icon: TrendingUp  },

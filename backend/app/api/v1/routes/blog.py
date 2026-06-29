@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
@@ -201,10 +201,15 @@ def toggle_featured(post_id: str, db: Session = Depends(get_db)) -> PostOut:
     return PostOut.from_orm(post)
 
 
-@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(post_id: str, db: Session = Depends(get_db)) -> None:
+@router.delete(
+    "/{post_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_post(post_id: str, db: Session = Depends(get_db)) -> Response:
     post = db.get(BlogPost, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="المقال غير موجود")
     db.delete(post)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

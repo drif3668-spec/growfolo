@@ -26,11 +26,11 @@ growfolo/
 │   │   ├── models/    SQLAlchemy ORM models
 │   │   ├── core/      Config, security
 │   │   └── db/        Engine + session
-│   └── requirements.txt
+│   └── requirements.local.txt
 ├── api/
 │   ├── index.py       Vercel serverless entry point
 │   └── requirements.txt
-└── vercel.json        Vercel build + routing config
+└── vercel.json        Vercel single-project config
 ```
 
 ---
@@ -67,7 +67,7 @@ cd backend
 python -m venv venv
 venv\Scripts\activate          # Windows
 # source venv/bin/activate     # macOS / Linux
-pip install -r requirements.txt
+pip install -r requirements.local.txt
 uvicorn main:app --reload --port 8000
 ```
 
@@ -106,8 +106,9 @@ git push origin main
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Click **Import Git Repository** → select `growfolo`
-3. Do **not** change Framework Preset — `vercel.json` handles everything
-4. Click **Deploy** (first deploy will likely fail — that is expected until env vars are set)
+3. Set **Root Directory** to `./`
+4. Use **Framework Preset**: `Next.js`
+5. Click **Deploy** after adding the environment variables below
 
 ### Step 3 — Set environment variables
 
