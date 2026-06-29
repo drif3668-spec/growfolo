@@ -1,23 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Send, X, MessageSquare } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const WS_URL = API_URL.replace(/^http/, "ws");
 
-/* ── Support team avatars ─────────────────────────────────────────────── */
 const TEAM = [
-  { initials: "AK", gradient: "linear-gradient(135deg,#7c3aed,#6d28d9)", ring: "#a855f7" },
-  { initials: "SR", gradient: "linear-gradient(135deg,#059669,#047857)", ring: "#10b981" },
-  { initials: "LM", gradient: "linear-gradient(135deg,#db2777,#be185d)", ring: "#f472b6" },
-  { initials: "NB", gradient: "linear-gradient(135deg,#2563eb,#1d4ed8)", ring: "#60a5fa" },
+  { initials: "AK", bg: "#1a1a1a", ring: "#c8e600" },
+  { initials: "SR", bg: "#1a1a1a", ring: "#a3c400" },
+  { initials: "LM", bg: "#1a1a1a", ring: "#c8e600" },
+  { initials: "NB", bg: "#1a1a1a", ring: "#a3c400" },
 ];
 
 type Message = { id: string; content: string; is_admin: boolean; created_at: string };
 type Phase = "closed" | "form" | "chat";
 
-/* ── Notification sound via Web Audio API ────────────────────────────── */
 function beep(hz: number, ms: number, vol = 0.22) {
   try {
     const ctx = new AudioContext();
@@ -35,29 +33,26 @@ function beep(hz: number, ms: number, vol = 0.22) {
   } catch { /* browser may block autoplay */ }
 }
 
-/* ── Glassmorphism panel style ───────────────────────────────────────── */
-const GLASS: React.CSSProperties = {
-  background: "linear-gradient(145deg, rgba(14,10,26,0.96), rgba(8,6,18,0.98))",
-  backdropFilter: "blur(28px) saturate(160%)",
-  WebkitBackdropFilter: "blur(28px) saturate(160%)",
-  border: "1px solid rgba(168,85,247,0.28)",
-  boxShadow: [
-    "0 0 0 1px rgba(168,85,247,0.08)",
-    "0 0 80px rgba(168,85,247,0.22)",
-    "0 0 40px rgba(59,130,246,0.12)",
-    "0 25px 70px rgba(0,0,0,0.65)",
-  ].join(","),
-};
-
-const HEADER_BG: React.CSSProperties = {
-  background: "linear-gradient(135deg, rgba(124,58,237,0.55) 0%, rgba(59,130,246,0.35) 60%, rgba(6,182,212,0.2) 100%)",
-  borderBottom: "1px solid rgba(168,85,247,0.18)",
-};
-
-/* ── Time formatter ──────────────────────────────────────────────────── */
 const fmt = (iso: string) => {
   try { return new Date(iso).toLocaleTimeString("ar-DZ", { hour: "2-digit", minute: "2-digit" }); }
   catch { return ""; }
+};
+
+/* ── LIME brand color ─────────────────────────────────────────────────── */
+const LIME = "#c8e600";
+const LIME_DARK = "#a3bd00";
+
+/* ── Panel styles ─────────────────────────────────────────────────────── */
+const PANEL: React.CSSProperties = {
+  background: "linear-gradient(160deg, #0e0e0e 0%, #111111 100%)",
+  backdropFilter: "blur(32px) saturate(180%)",
+  WebkitBackdropFilter: "blur(32px) saturate(180%)",
+  border: "1px solid rgba(200,230,0,0.18)",
+  boxShadow: [
+    `0 0 0 1px rgba(200,230,0,0.06)`,
+    `0 0 60px rgba(200,230,0,0.12)`,
+    "0 30px 80px rgba(0,0,0,0.75)",
+  ].join(","),
 };
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -76,17 +71,14 @@ export function LiveChat() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  /* Scroll to latest message */
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  /* Restore session from localStorage */
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("gf_chat_sid");
     if (saved) setSessionId(saved);
   }, []);
 
-  /* Open WebSocket for a given session */
   const connectWs = useCallback((sid: string) => {
     wsRef.current?.close();
     const ws = new WebSocket(`${WS_URL}/api/v1/chat/ws/${sid}`);
@@ -100,7 +92,6 @@ export function LiveChat() {
     wsRef.current = ws;
   }, []);
 
-  /* Load message history */
   const loadHistory = useCallback(async (sid: string) => {
     try {
       const r = await fetch(`${API_URL}/api/v1/chat/sessions/${sid}/messages`);
@@ -108,7 +99,6 @@ export function LiveChat() {
     } catch { /* ignore */ }
   }, []);
 
-  /* Open chat widget */
   const openChat = useCallback(async () => {
     if (sessionId) {
       await loadHistory(sessionId);
@@ -119,7 +109,6 @@ export function LiveChat() {
     }
   }, [sessionId, loadHistory, connectWs]);
 
-  /* Submit contact form */
   const submitForm = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.whatsapp.trim()) {
@@ -147,7 +136,6 @@ export function LiveChat() {
     }
   }, [form, connectWs]);
 
-  /* Send message */
   const send = useCallback(() => {
     if (!draft.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ content: draft.trim() }));
@@ -159,19 +147,28 @@ export function LiveChat() {
 
   const onKey = (e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
 
-  /* ── CLOSED — Circular breathing button ──────────────────────────── */
+  /* ── CLOSED — App-icon style button ─────────────────────────────── */
   if (phase === "closed") {
     return (
       <button
         onClick={openChat}
         aria-label="فتح الدعم"
-        className="chat-breathe fixed bottom-6 left-6 z-50 grid size-16 place-items-center rounded-full text-white transition-transform duration-200 hover:scale-110"
+        className="chat-breathe fixed bottom-6 left-6 z-50 grid size-[62px] place-items-center transition-all duration-300 hover:scale-110 active:scale-95"
         style={{
-          background: "linear-gradient(135deg, rgba(124,58,237,0.92) 0%, rgba(59,130,246,0.85) 55%, rgba(6,182,212,0.8) 100%)",
-          border: "1px solid rgba(255,255,255,0.18)",
+          background: `linear-gradient(145deg, ${LIME} 0%, ${LIME_DARK} 100%)`,
+          borderRadius: "22px",
+          boxShadow: `0 0 0 1px rgba(200,230,0,0.3), 0 8px 32px rgba(200,230,0,0.35), 0 2px 8px rgba(0,0,0,0.5)`,
         }}
       >
-        <MessageCircle size={26} strokeWidth={2} />
+        {/* Two overlapping chat bubbles — matching the logo */}
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          {/* Back bubble */}
+          <rect x="8" y="4" width="22" height="16" rx="7" fill="#000" opacity="0.9" />
+          {/* Front bubble */}
+          <rect x="4" y="11" width="22" height="16" rx="7" fill="#000" />
+          {/* Tail */}
+          <path d="M8 27 L4 33 L14 27" fill="#000" />
+        </svg>
       </button>
     );
   }
@@ -179,56 +176,79 @@ export function LiveChat() {
   /* ── OPEN — Chat window ──────────────────────────────────────────── */
   return (
     <aside
-      className="fixed bottom-6 left-6 z-50 flex w-[350px] flex-col overflow-hidden rounded-3xl"
-      style={GLASS}
+      className="fixed bottom-6 left-6 z-50 flex w-[360px] flex-col overflow-hidden"
+      style={{ ...PANEL, borderRadius: "24px" }}
     >
       {/* ── Header ─────────────────────────────────────────────────── */}
-      <div style={HEADER_BG} className="px-5 pt-5 pb-4">
+      <div
+        className="px-5 pt-5 pb-4"
+        style={{
+          background: "linear-gradient(135deg, #111111 0%, #161616 100%)",
+          borderBottom: "1px solid rgba(200,230,0,0.12)",
+        }}
+      >
         <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-base font-black tracking-tight text-white">Growfolo Support</h2>
-            <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-white/60">
-              <span
-                className="inline-block size-2 rounded-full bg-lime-400"
-                style={{ boxShadow: "0 0 6px rgba(132,204,22,0.9)" }}
-              />
-              Online
-            </p>
+          <div className="flex items-center gap-3">
+            {/* Mini logo icon */}
+            <div
+              className="grid size-10 shrink-0 place-items-center"
+              style={{ background: LIME, borderRadius: "13px", boxShadow: `0 4px 14px rgba(200,230,0,0.4)` }}
+            >
+              <svg width="22" height="22" viewBox="0 0 34 34" fill="none">
+                <rect x="8" y="4" width="22" height="16" rx="7" fill="#000" opacity="0.9" />
+                <rect x="4" y="11" width="22" height="16" rx="7" fill="#000" />
+                <path d="M8 27 L4 33 L14 27" fill="#000" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-sm font-black tracking-tight text-white">Growfolo Support</h2>
+              <p className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-white/50">
+                <span
+                  className="inline-block size-1.5 rounded-full"
+                  style={{ background: LIME, boxShadow: `0 0 6px ${LIME}` }}
+                />
+                متصل الآن
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setPhase("closed")}
-            className="grid size-8 place-items-center rounded-2xl text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+            className="grid size-8 place-items-center rounded-xl text-white/40 transition-all hover:bg-white/8 hover:text-white"
             aria-label="إغلاق"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
-        {/* Avatars */}
+        {/* Avatars strip */}
         <div className="mt-4 flex items-center gap-2">
-          {TEAM.map((av) => (
+          {TEAM.map((av, idx) => (
             <div
               key={av.initials}
-              className="grid size-10 shrink-0 place-items-center rounded-full text-[11px] font-black text-white"
+              className="grid size-9 shrink-0 place-items-center rounded-full text-[10px] font-black"
               style={{
-                background: av.gradient,
-                boxShadow: `0 0 0 2px rgba(9,8,15,1), 0 0 0 3px ${av.ring}55`,
+                background: "#1e1e1e",
+                color: LIME,
+                border: `2px solid ${av.ring}`,
+                marginLeft: idx > 0 ? "-8px" : "0",
+                zIndex: TEAM.length - idx,
+                boxShadow: `0 0 0 1px #111`,
               }}
             >
               {av.initials}
             </div>
           ))}
-          <p className="mr-1 text-[11px] leading-4 text-white/55">
-            عادة نرد خلال<br />
-            <span className="font-bold text-white/80">أقل من دقيقة</span>
+          <p className="mr-3 text-[11px] leading-4 text-white/45">
+            نرد عادةً خلال
+            <span className="block font-bold" style={{ color: LIME }}>أقل من دقيقة</span>
           </p>
         </div>
       </div>
 
-      {/* ── Contact Form (first visit) ──────────────────────────────── */}
+      {/* ── Contact Form ────────────────────────────────────────────── */}
       {phase === "form" && (
-        <form onSubmit={submitForm} className="flex flex-col gap-3.5 px-5 py-5">
-          <p className="text-sm text-white/55">أدخل بياناتك لبدء المحادثة</p>
+        <form onSubmit={submitForm} className="flex flex-col gap-3 px-5 py-5">
+          <p className="mb-1 text-xs text-white/40">أدخل بياناتك لبدء المحادثة</p>
 
           {(
             [
@@ -237,7 +257,7 @@ export function LiveChat() {
               { key: "whatsapp" as const, label: "رقم WhatsApp", placeholder: "+213 5XX XXX XXX", type: "tel" },
             ] as const
           ).map(({ key, label, placeholder, type }) => (
-            <label key={key} className="grid gap-1.5 text-xs font-semibold text-white/65">
+            <label key={key} className="grid gap-1.5 text-[11px] font-semibold text-white/50">
               {label}
               <input
                 required
@@ -245,13 +265,16 @@ export function LiveChat() {
                 value={form[key]}
                 onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
                 placeholder={placeholder}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 transition-colors focus:border-purple-500/50 focus:bg-white/8"
+                className="rounded-2xl border border-white/8 bg-white/4 px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-white/20 transition-all"
+                style={{ "--tw-ring-color": LIME } as React.CSSProperties}
+                onFocus={(e) => { e.currentTarget.style.borderColor = `${LIME}55`; e.currentTarget.style.background = "rgba(200,230,0,0.04)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
               />
             </label>
           ))}
 
           {formErr && (
-            <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+            <p className="rounded-xl border border-red-500/20 bg-red-500/8 px-3 py-2 text-xs text-red-400">
               {formErr}
             </p>
           )}
@@ -259,14 +282,15 @@ export function LiveChat() {
           <button
             type="submit"
             disabled={submitting}
-            className="neon-button mt-1 w-full rounded-2xl py-3 text-sm font-black text-black disabled:opacity-60"
+            className="mt-1 w-full rounded-2xl py-3 text-sm font-black text-black transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+            style={{ background: `linear-gradient(135deg, ${LIME}, ${LIME_DARK})`, boxShadow: `0 4px 18px rgba(200,230,0,0.35)` }}
           >
-            {submitting ? "جارٍ الإنشاء..." : "متابعة →"}
+            {submitting ? "جارٍ الإنشاء..." : "متابعة ←"}
           </button>
         </form>
       )}
 
-      {/* ── Messages ───────────────────────────────────────────────── */}
+      {/* ── Messages ─────────────────────────────────────────────────── */}
       {phase === "chat" && (
         <>
           <div
@@ -274,37 +298,43 @@ export function LiveChat() {
             style={{ minHeight: 200, maxHeight: 320 }}
           >
             {messages.length === 0 && (
-              <div className="rounded-2xl bg-white/6 px-3 py-2.5 text-sm text-white/80">
+              <div
+                className="self-start rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-6 text-white/85"
+                style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
                 مرحباً! كيف يمكنني مساعدتك اليوم؟
-                <span className="mt-0.5 block text-[10px] text-white/35">{fmt(new Date().toISOString())}</span>
+                <span className="mt-1 block text-[10px] text-white/30">{fmt(new Date().toISOString())}</span>
               </div>
             )}
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.is_admin ? "justify-start" : "justify-end"}`}>
                 <div
-                  className={`max-w-[82%] rounded-2xl px-3 py-2 text-sm leading-6 ${
-                    msg.is_admin
-                      ? "rounded-tr-sm bg-white/8 text-white"
-                      : "rounded-tl-sm text-white"
+                  className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
+                    msg.is_admin ? "rounded-tl-sm text-white/90" : "rounded-tr-sm text-black"
                   }`}
                   style={
-                    !msg.is_admin
-                      ? { background: "linear-gradient(135deg, rgba(124,58,237,0.85), rgba(59,130,246,0.7))" }
-                      : undefined
+                    msg.is_admin
+                      ? { background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.06)" }
+                      : { background: `linear-gradient(135deg, ${LIME}, ${LIME_DARK})`, boxShadow: `0 2px 12px rgba(200,230,0,0.25)` }
                   }
                 >
                   {msg.content}
-                  <span className="mt-0.5 block text-[10px] text-white/35">{fmt(msg.created_at)}</span>
+                  <span
+                    className="mt-0.5 block text-[10px]"
+                    style={{ color: msg.is_admin ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.45)" }}
+                  >
+                    {fmt(msg.created_at)}
+                  </span>
                 </div>
               </div>
             ))}
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
+          {/* Input bar */}
           <div
-            className="flex items-center gap-2 px-3 py-3"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+            className="flex items-center gap-2.5 px-3.5 py-3"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
           >
             <input
               ref={inputRef}
@@ -313,24 +343,23 @@ export function LiveChat() {
               onKeyDown={onKey}
               autoFocus
               placeholder="اكتب رسالتك..."
-              className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-purple-500/40"
+              className="min-w-0 flex-1 rounded-2xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 transition-all"
+              onFocus={(e) => { e.currentTarget.style.borderColor = `${LIME}44`; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
             />
             <button
               onClick={send}
               disabled={!draft.trim()}
-              className="grid size-10 shrink-0 place-items-center rounded-2xl text-white disabled:opacity-35"
-              style={{
-                background: "linear-gradient(135deg, rgba(124,58,237,0.9), rgba(59,130,246,0.8))",
-                boxShadow: "0 0 16px rgba(124,58,237,0.4)",
-              }}
               aria-label="إرسال"
+              className="grid size-10 shrink-0 place-items-center rounded-2xl text-black transition-all hover:opacity-90 active:scale-95 disabled:opacity-30"
+              style={{ background: `linear-gradient(135deg, ${LIME}, ${LIME_DARK})`, boxShadow: `0 2px 12px rgba(200,230,0,0.3)` }}
             >
               <Send size={15} />
             </button>
           </div>
 
           <div
-            className="py-1.5 text-center text-[10px] text-white/22"
+            className="py-1.5 text-center text-[10px] text-white/18"
             style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
           >
             Growfolo Support · Powered by AI
