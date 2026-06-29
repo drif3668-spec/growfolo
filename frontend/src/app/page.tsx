@@ -295,20 +295,6 @@ function Footer() {
                 <PaymentMethodImage method={method} />
               </span>
             ))}
-            <img
-              src="/app-badges/google-play.png"
-              alt="Get it on Google Play"
-              className="min-h-12 w-full rounded-lg object-contain"
-              loading="lazy"
-              draggable={false}
-            />
-            <img
-              src="/app-badges/app-store.png"
-              alt="Download on the App Store"
-              className="min-h-12 w-full rounded-lg object-contain"
-              loading="lazy"
-              draggable={false}
-            />
           </div>
         </div>
       </div>
