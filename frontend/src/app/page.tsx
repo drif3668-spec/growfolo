@@ -285,8 +285,18 @@ function Footer() {
             متجر رقمي يقدم لك أفضل الخدمات والاشتراكات الأصلية، كل ما تحتاج لتجربة رقمية متكاملة ومتميزة
           </p>
         </div>
-        <FooterColumn title="روابط سريعة" links={["المدونة", "الصفحة التعريفية", "سياسة الخصوصية", "الاستبدال والاسترجاع"]} />
-        <FooterColumn title="خدمة العملاء" links={["تواصل معنا", "الأسئلة الشائعة", "تتبع الطلب", "شروط الخدمة"]} />
+        <FooterColumn title="روابط سريعة" links={[
+          { label: "المدونة",                href: "#" },
+          { label: "الصفحة التعريفية",      href: "#about" },
+          { label: "سياسة الخصوصية",        href: "#" },
+          { label: "الاستبدال والاسترجاع",  href: "/refund-policy" },
+        ]} />
+        <FooterColumn title="خدمة العملاء" links={[
+          { label: "تواصل معنا",    href: "#" },
+          { label: "الأسئلة الشائعة", href: "#" },
+          { label: "تتبع الطلب",    href: "#" },
+          { label: "شروط الخدمة",  href: "#" },
+        ]} />
         <div>
           <h3 className="mb-4 font-black">طرق الدفع</h3>
           <div className="grid max-w-64 grid-cols-2 gap-2">
@@ -326,12 +336,16 @@ function IconBlock({ title, text, icon: Icon }: { title: string; text: string; i
   );
 }
 
-function FooterColumn({ title, links }: { title: string; links: string[] }) {
+function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
     <div>
       <h3 className="mb-4 font-black">{title}</h3>
       <ul className="grid gap-3 text-sm text-white/62">
-        {links.map((l) => <li key={l}>{l}</li>)}
+        {links.map((l) => (
+          <li key={l.label}>
+            <a href={l.href} className="transition-colors hover:text-white">{l.label}</a>
+          </li>
+        ))}
       </ul>
     </div>
   );
