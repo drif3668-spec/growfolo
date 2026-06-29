@@ -7,10 +7,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const WS_URL = API_URL.replace(/^http/, "ws");
 
 const TEAM = [
-  { initials: "AK", bg: "#1a1a1a", ring: "#c8e600" },
-  { initials: "SR", bg: "#1a1a1a", ring: "#a3c400" },
-  { initials: "LM", bg: "#1a1a1a", ring: "#c8e600" },
-  { initials: "NB", bg: "#1a1a1a", ring: "#a3c400" },
+  { initials: "AK", img: "/team/agent-1.jpg", ring: "#c8e600" },
+  { initials: "SR", img: "/team/agent-2.jpg", ring: "#a3c400" },
+  { initials: "LM", img: "/team/agent-3.jpg", ring: "#c8e600" },
+  { initials: "NB", img: "/team/agent-4.jpg", ring: "#a3c400" },
 ];
 
 type Message = { id: string; content: string; is_admin: boolean; created_at: string };
@@ -225,17 +225,30 @@ export function LiveChat() {
           {TEAM.map((av, idx) => (
             <div
               key={av.initials}
-              className="grid size-9 shrink-0 place-items-center rounded-full text-[10px] font-black"
+              className="size-9 shrink-0 overflow-hidden rounded-full"
               style={{
-                background: "#1e1e1e",
-                color: LIME,
                 border: `2px solid ${av.ring}`,
                 marginLeft: idx > 0 ? "-8px" : "0",
                 zIndex: TEAM.length - idx,
                 boxShadow: `0 0 0 1px #111`,
               }}
             >
-              {av.initials}
+              <img
+                src={av.img}
+                alt={av.initials}
+                className="size-full object-cover object-top"
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  el.style.display = "none";
+                  el.parentElement!.style.background = "#1e1e1e";
+                  el.parentElement!.style.display = "grid";
+                  el.parentElement!.style.placeItems = "center";
+                  el.parentElement!.style.color = LIME;
+                  el.parentElement!.style.fontSize = "10px";
+                  el.parentElement!.style.fontWeight = "900";
+                  el.parentElement!.textContent = av.initials;
+                }}
+              />
             </div>
           ))}
           <p className="mr-3 text-[11px] leading-4 text-white/45">
