@@ -94,3 +94,8 @@ input {
   animation-play-state: paused;
   transform: scale(1.12) !important;
 }
+
+@keyframes banner-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}

@@ -8,6 +8,7 @@ import {
 import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
+import { BannerCarousel } from "@/components/sections/banner-carousel";
 import { useCart } from "@/context/cart-context";
 
 const features = [
@@ -73,6 +74,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#050508] text-white">
       <SiteHeader />
+      <BannerCarousel />
       <div className="mx-auto max-w-7xl px-4 pb-10">
         <HeroSection />
         <FeatureStrip />

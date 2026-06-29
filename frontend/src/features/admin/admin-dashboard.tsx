@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MessageCircle, Package, ReceiptText, Send, ShieldCheck,
   Users, CheckCircle, RefreshCw, Eye, Clock, ExternalLink,
+  ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, ToggleLeft, ToggleRight, Pencil, X,
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -20,7 +21,24 @@ type Order = {
   created_at: string; expires_at: string | null;
 };
 
-type NavSection = "orders" | "products" | "chat" | "settings";
+type NavSection = "orders" | "products" | "banners" | "chat" | "settings";
+
+type BannerSlide = {
+  id: number; image_url: string; title: string | null; description: string | null;
+  button_text: string; link_url: string; sort_order: number; is_active: boolean;
+  alt_text: string | null; start_date: string | null; end_date: string | null; created_at: string;
+};
+
+type BannerForm = {
+  title: string; description: string; button_text: string; link_url: string;
+  sort_order: number; is_active: boolean; alt_text: string;
+  start_date: string; end_date: string; imageFile: File | null;
+};
+
+const EMPTY_FORM: BannerForm = {
+  title: "", description: "", button_text: "مشاهدة الإعلان", link_url: "/",
+  sort_order: 0, is_active: true, alt_text: "", start_date: "", end_date: "", imageFile: null,
+};
 
 /* ── Status config ─────────────────────────────────────────────────────── */
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
@@ -38,6 +56,91 @@ const STATUS: Record<string, { label: string; color: string; bg: string }> = {
 ════════════════════════════════════════════════════════════════════════ */
 export function AdminDashboard() {
   const [nav, setNav] = useState<NavSection>("orders");
+
+  /* ── Banners state ─────────────────────────────────────────────────── */
+  const [slides, setSlides] = useState<BannerSlide[]>([]);
+  const [slidesLoading, setSlidesLoading] = useState(false);
+  const [bannerForm, setBannerForm] = useState<BannerForm>(EMPTY_FORM);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [bannerSaving, setBannerSaving] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const loadSlides = useCallback(async () => {
+    setSlidesLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/banners/admin/all`);
+      if (res.ok) setSlides(await res.json());
+    } catch {} finally { setSlidesLoading(false); }
+  }, []);
+
+  useEffect(() => { if (nav === "banners") loadSlides(); }, [nav, loadSlides]);
+
+  function openAddForm() {
+    setEditingId(null);
+    setBannerForm(EMPTY_FORM);
+    setShowForm(true);
+  }
+
+  function openEditForm(s: BannerSlide) {
+    setEditingId(s.id);
+    setBannerForm({
+      title: s.title ?? "", description: s.description ?? "",
+      button_text: s.button_text, link_url: s.link_url,
+      sort_order: s.sort_order, is_active: s.is_active,
+      alt_text: s.alt_text ?? "", start_date: s.start_date?.slice(0, 16) ?? "",
+      end_date: s.end_date?.slice(0, 16) ?? "", imageFile: null,
+    });
+    setShowForm(true);
+  }
+
+  async function saveBanner() {
+    if (!editingId && !bannerForm.imageFile) { alert("اختر صورة"); return; }
+    setBannerSaving(true);
+    const fd = new FormData();
+    if (bannerForm.imageFile) fd.append("image", bannerForm.imageFile);
+    fd.append("title", bannerForm.title);
+    fd.append("description", bannerForm.description);
+    fd.append("button_text", bannerForm.button_text);
+    fd.append("link_url", bannerForm.link_url);
+    fd.append("sort_order", String(bannerForm.sort_order));
+    fd.append("is_active", String(bannerForm.is_active));
+    fd.append("alt_text", bannerForm.alt_text);
+    fd.append("start_date", bannerForm.start_date);
+    fd.append("end_date", bannerForm.end_date);
+    try {
+      const url = editingId ? `${API_URL}/api/v1/banners/${editingId}` : `${API_URL}/api/v1/banners`;
+      const method = editingId ? "PUT" : "POST";
+      const res = await fetch(url, { method, body: fd });
+      if (res.ok) {
+        setShowForm(false);
+        await loadSlides();
+      }
+    } catch {} finally { setBannerSaving(false); }
+  }
+
+  async function deleteBanner(id: number) {
+    if (!confirm("حذف هذه الشريحة؟")) return;
+    await fetch(`${API_URL}/api/v1/banners/${id}`, { method: "DELETE" });
+    setSlides((p) => p.filter((s) => s.id !== id));
+  }
+
+  async function toggleBanner(id: number) {
+    const res = await fetch(`${API_URL}/api/v1/banners/${id}/toggle`, { method: "PATCH" });
+    if (res.ok) { const updated: BannerSlide = await res.json(); setSlides((p) => p.map((s) => s.id === id ? updated : s)); }
+  }
+
+  async function moveSlide(id: number, dir: "up" | "down") {
+    const idx = slides.findIndex((s) => s.id === id);
+    const swap = dir === "up" ? idx - 1 : idx + 1;
+    if (swap < 0 || swap >= slides.length) return;
+    const a = slides[idx], b = slides[swap];
+    await Promise.all([
+      fetch(`${API_URL}/api/v1/banners/${a.id}/order?sort_order=${b.sort_order}`, { method: "PATCH" }),
+      fetch(`${API_URL}/api/v1/banners/${b.id}/order?sort_order=${a.sort_order}`, { method: "PATCH" }),
+    ]);
+    await loadSlides();
+  }
 
   /* ── Orders state ──────────────────────────────────────────────────── */
   const [orders, setOrders] = useState<Order[]>([]);
@@ -138,6 +241,7 @@ export function AdminDashboard() {
   /* ── Sidebar nav items ─────────────────────────────────────────────── */
   const NAV = [
     { id: "orders" as NavSection, label: "الطلبات", icon: ReceiptText, badge: orders.filter((o) => o.status === "processing").length },
+    { id: "banners" as NavSection, label: "البانرات", icon: ImageIcon, badge: 0 },
     { id: "products" as NavSection, label: "المنتجات", icon: Package, badge: 0 },
     { id: "chat" as NavSection, label: "الشات المباشر", icon: MessageCircle, badge: sessions.filter((s) => !s.is_resolved).length },
     { id: "settings" as NavSection, label: "الإعدادات", icon: ShieldCheck, badge: 0 },
@@ -318,6 +422,178 @@ export function AdminDashboard() {
                     اختر طلباً لعرض التفاصيل
                   </div>
                 )}
+              </div>
+            </>
+          )}
+
+          {/* ── BANNERS ──────────────────────────────────────────────── */}
+          {nav === "banners" && (
+            <>
+              {/* Modal Form */}
+              {showForm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur">
+                  <div className="w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0d0b14] p-6" style={{ maxHeight: "90vh" }}>
+                    <div className="mb-5 flex items-center justify-between">
+                      <h3 className="font-black text-white">{editingId ? "تعديل الشريحة" : "إضافة شريحة جديدة"}</h3>
+                      <button onClick={() => setShowForm(false)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15"><X size={16} /></button>
+                    </div>
+                    <div className="grid gap-3 text-sm">
+                      {/* Image */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        الصورة {!editingId && <span className="text-red-400">*</span>}
+                        <div
+                          onClick={() => imageInputRef.current?.click()}
+                          className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/3 py-5 text-center hover:bg-white/6"
+                        >
+                          {bannerForm.imageFile ? (
+                            <span className="text-xs text-lime-400">{bannerForm.imageFile.name}</span>
+                          ) : (
+                            <>
+                              <ImageIcon size={28} className="text-white/25" />
+                              <span className="text-xs text-white/40">انقر لاختيار صورة (WebP / JPG / PNG)</span>
+                              <span className="text-[10px] text-white/25">الأفضل: 1920×640 بكسل · أقل من 250KB</span>
+                            </>
+                          )}
+                        </div>
+                        <input ref={imageInputRef} type="file" accept="image/*" className="hidden"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) setBannerForm((p) => ({ ...p, imageFile: f })); }} />
+                      </label>
+                      {/* Title */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        العنوان (اختياري)
+                        <input value={bannerForm.title} onChange={(e) => setBannerForm((p) => ({ ...p, title: e.target.value }))}
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="مثال: عروض الصيف 🔥" />
+                      </label>
+                      {/* Description */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        وصف قصير (اختياري)
+                        <input value={bannerForm.description} onChange={(e) => setBannerForm((p) => ({ ...p, description: e.target.value }))}
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="وصف العرض أو المنتج" />
+                      </label>
+                      {/* Button text + link */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          نص الزر
+                          <input value={bannerForm.button_text} onChange={(e) => setBannerForm((p) => ({ ...p, button_text: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                        </label>
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          رابط الوجهة
+                          <input value={bannerForm.link_url} onChange={(e) => setBannerForm((p) => ({ ...p, link_url: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="/checkout" />
+                        </label>
+                      </div>
+                      {/* Alt + Order */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          نص Alt (للسيو)
+                          <input value={bannerForm.alt_text} onChange={(e) => setBannerForm((p) => ({ ...p, alt_text: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                        </label>
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          الترتيب
+                          <input type="number" value={bannerForm.sort_order} onChange={(e) => setBannerForm((p) => ({ ...p, sort_order: Number(e.target.value) }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                        </label>
+                      </div>
+                      {/* Dates */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          تاريخ البدء (اختياري)
+                          <input type="datetime-local" value={bannerForm.start_date} onChange={(e) => setBannerForm((p) => ({ ...p, start_date: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                        </label>
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          تاريخ الانتهاء (اختياري)
+                          <input type="datetime-local" value={bannerForm.end_date} onChange={(e) => setBannerForm((p) => ({ ...p, end_date: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                        </label>
+                      </div>
+                      {/* Active toggle */}
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <span className="text-sm font-semibold text-white/55">مفعّلة</span>
+                        <button type="button" onClick={() => setBannerForm((p) => ({ ...p, is_active: !p.is_active }))}>
+                          {bannerForm.is_active ? <ToggleRight size={28} className="text-lime-400" /> : <ToggleLeft size={28} className="text-white/30" />}
+                        </button>
+                      </label>
+                      {/* Save */}
+                      <button onClick={saveBanner} disabled={bannerSaving}
+                        className="mt-2 neon-button w-full rounded-2xl py-3.5 font-black text-black disabled:opacity-50">
+                        {bannerSaving ? "جاري الحفظ..." : editingId ? "حفظ التعديلات" : "إضافة الشريحة"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Header */}
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-black">إدارة البانرات الإعلانية</h2>
+                <div className="flex gap-2">
+                  <button onClick={loadSlides} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                    <RefreshCw size={14} className={slidesLoading ? "animate-spin" : ""} /> تحديث
+                  </button>
+                  <button onClick={openAddForm} className="neon-button flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black">
+                    <Plus size={16} /> إضافة بانر
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="mb-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "إجمالي الشرائح", val: slides.length, color: "text-white" },
+                  { label: "مفعّلة", val: slides.filter((s) => s.is_active).length, color: "text-lime-400" },
+                  { label: "معطّلة", val: slides.filter((s) => !s.is_active).length, color: "text-white/40" },
+                ].map(({ label, val, color }) => (
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
+                    <p className="text-xs text-white/40">{label}</p>
+                    <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Slides list */}
+              <div className="grid gap-4">
+                {slides.length === 0 && !slidesLoading && (
+                  <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                    لا توجد شرائح — اضغط "إضافة بانر" للبدء
+                  </div>
+                )}
+                {slides.map((slide, idx) => (
+                  <div key={slide.id} className={`flex gap-4 rounded-3xl border p-4 ${slide.is_active ? "border-white/10 bg-white/3" : "border-white/5 bg-white/1.5 opacity-60"}`}>
+                    {/* Thumbnail */}
+                    <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-2xl bg-white/5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`${API_URL}${slide.image_url}`} alt={slide.alt_text ?? ""} className="h-full w-full object-cover" loading="lazy" />
+                    </div>
+                    {/* Info */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex items-start gap-2">
+                        <span className="flex-1 truncate font-bold text-white">{slide.title || <span className="text-white/30 italic">بدون عنوان</span>}</span>
+                        <span className={`shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-bold ${slide.is_active ? "bg-lime-500/15 text-lime-400" : "bg-white/8 text-white/40"}`}>
+                          {slide.is_active ? "مفعّل" : "معطّل"}
+                        </span>
+                      </div>
+                      {slide.description && <p className="truncate text-xs text-white/45">{slide.description}</p>}
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-white/30">
+                        <span>زر: {slide.button_text}</span>
+                        <span>رابط: {slide.link_url}</span>
+                        <span>ترتيب: {slide.sort_order}</span>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex shrink-0 flex-col gap-1.5">
+                      <button onClick={() => openEditForm(slide)} className="grid size-8 place-items-center rounded-xl bg-purple-500/15 text-purple-400 hover:bg-purple-500/25" title="تعديل"><Pencil size={13} /></button>
+                      <button onClick={() => toggleBanner(slide.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15" title="تفعيل/تعطيل">
+                        {slide.is_active ? <ToggleRight size={13} className="text-lime-400" /> : <ToggleLeft size={13} />}
+                      </button>
+                      <button onClick={() => moveSlide(slide.id, "up")} disabled={idx === 0} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 disabled:opacity-25" title="أعلى"><ArrowUp size={13} /></button>
+                      <button onClick={() => moveSlide(slide.id, "down")} disabled={idx === slides.length - 1} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 disabled:opacity-25" title="أسفل"><ArrowDown size={13} /></button>
+                      <button onClick={() => deleteBanner(slide.id)} className="grid size-8 place-items-center rounded-xl bg-red-500/15 text-red-400 hover:bg-red-500/25" title="حذف"><Trash2 size={13} /></button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
