@@ -14,6 +14,8 @@ import { BannerCarousel } from "@/components/sections/banner-carousel";
 import { AdsShowcase } from "@/components/sections/ads-showcase";
 import { AdsSectionSlider } from "@/components/sections/ads-section-slider";
 import { useCart } from "@/context/cart-context";
+import { useFavorites } from "@/context/favorites-context";
+import { useNotifications } from "@/context/notifications-context";
 import { PRODUCTS } from "@/data/products";
 
 const features = [
@@ -66,13 +68,45 @@ const BRANDS = [
 
 function AddToCartBtn({ product }: { product: { id: string; name: string; price_num: number; logo: string; color: string } }) {
   const { addItem } = useCart();
+  const { addNotification } = useNotifications();
   return (
     <button
-      onClick={() => addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color })}
+      onClick={() => {
+        addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color });
+        addNotification({ title: "تمت الإضافة إلى السلة", description: `تم إضافة "${product.name}" إلى سلة المشتريات`, type: "cart" });
+      }}
       className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)] hover:scale-110 transition-transform"
       aria-label="إضافة للسلة"
     >
       <ShoppingCart size={17} />
+    </button>
+  );
+}
+
+function FavoriteBtn({ product }: { product: (typeof products)[number] }) {
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { addNotification } = useNotifications();
+  const fav = isFavorite(product.id);
+  return (
+    <button
+      onClick={() => {
+        toggleFavorite({ id: product.id, name: product.name, logo: product.logo, color: product.color, price: product.price_num, rating: product.rating, discount: product.discount });
+        addNotification({
+          title: fav ? "تمت الإزالة من المفضلة" : "تمت الإضافة إلى المفضلة",
+          description: fav ? `تم إزالة "${product.name}" من قائمة المفضلة` : `تم إضافة "${product.name}" إلى قائمة المفضلة`,
+          type: "info",
+        });
+      }}
+      className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 transition-all hover:scale-110 hover:border-yellow-400/40"
+      aria-label={fav ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+      style={{ transition: "transform .2s, border-color .2s" }}
+    >
+      <Star
+        size={15}
+        fill={fav ? "#facc15" : "none"}
+        className="transition-all duration-200"
+        style={{ color: fav ? "#facc15" : "rgba(255,255,255,0.45)", filter: fav ? "drop-shadow(0 0 6px rgba(250,204,21,0.7))" : "none" }}
+      />
     </button>
   );
 }
@@ -192,6 +226,7 @@ function ProductCard({ product: p }: { product: (typeof products)[number] }) {
           <Star size={14} fill="currentColor" /> {p.rating} ({p.buyers})
         </span>
         <div className="flex items-center gap-1.5">
+          <FavoriteBtn product={p} />
           <a href={`/products/${p.id}`} className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/12 transition-colors" aria-label="تفاصيل">
             <Eye size={15} />
           </a>

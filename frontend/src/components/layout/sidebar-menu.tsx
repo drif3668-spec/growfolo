@@ -2,27 +2,11 @@
 
 import { useCallback, useEffect } from "react";
 import {
-  X,
-  LogIn,
-  UserPlus,
-  ShoppingBag,
-  ShoppingCart,
-  Heart,
-  MessageCircle,
-  Shield,
-  HelpCircle,
+  X, LogIn, UserPlus, ShoppingBag, ShoppingCart,
+  Heart, MessageCircle, Shield, HelpCircle, Bell,
 } from "lucide-react";
-
-const NAV_ITEMS = [
-  { href: "/login", label: "تسجيل الدخول", icon: LogIn, highlight: false },
-  { href: "/register", label: "إنشاء حساب جديد", icon: UserPlus, highlight: true },
-  { href: "/orders", label: "الطلبات", icon: ShoppingBag, highlight: false },
-  { href: "/checkout", label: "السلة", icon: ShoppingCart, highlight: false },
-  { href: "/wishlist", label: "المفضلة", icon: Heart, highlight: false },
-  { href: "/contact", label: "تواصل معنا", icon: MessageCircle, highlight: false },
-  { href: "/privacy", label: "سياسة الخصوصية", icon: Shield, highlight: false },
-  { href: "/faq", label: "الأسئلة الشائعة", icon: HelpCircle, highlight: false },
-];
+import { useNotifications } from "@/context/notifications-context";
+import { useFavorites } from "@/context/favorites-context";
 
 interface SidebarMenuProps {
   open: boolean;
@@ -30,10 +14,11 @@ interface SidebarMenuProps {
 }
 
 export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
+  const { unreadCount } = useNotifications();
+  const { count: favCount } = useFavorites();
+
   const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    },
+    (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); },
     [onClose]
   );
 
@@ -50,6 +35,18 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
     };
   }, [open, handleEscape]);
 
+  const NAV_ITEMS = [
+    { href: "/login",    label: "تسجيل الدخول",    icon: LogIn,          highlight: false, badge: 0 },
+    { href: "/register", label: "إنشاء حساب جديد", icon: UserPlus,       highlight: true,  badge: 0 },
+    { href: "/orders",   label: "الطلبات",          icon: ShoppingBag,    highlight: false, badge: 0 },
+    { href: "/checkout", label: "السلة",            icon: ShoppingCart,   highlight: false, badge: 0 },
+    { href: "/wishlist", label: "المفضلة",          icon: Heart,          highlight: false, badge: favCount },
+    { href: "/notifications", label: "الإشعارات",  icon: Bell,           highlight: false, badge: unreadCount },
+    { href: "/contact",  label: "تواصل معنا",       icon: MessageCircle,  highlight: false, badge: 0 },
+    { href: "/privacy",  label: "سياسة الخصوصية",  icon: Shield,         highlight: false, badge: 0 },
+    { href: "/faq",      label: "الأسئلة الشائعة",  icon: HelpCircle,     highlight: false, badge: 0 },
+  ];
+
   return (
     <>
       {/* Overlay */}
@@ -60,7 +57,7 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
         }`}
       />
 
-      {/* Drawer — slides from the right (visually, RTL) */}
+      {/* Drawer */}
       <aside
         className={`fixed inset-y-0 right-0 z-50 flex w-[300px] flex-col bg-[#09080f] shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-transform duration-300 ${
           open ? "translate-x-0" : "translate-x-full"
@@ -95,14 +92,27 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
               }`}
             >
               <item.icon size={18} className={item.highlight ? "text-purple-400" : "text-white/50"} />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge > 0 && (
+                <span
+                  className="grid min-w-5 place-items-center rounded-full px-1.5 py-0.5 text-[10px] font-black"
+                  style={{
+                    background: item.href === "/notifications"
+                      ? "rgba(168,85,247,0.9)"
+                      : "rgba(250,204,21,0.9)",
+                    color: item.href === "/notifications" ? "white" : "black",
+                  }}
+                >
+                  {item.badge > 99 ? "99+" : item.badge}
+                </span>
+              )}
             </a>
           ))}
         </nav>
 
         {/* Footer */}
         <div className="border-t border-white/8 px-5 py-4">
-          <p className="text-xs text-white/30 text-center">جميع الحقوق محفوظة © Growfolo 2026</p>
+          <p className="text-center text-xs text-white/30">جميع الحقوق محفوظة © Growfolo 2026</p>
         </div>
       </aside>
     </>

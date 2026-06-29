@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Minus, Plus, Trash2, ShoppingCart, Clock, ChevronDown, Search, Tag, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useCurrency, type Currency } from "@/context/currency-context";
+import { useNotifications } from "@/context/notifications-context";
 import { PaymentMethodImage } from "@/components/payments/payment-method-image";
 import { PAYMENT_METHODS } from "@/lib/payment-methods";
 
@@ -29,6 +30,7 @@ interface Order {
 export function CartSidebar() {
   const { items, removeItem, updateQty, clear, totalUSD, sidebarOpen, closeSidebar } = useCart();
   const { currencies, selected, setSelected, convert } = useCurrency();
+  const { addNotification } = useNotifications();
 
   const [tab, setTab] = useState<"cart" | "orders">("cart");
   const [payMethod, setPayMethod] = useState("usdt");
@@ -108,6 +110,7 @@ export function CartSidebar() {
         const dc = await res.json() as { code: string; percent: number };
         setAppliedDiscount({ code: dc.code, percent: dc.percent });
         setDcInput("");
+        addNotification({ title: "تم تطبيق كود الخصم", description: `كود "${dc.code}" — خصم ${dc.percent}% على إجمالي سلتك`, type: "discount" });
       } else {
         const err = await res.json() as { detail?: string };
         setDcError(err.detail ?? "الكود غير صالح");
