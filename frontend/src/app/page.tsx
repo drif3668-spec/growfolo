@@ -321,7 +321,7 @@ function Footer() {
           </p>
         </div>
         <FooterColumn title="روابط سريعة" links={[
-          { label: "المدونة",                href: "#" },
+          { label: "المدونة",                href: "/blog" },
           { label: "الصفحة التعريفية",      href: "#about" },
           { label: "سياسة الخصوصية",        href: "#" },
           { label: "الاستبدال والاسترجاع",  href: "/refund-policy" },

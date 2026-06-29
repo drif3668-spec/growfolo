@@ -5,7 +5,7 @@ import {
   MessageCircle, Package, ReceiptText, Send, ShieldCheck,
   Users, CheckCircle, RefreshCw, Eye, Clock, ExternalLink,
   ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, ToggleLeft, ToggleRight, Pencil, X,
-  Gift, Tag, Percent, Copy, Truck,
+  Gift, Tag, Percent, Copy, Truck, BookOpen, Star,
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -36,7 +36,26 @@ type DiscountForm = {
 
 const EMPTY_DC: DiscountForm = { code: "", percent: 35, order_id: "", description: "", expires_at: "", max_uses: 1 };
 
-type NavSection = "orders" | "products" | "banners" | "chat" | "settings" | "discounts";
+type NavSection = "orders" | "products" | "banners" | "chat" | "settings" | "discounts" | "blog";
+
+type BlogPost = {
+  id: string; slug: string; title: string; excerpt: string; content: string;
+  author: string; category: string; tags: string[]; published: boolean;
+  featured: boolean; views: number; created_at: string;
+};
+type BlogForm = {
+  title: string; slug: string; excerpt: string; content: string;
+  author: string; category: string; tags: string; published: boolean; featured: boolean;
+};
+const EMPTY_BLOG: BlogForm = {
+  title: "", slug: "", excerpt: "", content: "", author: "فريق Growfolo",
+  category: "news", tags: "", published: false, featured: false,
+};
+const BLOG_CATS = [
+  { id: "ai", label: "الذكاء الاصطناعي" }, { id: "services", label: "الخدمات" },
+  { id: "companies", label: "الشركات العالمية" }, { id: "tutorials", label: "الشروحات" },
+  { id: "news", label: "الأخبار" },
+];
 
 type BannerSlide = {
   id: number; image_url: string; title: string | null; description: string | null;
@@ -329,6 +348,69 @@ export function AdminDashboard() {
 
   const fmt = (iso: string) => { try { return new Date(iso).toLocaleString("ar-DZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } };
 
+  /* ── Blog state ────────────────────────────────────────────────────── */
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogLoading, setBlogLoading] = useState(false);
+  const [blogForm, setBlogForm] = useState<BlogForm>(EMPTY_BLOG);
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [blogSaving, setBlogSaving] = useState(false);
+
+  const loadBlogPosts = useCallback(async () => {
+    setBlogLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/blog/admin/all`);
+      if (res.ok) setBlogPosts(await res.json());
+    } catch {} finally { setBlogLoading(false); }
+  }, []);
+
+  useEffect(() => { if (nav === "blog") loadBlogPosts(); }, [nav, loadBlogPosts]);
+
+  function openBlogAdd() {
+    setEditingBlogId(null); setBlogForm(EMPTY_BLOG); setShowBlogForm(true);
+  }
+  function openBlogEdit(p: BlogPost) {
+    setEditingBlogId(p.id);
+    setBlogForm({ title: p.title, slug: p.slug, excerpt: p.excerpt, content: p.content, author: p.author, category: p.category, tags: p.tags.join(", "), published: p.published, featured: p.featured });
+    setShowBlogForm(true);
+  }
+
+  async function saveBlogPost() {
+    if (!blogForm.title.trim()) { alert("عنوان المقال مطلوب"); return; }
+    setBlogSaving(true);
+    const body = {
+      title: blogForm.title, slug: blogForm.slug.trim() || undefined,
+      excerpt: blogForm.excerpt, content: blogForm.content,
+      author: blogForm.author, category: blogForm.category,
+      tags: blogForm.tags.split(",").map(t => t.trim()).filter(Boolean),
+      published: blogForm.published, featured: blogForm.featured,
+    };
+    try {
+      const url = editingBlogId ? `${API_URL}/api/v1/blog/${editingBlogId}` : `${API_URL}/api/v1/blog`;
+      const method = editingBlogId ? "PUT" : "POST";
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (res.ok) { setShowBlogForm(false); await loadBlogPosts(); }
+      else { const err = await res.json(); alert(err.detail ?? "خطأ في الحفظ"); }
+    } catch {} finally { setBlogSaving(false); }
+  }
+
+  async function deleteBlogPost(id: string) {
+    if (!confirm("حذف هذا المقال نهائياً؟")) return;
+    await fetch(`${API_URL}/api/v1/blog/${id}`, { method: "DELETE" });
+    setBlogPosts(p => p.filter(b => b.id !== id));
+    if (editingBlogId === id) { setShowBlogForm(false); setEditingBlogId(null); }
+  }
+
+  async function toggleBlogPublish(id: string) {
+    const res = await fetch(`${API_URL}/api/v1/blog/${id}/toggle`, { method: "PATCH" });
+    if (res.ok) { const u: BlogPost = await res.json(); setBlogPosts(p => p.map(b => b.id === id ? u : b)); }
+  }
+
+  async function toggleBlogFeatured(id: string) {
+    const res = await fetch(`${API_URL}/api/v1/blog/${id}/featured`, { method: "PATCH" });
+    if (res.ok) { const u: BlogPost = await res.json(); setBlogPosts(p => p.map(b => b.id === id ? u : b)); }
+  }
+
   /* ── Sidebar nav items ─────────────────────────────────────────────── */
   const NAV = [
     { id: "orders" as NavSection, label: "الطلبات", icon: ReceiptText, badge: orders.filter((o) => o.status === "processing").length },
@@ -336,6 +418,7 @@ export function AdminDashboard() {
     { id: "products" as NavSection, label: "المنتجات", icon: Package, badge: 0 },
     { id: "chat" as NavSection, label: "الشات المباشر", icon: MessageCircle, badge: sessions.filter((s) => !s.is_resolved).length },
     { id: "discounts" as NavSection, label: "أكواد الخصم", icon: Gift, badge: 0 },
+    { id: "blog" as NavSection, label: "المدونة", icon: BookOpen, badge: blogPosts.filter(p => !p.published).length },
     { id: "settings" as NavSection, label: "الإعدادات", icon: ShieldCheck, badge: 0 },
   ];
 
@@ -814,6 +897,176 @@ export function AdminDashboard() {
           )}
           {nav === "settings" && (
             <div className="py-12 text-center text-white/30">قسم الإعدادات — قريباً</div>
+          )}
+
+          {/* ── BLOG ─────────────────────────────────────────────────── */}
+          {nav === "blog" && (
+            <>
+              {/* Blog form modal */}
+              {showBlogForm && (
+                <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur">
+                  <div className="my-8 w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0d0b14] p-6">
+                    <div className="mb-5 flex items-center justify-between">
+                      <h3 className="font-black text-white">{editingBlogId ? "تعديل المقال" : "مقال جديد"}</h3>
+                      <button onClick={() => setShowBlogForm(false)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15"><X size={16} /></button>
+                    </div>
+                    <div className="grid gap-3 text-sm">
+                      {/* Title */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        العنوان <span className="text-red-400">*</span>
+                        <input value={blogForm.title} onChange={e => {
+                          const t = e.target.value;
+                          setBlogForm(p => ({ ...p, title: t, slug: p.slug || t.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 80) }));
+                        }}
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="عنوان المقال..." />
+                      </label>
+                      {/* Slug */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        الـ Slug (رابط المقال)
+                        <input value={blogForm.slug} onChange={e => setBlogForm(p => ({ ...p, slug: e.target.value }))}
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-sm text-white outline-none focus:border-lime-500/50" placeholder="auto-generated-if-empty" />
+                      </label>
+                      {/* Category + Author */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          التصنيف
+                          <select value={blogForm.category} onChange={e => setBlogForm(p => ({ ...p, category: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-[#0d0b14] px-3 py-2.5 text-white outline-none focus:border-lime-500/50">
+                            {BLOG_CATS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                          </select>
+                        </label>
+                        <label className="grid gap-1.5 font-semibold text-white/55">
+                          الكاتب
+                          <input value={blogForm.author} onChange={e => setBlogForm(p => ({ ...p, author: e.target.value }))}
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" />
+                        </label>
+                      </div>
+                      {/* Excerpt */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        المقتطف (وصف قصير)
+                        <textarea rows={2} value={blogForm.excerpt} onChange={e => setBlogForm(p => ({ ...p, excerpt: e.target.value }))}
+                          className="resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="وصف مختصر للمقال..." />
+                      </label>
+                      {/* Content */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        محتوى المقال (HTML مسموح)
+                        <textarea rows={12} value={blogForm.content} onChange={e => setBlogForm(p => ({ ...p, content: e.target.value }))}
+                          className="resize-y rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-xs text-white outline-none focus:border-lime-500/50" placeholder="<h2>عنوان...</h2><p>محتوى المقال هنا...</p>" />
+                      </label>
+                      {/* Tags */}
+                      <label className="grid gap-1.5 font-semibold text-white/55">
+                        الوسوم (مفصولة بفاصلة)
+                        <input value={blogForm.tags} onChange={e => setBlogForm(p => ({ ...p, tags: e.target.value }))}
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="ذكاء اصطناعي, Claude, GPT" />
+                      </label>
+                      {/* Toggles */}
+                      <div className="flex gap-4">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-white/55">
+                          <button type="button" onClick={() => setBlogForm(p => ({ ...p, published: !p.published }))}>
+                            {blogForm.published ? <ToggleRight size={26} className="text-lime-400" /> : <ToggleLeft size={26} className="text-white/30" />}
+                          </button>
+                          منشور
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-white/55">
+                          <button type="button" onClick={() => setBlogForm(p => ({ ...p, featured: !p.featured }))}>
+                            {blogForm.featured ? <Star size={20} className="text-yellow-400 fill-yellow-400" /> : <Star size={20} className="text-white/25" />}
+                          </button>
+                          مميز
+                        </label>
+                      </div>
+                      {/* Save */}
+                      <button onClick={saveBlogPost} disabled={blogSaving}
+                        className="mt-2 neon-button w-full rounded-2xl py-3.5 font-black text-black disabled:opacity-50">
+                        {blogSaving ? "جارٍ الحفظ..." : editingBlogId ? "حفظ التعديلات" : "نشر المقال"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Header */}
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-black">إدارة المدونة</h2>
+                <div className="flex gap-2">
+                  <button onClick={loadBlogPosts} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                    <RefreshCw size={14} className={blogLoading ? "animate-spin" : ""} /> تحديث
+                  </button>
+                  <a href="/blog" target="_blank" className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                    <Eye size={14} /> معاينة
+                  </a>
+                  <button onClick={openBlogAdd} className="neon-button flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black">
+                    <Plus size={16} /> مقال جديد
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="mb-5 grid gap-3 sm:grid-cols-4">
+                {[
+                  { label: "إجمالي المقالات", val: blogPosts.length, color: "text-white" },
+                  { label: "منشورة", val: blogPosts.filter(p => p.published).length, color: "text-lime-400" },
+                  { label: "مسودة", val: blogPosts.filter(p => !p.published).length, color: "text-yellow-400" },
+                  { label: "مميزة", val: blogPosts.filter(p => p.featured).length, color: "text-purple-400" },
+                ].map(({ label, val, color }) => (
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
+                    <p className="text-xs text-white/40">{label}</p>
+                    <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Posts list */}
+              {blogPosts.length === 0 && !blogLoading && (
+                <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                  لا توجد مقالات — اضغط "مقال جديد" للبدء
+                </div>
+              )}
+              <div className="grid gap-3">
+                {blogPosts.map(post => {
+                  const catConf = BLOG_CATS.find(c => c.id === post.category);
+                  return (
+                    <div key={post.id} className="flex flex-wrap items-start gap-4 rounded-3xl border border-white/8 bg-white/3 p-4">
+                      {/* Status badges */}
+                      <div className="flex flex-col gap-1.5">
+                        <span className={`rounded-xl px-2 py-1 text-[10px] font-black ${post.published ? "bg-lime-500/15 text-lime-400" : "bg-yellow-500/15 text-yellow-400"}`}>
+                          {post.published ? "● منشور" : "○ مسودة"}
+                        </span>
+                        {post.featured && <span className="rounded-xl bg-yellow-400/15 px-2 py-1 text-[10px] font-black text-yellow-400">★ مميز</span>}
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-black text-white">{post.title}</p>
+                          {catConf && <span className="rounded-lg bg-white/8 px-2 py-0.5 text-[10px] text-white/50">{catConf.label}</span>}
+                        </div>
+                        <p className="mt-1 truncate text-xs text-white/40">{post.excerpt}</p>
+                        <div className="mt-1.5 flex flex-wrap gap-x-4 text-[10px] text-white/30">
+                          <span>{post.author}</span>
+                          <span>{new Date(post.created_at).toLocaleDateString("ar")}</span>
+                          <span className="flex items-center gap-0.5"><Eye size={10} /> {post.views}</span>
+                          <span className="font-mono text-white/20">/blog/{post.slug}</span>
+                        </div>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex shrink-0 gap-2">
+                        <button onClick={() => toggleBlogFeatured(post.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 hover:bg-yellow-500/15" title="تمييز">
+                          <Star size={13} className={post.featured ? "fill-yellow-400 text-yellow-400" : "text-white/40"} />
+                        </button>
+                        <button onClick={() => openBlogEdit(post)} className="grid size-8 place-items-center rounded-xl bg-purple-500/15 text-purple-400 hover:bg-purple-500/25" title="تعديل">
+                          <Pencil size={13} />
+                        </button>
+                        <button onClick={() => toggleBlogPublish(post.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15" title={post.published ? "إلغاء النشر" : "نشر"}>
+                          {post.published ? <ToggleRight size={13} className="text-lime-400" /> : <ToggleLeft size={13} />}
+                        </button>
+                        <button onClick={() => deleteBlogPost(post.id)} className="grid size-8 place-items-center rounded-xl bg-red-500/12 text-red-400 hover:bg-red-500/22" title="حذف">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {/* ── DISCOUNTS ────────────────────────────────────────── */}
