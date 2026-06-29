@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <clipPath id="circle4"><circle cx="100" cy="100" r="100"/></clipPath>
+  </defs>
+  <!-- Background gradient -->
+  <circle cx="100" cy="100" r="100" fill="#0d1520"/>
+  <!-- White thobe body -->
+  <rect x="25" y="155" width="150" height="65" fill="#f0f0f0" rx="4"/>
+  <!-- Thobe collar -->
+  <rect x="88" y="140" width="24" height="30" rx="4" fill="#f0f0f0"/>
+  <rect x="93" y="140" width="14" height="8" rx="2" fill="#e0e0e0"/>
+  <!-- Pocket detail -->
+  <rect x="108" y="162" width="18" height="14" rx="3" fill="none" stroke="#d0d0d0" stroke-width="1.5"/>
+  <!-- Neck (darker skin) -->
+  <rect x="88" y="132" width="24" height="20" rx="5" fill="#5a3520"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="110" rx="36" ry="40" fill="#5a3520"/>
+  <!-- Ears -->
+  <ellipse cx="64" cy="110" rx="6" ry="8" fill="#4e2c18"/>
+  <ellipse cx="136" cy="110" rx="6" ry="8" fill="#4e2c18"/>
+  <!-- Kufiya (white headscarf) -->
+  <ellipse cx="100" cy="76" rx="44" ry="26" fill="#f5f5f5"/>
+  <!-- Kufiya drape left -->
+  <path d="M56,82 Q45,110 50,145 Q60,155 70,150 Q62,120 68,90 Z" fill="#f5f5f5"/>
+  <!-- Kufiya drape right -->
+  <path d="M144,82 Q155,110 150,145 Q140,155 130,150 Q138,120 132,90 Z" fill="#f5f5f5"/>
+  <!-- Kufiya pattern (subtle check) -->
+  <path d="M60,85 Q80,78 100,80 Q120,78 140,85" stroke="#d0d0d0" stroke-width="1" fill="none"/>
+  <path d="M58,92 Q80,86 100,88 Q120,86 142,92" stroke="#d0d0d0" stroke-width="1" fill="none"/>
+  <!-- Iqal (black rope on top) -->
+  <ellipse cx="100" cy="72" rx="38" ry="8" fill="#111111"/>
+  <ellipse cx="100" cy="68" rx="34" ry="6" fill="#1a1a1a"/>
+  <!-- Face features -->
+  <!-- Eyebrows -->
+  <path d="M78 100 Q87 95 96 100" stroke="#1a0800" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M104 100 Q113 95 122 100" stroke="#1a0800" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <ellipse cx="87" cy="107" rx="7" ry="5" fill="white"/>
+  <ellipse cx="113" cy="107" rx="7" ry="5" fill="white"/>
+  <ellipse cx="87" cy="107" rx="4" ry="4" fill="#1a0800"/>
+  <ellipse cx="113" cy="107" rx="4" ry="4" fill="#1a0800"/>
+  <circle cx="88.5" cy="105.5" r="1.5" fill="white"/>
+  <circle cx="114.5" cy="105.5" r="1.5" fill="white"/>
+  <!-- Nose -->
+  <path d="M97 113 Q100 120 103 113" stroke="#3d1e0a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Light mustache -->
+  <path d="M90 124 Q100 121 110 124" stroke="#1a0800" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <!-- Mouth -->
+  <path d="M91 128 Q100 134 109 128" stroke="#3a1808" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Light beard -->
+  <ellipse cx="100" cy="134" rx="26" ry="8" fill="#1a0800" opacity="0.25"/>
+</svg>

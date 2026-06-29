@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <clipPath id="circle2"><circle cx="100" cy="100" r="100"/></clipPath>
+  </defs>
+  <!-- Background -->
+  <circle cx="100" cy="100" r="100" fill="#0f1923"/>
+  <!-- Suit body dark gray -->
+  <rect x="20" y="155" width="160" height="70" fill="#2d3748" rx="4"/>
+  <!-- Shirt white -->
+  <rect x="78" y="148" width="44" height="60" fill="#f0f0f0"/>
+  <!-- Tie blue -->
+  <polygon points="100,152 93,162 100,195 107,162" fill="#2b5ea7"/>
+  <rect x="94" y="148" width="12" height="14" fill="#2b5ea7" rx="2"/>
+  <!-- Suit lapels -->
+  <polygon points="78,155 45,185 78,185" fill="#3a4a5c"/>
+  <polygon points="122,155 155,185 122,185" fill="#3a4a5c"/>
+  <!-- Suit collar -->
+  <polygon points="78,148 100,165 78,168" fill="#2d3748"/>
+  <polygon points="122,148 100,165 122,168" fill="#2d3748"/>
+  <!-- Neck -->
+  <rect x="87" y="136" width="26" height="24" rx="5" fill="#c9906a"/>
+  <!-- Head -->
+  <ellipse cx="100" cy="115" rx="40" ry="44" fill="#c9906a"/>
+  <!-- Ears -->
+  <ellipse cx="60" cy="115" rx="7" ry="9" fill="#bb7f58"/>
+  <ellipse cx="140" cy="115" rx="7" ry="9" fill="#bb7f58"/>
+  <!-- Short dark hair -->
+  <ellipse cx="100" cy="76" rx="40" ry="18" fill="#1a0a00"/>
+  <rect x="60" y="76" width="80" height="16" fill="#1a0a00"/>
+  <ellipse cx="64" cy="88" rx="10" ry="16" fill="#1a0a00"/>
+  <ellipse cx="136" cy="88" rx="10" ry="16" fill="#1a0a00"/>
+  <!-- Eyebrows -->
+  <path d="M76 103 Q85 98 94 103" stroke="#1a0a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M106 103 Q115 98 124 103" stroke="#1a0a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <ellipse cx="85" cy="110" rx="7" ry="5.5" fill="white"/>
+  <ellipse cx="115" cy="110" rx="7" ry="5.5" fill="white"/>
+  <ellipse cx="85" cy="110" rx="4" ry="4" fill="#2d1800"/>
+  <ellipse cx="115" cy="110" rx="4" ry="4" fill="#2d1800"/>
+  <circle cx="86.5" cy="108.5" r="1.5" fill="white"/>
+  <circle cx="116.5" cy="108.5" r="1.5" fill="white"/>
+  <!-- Nose -->
+  <path d="M97 116 Q100 124 103 116" stroke="#a06040" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Mouth -->
+  <path d="M89 130 Q100 137 111 130" stroke="#7a3820" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Light beard -->
+  <ellipse cx="100" cy="136" rx="30" ry="10" fill="#1a0a00" opacity="0.28"/>
+</svg>

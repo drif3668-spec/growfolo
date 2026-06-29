@@ -7,10 +7,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const WS_URL = API_URL.replace(/^http/, "ws");
 
 const TEAM = [
-  { initials: "AK", img: "/team/agent-1.jpg", ring: "#c8e600" },
-  { initials: "SR", img: "/team/agent-2.jpg", ring: "#a3c400" },
-  { initials: "LM", img: "/team/agent-3.jpg", ring: "#c8e600" },
-  { initials: "NB", img: "/team/agent-4.jpg", ring: "#a3c400" },
+  { initials: "AK", img: "/team/agent-1.svg", ring: "#c8e600" },
+  { initials: "SR", img: "/team/agent-2.svg", ring: "#a3c400" },
+  { initials: "LM", img: "/team/agent-3.svg", ring: "#c8e600" },
+  { initials: "NB", img: "/team/agent-4.svg", ring: "#a3c400" },
 ];
 
 type Message = { id: string; content: string; is_admin: boolean; created_at: string };
