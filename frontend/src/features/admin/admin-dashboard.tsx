@@ -585,7 +585,7 @@ export function AdminDashboard() {
                 {/* Detail panel */}
                 {selectedOrder ? (() => {
                   const proofUrls = getProofUrls(selectedOrder);
-                  const instaCode = selectedOrder.customer_notes?.match(/\[رمز الطلب: (IP-[A-Z0-9]+)\]/)?.[1] ?? null;
+                  const instaCode = selectedOrder.customer_notes?.match(/\[رمز الطلب: ([A-Z]+-[A-Z0-9]+)\]/)?.[1] ?? null;
                   return (
                   <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-5 overflow-y-auto" style={{ maxHeight: 600 }}>
                     <div className="mb-4 flex items-start justify-between gap-2">
@@ -618,13 +618,13 @@ export function AdminDashboard() {
                       ))}
                       {instaCode && (
                         <div className="mt-1 rounded-xl border border-yellow-400/30 bg-yellow-400/8 px-3 py-2">
-                          <p className="mb-0.5 text-[10px] font-black text-yellow-300/60">رمز الطلب InstaPay</p>
+                          <p className="mb-0.5 text-[10px] font-black text-yellow-300/60">رمز الطلب ({selectedOrder.payment_method?.toUpperCase() ?? "—"})</p>
                           <code className="text-base font-black text-yellow-300">{instaCode}</code>
                         </div>
                       )}
                       {selectedOrder.customer_notes && (
                         <div className="mt-1 rounded-xl bg-white/5 px-3 py-2 text-xs text-white/55">
-                          {selectedOrder.customer_notes.replace(/\[رمز الطلب: IP-[A-Z0-9]+\]\s*\|?\s*/, "").trim() || selectedOrder.customer_notes}
+                          {selectedOrder.customer_notes.replace(/\[رمز الطلب: [A-Z]+-[A-Z0-9]+\]\s*\|?\s*/, "").trim() || selectedOrder.customer_notes}
                         </div>
                       )}
                     </div>

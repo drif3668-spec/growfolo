@@ -151,6 +151,18 @@ export default function PaymentPage() {
       return "IP-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
     }
   });
+  const [bariDiMobCode] = useState<string>(() => {
+    const key = "gf_baridimob_order_code";
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) return saved;
+      const code = "BD-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+      localStorage.setItem(key, code);
+      return code;
+    } catch {
+      return "BD-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+    }
+  });
 
   const handleConfirm = async () => {
     if (!proof) return;
@@ -222,19 +234,23 @@ export default function PaymentPage() {
             </h2>
 
             {/* Fields */}
-            {selected === "instapay" ? (
+            {(selected === "instapay" || selected === "baridimob") ? (() => {
+              const isInsta = selected === "instapay";
+              const orderCode = isInsta ? instaPayCode : bariDiMobCode;
+              const methodLabel = isInsta ? "InstaPay" : "BaridiMob";
+              return (
               <div className="mb-5 flex flex-col items-center gap-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر InstaPay</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر {methodLabel}</p>
                 <div className="w-full rounded-2xl border border-yellow-400/40 bg-yellow-400/8 p-5 text-center">
                   <p className="mb-2 text-[10px] text-white/35">رمز طلبك الخاص — احتفظ به</p>
-                  <code className="text-3xl font-black tracking-widest text-yellow-300 select-all">{instaPayCode}</code>
+                  <code className="text-3xl font-black tracking-widest text-yellow-300 select-all">{orderCode}</code>
                   <div className="mt-3 flex items-center justify-center gap-2">
-                    <CopyButton value={instaPayCode} />
+                    <CopyButton value={orderCode} />
                     <span className="text-xs text-white/50">نسخ رمز الطلب</span>
                   </div>
                 </div>
                 <a
-                  href={`https://wa.me/213779012833?text=${encodeURIComponent(`مرحباً، أريد إتمام الدفع عبر InstaPay. رمز طلبي: ${instaPayCode}`)}`}
+                  href={`https://wa.me/213779012833?text=${encodeURIComponent(`مرحباً، أريد إتمام الدفع عبر ${methodLabel}. رمز طلبي: ${orderCode}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="wa-float w-full rounded-2xl py-4 text-center text-base font-black text-black"
@@ -244,7 +260,8 @@ export default function PaymentPage() {
                 </a>
                 <p className="text-center text-xs leading-7 text-white/40">أرسل رمز طلبك عبر واتساب، وستصلك تعليمات الدفع. بعد إتمام الدفع، ارجع هنا وارفع إيصالك.</p>
               </div>
-            ) : (
+              );
+            })() : (
               <div className="mb-5 grid gap-3">
                 {PAYMENT_DETAILS[selected].fields.map((f) => (
                   <div key={f.label} className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
