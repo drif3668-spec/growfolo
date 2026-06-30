@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import shutil
+import base64
 import json
+import mimetypes
 from datetime import datetime, timedelta
-from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import Response as FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -14,12 +15,15 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.order import Order
-from app.services.email import send_order_activated, send_order_received, send_order_rejected
+from app.models.proof import OrderProof
+from app.services.email import send_order_activated, send_order_received, send_order_rejected, send_proof_uploaded_admin
 
 router = APIRouter()
 
 EXPIRE_MINUTES = 35
 EXPIRE_MINUTES_WHATSAPP = 360  # 6 hours
+
+MAX_PROOF_BYTES = 15 * 1024 * 1024  # 15 MB per file
 
 
 # ── Schemas ────────────────────────────────────────────────────────────────
@@ -148,6 +152,27 @@ def update_tracking(order_id: str, payload: TrackingUpdate, db: Session = Depend
     return order
 
 
+@router.get("/{order_id}/proof/{proof_id}")
+def serve_proof(order_id: str, proof_id: str, db: Session = Depends(get_db)) -> FileResponse:
+    """Serve a stored proof file directly from the database."""
+    proof = db.get(OrderProof, proof_id)
+    if not proof or proof.order_id != order_id:
+        raise HTTPException(status_code=404, detail="الملف غير موجود")
+    try:
+        raw = base64.b64decode(proof.data_b64)
+    except Exception:
+        raise HTTPException(status_code=500, detail="خطأ في قراءة الملف")
+    return FileResponse(
+        content=raw,
+        media_type=proof.mime_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{proof.filename}"',
+            "Cache-Control": "private, max-age=604800",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
 @router.get("/{order_id}", response_model=OrderOut)
 def get_order(order_id: str, db: Session = Depends(get_db)) -> Order:
     order = db.get(Order, order_id)
@@ -178,29 +203,61 @@ def upload_proof(
         raise HTTPException(status_code=400, detail="يرجى رفع إثبات الدفع")
 
     is_mobilis = order.payment_method == "mobilis"
-    existing = _existing_proof_urls(order)
-    if is_mobilis and len(existing) + len(uploaded_files) > 4:
+    existing_urls = _existing_proof_urls(order)
+    if is_mobilis and len(existing_urls) + len(uploaded_files) > 4:
         raise HTTPException(status_code=400, detail="Flexy Mobilis يسمح برفع 4 إيصالات كحد أقصى")
     if not is_mobilis and len(uploaded_files) > 1:
         raise HTTPException(status_code=400, detail="هذه الطريقة تسمح بإثبات دفع واحد فقط")
 
-    saved_urls: list[str] = []
-    for proof in uploaded_files:
-        ext = Path(proof.filename or "proof.jpg").suffix or ".jpg"
-        filename = f"proof_{order_id}_{uuid4().hex[:8]}{ext}"
-        dest = settings.upload_path / filename
+    new_urls: list[str] = []
+    proof_metas: list[dict] = []
 
-        with dest.open("wb") as f:
-            shutil.copyfileobj(proof.file, f)
-        saved_urls.append(f"/uploads/{filename}")
+    for uf in uploaded_files:
+        raw = uf.file.read()
+        if len(raw) > MAX_PROOF_BYTES:
+            raise HTTPException(status_code=400, detail="حجم الملف يتجاوز 15 ميغابايت")
 
+        fname = (uf.filename or "proof.jpg").replace("/", "_").replace("..", "_")
+        mime = uf.content_type or mimetypes.guess_type(fname)[0] or "application/octet-stream"
+
+        b64 = base64.b64encode(raw).decode()
+        proof = OrderProof(
+            order_id=order_id,
+            filename=fname,
+            mime_type=mime,
+            data_b64=b64,
+        )
+        db.add(proof)
+        db.flush()  # get proof.id before commit
+
+        import urllib.parse
+        serve_url = f"/api/v1/store-orders/{order_id}/proof/{proof.id}?name={urllib.parse.quote(fname)}"
+        new_urls.append(serve_url)
+        proof_metas.append({"filename": fname, "data_b64": b64, "mime": mime})
+
+    all_urls = existing_urls + new_urls
     if is_mobilis:
-        order.payment_proof_url = json.dumps([*existing, *saved_urls], ensure_ascii=False)
+        order.payment_proof_url = json.dumps(all_urls, ensure_ascii=False)
     else:
-        order.payment_proof_url = saved_urls[0]
+        order.payment_proof_url = new_urls[0]
+
     order.status = "processing"
     db.commit()
     db.refresh(order)
+
+    # Notify admin with file attachment
+    send_proof_uploaded_admin(
+        {
+            "id": order.id,
+            "customer_name": order.customer_name,
+            "customer_email": order.customer_email,
+            "product_name": order.product_name,
+            "product_price": float(order.product_price),
+            "payment_method": order.payment_method or "—",
+        },
+        proof_metas,
+    )
+
     return order
 
 

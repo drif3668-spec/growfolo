@@ -97,15 +97,23 @@ function getProofUrls(order: Order): string[] {
   return [order.payment_proof_url];
 }
 
+function _nameFromUrl(url: string): string {
+  // New format: /api/v1/store-orders/.../proof/...?name=filename.jpg
+  const m = url.match(/[?&]name=([^&]+)/);
+  if (m) return decodeURIComponent(m[1]);
+  // Old format: /uploads/proof_xxx.jpg
+  return decodeURIComponent(url.split("/").pop()?.split("?")[0] ?? url);
+}
+
 function getFileType(url: string): "image" | "pdf" | "unknown" {
-  const lower = url.toLowerCase();
-  if (/\.(jpg|jpeg|png|gif|webp|bmp|avif|svg)(\?|$)/.test(lower)) return "image";
-  if (/\.pdf(\?|$)/.test(lower)) return "pdf";
+  const name = _nameFromUrl(url).toLowerCase();
+  if (/\.(jpg|jpeg|png|gif|webp|bmp|avif|svg)$/.test(name)) return "image";
+  if (/\.pdf$/.test(name)) return "pdf";
   return "unknown";
 }
 
 function getFilename(url: string): string {
-  return decodeURIComponent(url.split("/").pop()?.split("?")[0] ?? url);
+  return _nameFromUrl(url);
 }
 
 function buildProofUrl(url: string): string {

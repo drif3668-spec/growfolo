@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 import resend
 from app.core.config import settings
 
@@ -99,6 +101,47 @@ def send_order_rejected(order: dict) -> None:
                             "subject": f"ℹ️ تحديث طلبك #{ref} — Growfolo", "html": _html("تحديث حالة الطلب", body)})
     except Exception:
         pass
+
+
+def send_proof_uploaded_admin(order: dict, proofs: list[dict]) -> None:
+    """Send proof-of-payment notification to admin with file attachment(s)."""
+    if not settings.resend_api_key:
+        return
+    ref = order["id"][:8].upper()
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M") + " UTC"
+    body = f"""
+    <p style="color:rgba(255,255,255,.7);margin-bottom:18px">
+      رفع العميل إثبات دفع جديد ويحتاج إلى مراجعة.
+    </p>
+    <div class="card">
+      <div class="row"><span class="lbl">رقم الطلب</span><span class="val">#{ref}</span></div>
+      <div class="row"><span class="lbl">اسم العميل</span><span class="val">{order['customer_name']}</span></div>
+      <div class="row"><span class="lbl">البريد الإلكتروني</span><span class="val">{order['customer_email']}</span></div>
+      <div class="row"><span class="lbl">طريقة الدفع</span><span class="val">{order.get('payment_method', '—')}</span></div>
+      <div class="row"><span class="lbl">قيمة الطلب</span><span class="val">{order['product_price']}$</span></div>
+      <div class="row"><span class="lbl">المنتج</span><span class="val">{order['product_name']}</span></div>
+      <div class="row"><span class="lbl">تاريخ الرفع</span><span class="val">{now}</span></div>
+      <div class="row" style="border:none"><span class="lbl">الحالة</span>
+        <span class="val"><span class="badge pend">بانتظار المراجعة</span></span></div>
+    </div>
+    <a href="https://growol.store/admin" class="btn">فتح لوحة الإدارة للمراجعة →</a>"""
+    attachments = [
+        {"filename": p["filename"], "content": p["data_b64"]}
+        for p in proofs
+        if p.get("data_b64")
+    ]
+    try:
+        payload: dict = {
+            "from": settings.email_from,
+            "to": ["support@growol.store"],
+            "subject": f"🧾 إثبات دفع جديد — طلب #{ref} — {order['customer_name']}",
+            "html": _html("إثبات دفع جديد يحتاج مراجعة", body),
+        }
+        if attachments:
+            payload["attachments"] = attachments
+        resend.Emails.send(payload)
+    except Exception as exc:
+        print(f"[WARN] send_proof_uploaded_admin failed: {exc}")
 
 
 # Legacy compatibility

@@ -1,8 +1,6 @@
 import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.session import Base, engine, SessionLocal
@@ -380,26 +378,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve uploaded files. upload_path already falls back to /tmp/uploads on
-# read-only filesystems (Vercel). StaticFiles raises RuntimeError when the
-# directory is empty on cold starts; mount once it exists and is non-empty,
-# falling back to an always-succeed approach via a custom route.
-_upload_dir = settings.upload_path
-_upload_dir.mkdir(parents=True, exist_ok=True)
-try:
-    app.mount("/uploads", StaticFiles(directory=str(_upload_dir), check_dir=False), name="uploads")
-except Exception:
-    # Last-resort: serve files manually so the route always works
-    from fastapi.responses import FileResponse
-    @app.get("/uploads/{filename:path}")
-    def serve_upload(filename: str):
-        from fastapi import HTTPException as _HTTPException
-        import mimetypes
-        target = _upload_dir / filename
-        if not target.exists():
-            raise _HTTPException(status_code=404, detail="File not found")
-        mime, _ = mimetypes.guess_type(str(target))
-        return FileResponse(str(target), media_type=mime or "application/octet-stream")
+# Proof files are now stored as base64 in the order_proofs table.
+# Served via GET /api/v1/store-orders/{order_id}/proof/{proof_id} — no static mount needed.
 
 app.include_router(api_router, prefix="/api/v1")
 
