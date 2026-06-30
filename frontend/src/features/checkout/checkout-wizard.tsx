@@ -251,13 +251,19 @@ function WhatsAppPaymentStep({
 /* ═══════════════════════════════════════════════════════════════════════════
    MAIN WIZARD
 ═══════════════════════════════════════════════════════════════════════════ */
-export function CheckoutWizard({ product }: { product?: { name: string; price: number } }) {
+export function CheckoutWizard({
+  product,
+  defaultMethod,
+}: {
+  product?: { name: string; price: number };
+  defaultMethod?: string | null;
+}) {
   const defaultProduct = product ?? { name: "Claude Pro", price: 19 };
 
   const [step,      setStep]      = useState(1);
   const [orderId,   setOrderId]   = useState<string | null>(null);
   const [customer,  setCustomer]  = useState<Customer>(EMPTY_CUSTOMER);
-  const [method,    setMethod]    = useState<string | null>(null);
+  const [method,    setMethod]    = useState<string | null>(defaultMethod ?? null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [proof,     setProof]     = useState<File | null>(null);

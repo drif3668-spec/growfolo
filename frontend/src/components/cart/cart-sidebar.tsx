@@ -175,7 +175,7 @@ export function CartSidebar() {
       paymentMethod: payMethod,
     };
     try { localStorage.setItem("gf_checkout_data", JSON.stringify(checkoutData)); } catch {}
-    window.location.href = "/checkout/pay";
+    window.location.href = payMethod === "whatsapp" ? "/checkout?method=whatsapp" : "/checkout/pay";
   }
 
   const filteredCurrencies = currencies.filter(c =>
@@ -329,6 +329,18 @@ export function CartSidebar() {
               <div>
                 <p className="mb-2 text-xs font-bold text-white/50 uppercase tracking-wider">طريقة الدفع</p>
                 <div className="grid grid-cols-2 gap-2">
+                  {/* WhatsApp payment */}
+                  <button
+                    onClick={() => setPayMethod("whatsapp")}
+                    className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all col-span-2 ${payMethod === "whatsapp" ? "border-[#25D366] bg-[#25D366]/15 text-[#25D366]" : "border-[#25D366]/30 bg-[#25D366]/5 text-white/70 hover:bg-[#25D366]/10"}`}
+                  >
+                    <span className="grid h-10 w-14 shrink-0 place-items-center text-2xl">💬</span>
+                    <div className="text-right">
+                      <p className="font-black">الدفع عبر واتساب</p>
+                      <p className="text-[10px] text-white/40 font-normal mt-0.5">تواصل مع الوكيل + ادفع بأي وسيلة</p>
+                    </div>
+                  </button>
+                  {/* Standard methods */}
                   {PAYMENT_METHODS.map(m => (
                     <button
                       key={m.id}
