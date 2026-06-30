@@ -41,7 +41,6 @@ const products = PRODUCTS.map(p => ({
 }));
 
 const AI_PACKAGE_IDS = ["claude-pro-yearly", "claude-max-5x-yearly", "claude-max-20x-yearly"];
-const latestProducts = products.filter((p) => !AI_PACKAGE_IDS.includes(p.id));
 const aiPackageProducts = products.filter((p) => AI_PACKAGE_IDS.includes(p.id));
 
 const globalStats = [
@@ -121,7 +120,6 @@ export default function HomePage() {
         <HeroSection />
         <FeatureStrip />
         <CategoriesSection />
-        <ProductsSection />
         <AiPackagesSection />
         <StatsSection />
         <ReviewsCarousel />
@@ -186,20 +184,9 @@ function CategoriesSection() {
   );
 }
 
-function ProductsSection() {
-  return (
-    <section id="products" className="pb-10">
-      <SectionTitle title="أحدث المنتجات 🔥" />
-      <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {latestProducts.map((p) => <ProductCard key={p.id} product={p} />)}
-      </div>
-    </section>
-  );
-}
-
 function AiPackagesSection() {
   return (
-    <section className="pb-10">
+    <section id="products" className="pb-10">
       <SectionTitle title="قسم الذكاء الاصطناعي" />
       <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {aiPackageProducts.map((p) => <ProductCard key={p.id} product={p} />)}
@@ -209,11 +196,21 @@ function AiPackagesSection() {
 }
 
 function ProductCard({ product: p }: { product: (typeof products)[number] }) {
+  const isAiPackage = AI_PACKAGE_IDS.includes(p.id);
+
   return (
     <article className="glass-panel relative overflow-hidden rounded-3xl p-4">
       <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{p.discount}</span>
       <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${p.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
-        {p.logo}
+        {isAiPackage ? (
+          <img
+            src="/products/claude-card-logo.jpg"
+            alt={p.name}
+            className="size-full rounded-3xl object-cover"
+          />
+        ) : (
+          p.logo
+        )}
       </div>
       <h3 className="mt-5 text-center text-sm font-bold text-white">{p.name}</h3>
       <p className="mt-2 text-center text-xs leading-5 text-white/70">اشتراك رسمي<br />تسليم فوري</p>
