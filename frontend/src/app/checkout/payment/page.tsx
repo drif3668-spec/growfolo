@@ -139,6 +139,18 @@ export default function PaymentPage() {
   const [proof, setProof] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [instaPayCode] = useState<string>(() => {
+    const key = "gf_instapay_order_code";
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) return saved;
+      const code = "IP-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+      localStorage.setItem(key, code);
+      return code;
+    } catch {
+      return "IP-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+    }
+  });
 
   const handleConfirm = async () => {
     if (!proof) return;
@@ -170,6 +182,10 @@ export default function PaymentPage() {
 
   return (
     <main className="min-h-screen bg-[#050508]">
+      <style>{`
+        @keyframes floatWA { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-6px) scale(1.03); } }
+        .wa-float { animation: floatWA 2.2s ease-in-out infinite; display: block; }
+      `}</style>
       <SiteHeader />
       <div className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6 flex items-center gap-3">
@@ -206,17 +222,41 @@ export default function PaymentPage() {
             </h2>
 
             {/* Fields */}
-            <div className="mb-5 grid gap-3">
-              {PAYMENT_DETAILS[selected].fields.map((f) => (
-                <div key={f.label} className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
-                  <p className="mb-1 text-xs text-white/45">{f.label}</p>
-                  <div className="flex items-center justify-between gap-2">
-                    <code className="text-sm font-bold text-white break-all">{f.value}</code>
-                    <CopyButton value={f.value} />
+            {selected === "instapay" ? (
+              <div className="mb-5 flex flex-col items-center gap-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر InstaPay</p>
+                <div className="w-full rounded-2xl border border-yellow-400/40 bg-yellow-400/8 p-5 text-center">
+                  <p className="mb-2 text-[10px] text-white/35">رمز طلبك الخاص — احتفظ به</p>
+                  <code className="text-3xl font-black tracking-widest text-yellow-300 select-all">{instaPayCode}</code>
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    <CopyButton value={instaPayCode} />
+                    <span className="text-xs text-white/50">نسخ رمز الطلب</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                <a
+                  href={`https://wa.me/213779012833?text=${encodeURIComponent(`مرحباً، أريد إتمام الدفع عبر InstaPay. رمز طلبي: ${instaPayCode}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="wa-float w-full rounded-2xl py-4 text-center text-base font-black text-black"
+                  style={{ background: "linear-gradient(135deg, #fbbf24, #f59e0b)", boxShadow: "0 8px 25px rgba(251,191,36,0.45)" }}
+                >
+                  💬 تواصل عبر واتساب لإتمام الدفع
+                </a>
+                <p className="text-center text-xs leading-7 text-white/40">أرسل رمز طلبك عبر واتساب، وستصلك تعليمات الدفع. بعد إتمام الدفع، ارجع هنا وارفع إيصالك.</p>
+              </div>
+            ) : (
+              <div className="mb-5 grid gap-3">
+                {PAYMENT_DETAILS[selected].fields.map((f) => (
+                  <div key={f.label} className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+                    <p className="mb-1 text-xs text-white/45">{f.label}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <code className="text-sm font-bold text-white break-all">{f.value}</code>
+                      <CopyButton value={f.value} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Steps */}
             <div className="mb-5">

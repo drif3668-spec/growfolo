@@ -89,6 +89,18 @@ export default function PayPage() {
   const [timeLeft, setTimeLeft] = useState(TIMER_MINUTES * 60);
   const [expired, setExpired] = useState(false);
   const [orderId] = useState(() => `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  const [instaPayCode] = useState<string>(() => {
+    const key = "gf_instapay_order_code";
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) return saved;
+      const code = "IP-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+      localStorage.setItem(key, code);
+      return code;
+    } catch {
+      return "IP-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+    }
+  });
 
   // Form fields
   const [fullName, setFullName] = useState("");
@@ -196,7 +208,9 @@ export default function PayPage() {
           customer_email: email,
           customer_whatsapp: whatsapp,
           customer_country: country,
-          customer_notes: notes || null,
+          customer_notes: payMethod === "instapay"
+            ? `[رمز الطلب: ${instaPayCode}]${notes ? " | " + notes : ""}`
+            : (notes || null),
           product_name: productName,
           product_price: productPrice,
           payment_method: payMethod,
@@ -276,6 +290,8 @@ export default function PayPage() {
         .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%); bottom: -80px; left: -80px; animation: float2 10s ease-in-out infinite; }
         .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); top: 40%; left: 50%; transform: translateX(-50%); animation: float 12s ease-in-out infinite 2s; }
         .glass-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(20px); border-radius: 24px; }
+        @keyframes floatWA { 0%, 100% { transform: translateY(0px) scale(1); box-shadow: 0 8px 25px rgba(251,191,36,0.4); } 50% { transform: translateY(-6px) scale(1.03); box-shadow: 0 18px 40px rgba(251,191,36,0.6); } }
+        .wa-float { animation: floatWA 2.2s ease-in-out infinite; display: block; }
       `}</style>
 
       <div className="orb orb-1" />
@@ -352,15 +368,39 @@ export default function PayPage() {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            {selectedMethod.fields.map(field => (
-              <div key={field.label} className="rounded-xl bg-white/5 p-3">
-                <p className="mb-1 text-xs text-white/40">{field.label}</p>
-                <div className="flex items-center justify-between gap-2">
-                  <code className="flex-1 break-all text-sm font-mono text-cyan-300">{field.value}</code>
-                  <CopyButton value={field.value} />
+            {payMethod === "instapay" ? (
+              <div className="flex flex-col items-center gap-4 py-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر InstaPay</p>
+                <div className="w-full rounded-2xl border border-yellow-400/40 bg-yellow-400/8 p-5 text-center">
+                  <p className="mb-2 text-[10px] text-white/35">رمز طلبك الخاص — احتفظ به</p>
+                  <code className="text-3xl font-black tracking-widest text-yellow-300 select-all">{instaPayCode}</code>
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    <CopyButton value={instaPayCode} />
+                    <span className="text-xs text-white/50">نسخ رمز الطلب</span>
+                  </div>
                 </div>
+                <a
+                  href={`https://wa.me/213779012833?text=${encodeURIComponent(`مرحباً، أريد إتمام الدفع عبر InstaPay. رمز طلبي: ${instaPayCode}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="wa-float w-full rounded-2xl py-4 text-center text-base font-black text-black"
+                  style={{ background: "linear-gradient(135deg, #fbbf24, #f59e0b)" }}
+                >
+                  💬 تواصل عبر واتساب لإتمام الدفع
+                </a>
+                <p className="text-center text-xs leading-7 text-white/40">أرسل رمز طلبك عبر واتساب، وستصلك تعليمات الدفع. بعد إتمام الدفع، ارجع هنا وارفع إيصالك.</p>
               </div>
-            ))}
+            ) : (
+              selectedMethod.fields.map(field => (
+                <div key={field.label} className="rounded-xl bg-white/5 p-3">
+                  <p className="mb-1 text-xs text-white/40">{field.label}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <code className="flex-1 break-all text-sm font-mono text-cyan-300">{field.value}</code>
+                    <CopyButton value={field.value} />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           {isMobilis && (
             <div className="relative mt-5 grid gap-4">
