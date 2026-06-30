@@ -23,25 +23,25 @@ const AGENTS = [
     id: "finance", name: "عبد الكريم", initials: "ع.ك",
     dept: "قسم المالية",
     desc: "مختص في متابعة المدفوعات، تأكيد عمليات الدفع، مشاكل التحويل، الفواتير، والطلبات المالية.",
-    img: "/team/agent-1.svg", ring: LIME, status: "online" as Status,
+    img: "/team/support-finance.jpg", ring: LIME, status: "online" as Status,
   },
   {
     id: "faq", name: "ياسمين", initials: "ي.م",
     dept: "قسم الأسئلة الشائعة",
     desc: "مختصة في الأسئلة العامة، طريقة الطلب، مدة التنفيذ، طرق الاستخدام، وسياسات المتجر.",
-    img: "/team/agent-3.svg", ring: LIME, status: "online" as Status,
+    img: "/team/support-faq.jpg", ring: LIME, status: "online" as Status,
   },
   {
     id: "coordination", name: "أسامة", initials: "أ.س",
     dept: "قسم الوكلاء والتنسيق",
     desc: "مسؤول عن تنظيم الطلبات مع الوكلاء، متابعة التنسيق، وتوجيه العميل إلى القسم المناسب.",
-    img: "/team/agent-2.svg", ring: "#a3c400", status: "soon" as Status,
+    img: "/team/support-coordination.jpg", ring: "#a3c400", status: "soon" as Status,
   },
   {
     id: "support", name: "مروان", initials: "م.ر",
     dept: "قسم الدعم الفني",
     desc: "مختص في حل المشاكل التقنية، مشاكل الحسابات، أخطاء الطلبات، وتعطل الخدمات.",
-    img: "/team/agent-4.svg", ring: "#a3c400", status: "online" as Status,
+    img: "/team/support-technical.jpg", ring: "#a3c400", status: "online" as Status,
   },
 ] as const;
 
