@@ -548,12 +548,15 @@ export function AdminDashboard() {
                         className={`flex w-full items-center gap-3 border-b border-white/5 px-5 py-4 text-right transition-colors hover:bg-white/4 ${selectedOrder?.id === order.id ? "bg-purple-600/10" : ""}`}
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-black text-white truncate">{order.customer_name}</span>
                             <span className={`shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-bold ${s.bg} ${s.color}`}>{s.label}</span>
+                            {order.payment_method === "whatsapp" && (
+                              <span className="shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-black bg-[#25D366]/15 text-[#25D366]">💬 واتساب</span>
+                            )}
                           </div>
                           <p className="mt-0.5 truncate text-xs text-white/40">{order.product_name} · {order.customer_email}</p>
-                          <p className="text-[10px] text-white/25 mt-0.5">{fmt(order.created_at)}</p>
+                          <p className="text-[10px] text-white/25 mt-0.5">{fmt(order.created_at)} {order.customer_country ? `· ${order.customer_country}` : ""}</p>
                         </div>
                         <div className="shrink-0 text-right">
                           <p className="font-black text-white">{order.product_price}$</p>

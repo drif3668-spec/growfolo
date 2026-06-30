@@ -322,6 +322,8 @@ def get_my_orders(
             "tracking_stage": o.tracking_stage,
             "tracking_notes": o.tracking_notes,
             "created_at": o.created_at.isoformat() if o.created_at else None,
+            "expires_at": o.expires_at.isoformat() if o.expires_at else None,
+            "payment_proof_url": o.payment_proof_url,
         }
         for o in orders
     ]

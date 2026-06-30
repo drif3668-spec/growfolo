@@ -6,7 +6,7 @@ import {
   Home, User, Package, ShoppingBag, ShoppingCart, Heart,
   Bell, MessageCircle, Settings, LogOut, Menu, X, Camera,
   Eye, EyeOff, CheckCircle, AlertCircle, ChevronRight,
-  Shield, Edit3, Save, Star, Clock,
+  Shield, Edit3, Save, Star, Clock, Copy, Upload,
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
@@ -16,7 +16,7 @@ import { PRODUCTS } from "@/data/products";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 type Section =
-  | "home" | "account" | "orders" | "purchases"
+  | "home" | "account" | "orders" | "purchases" | "transactions"
   | "products" | "cart" | "favorites" | "notifications"
   | "support" | "settings";
 
@@ -41,6 +41,8 @@ interface OrderData {
   tracking_stage: number;
   tracking_notes: string | null;
   created_at: string | null;
+  expires_at?: string | null;
+  payment_proof_url?: string | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -103,6 +105,7 @@ const NAV_ITEMS: { section: Section; label: string; icon: React.ReactNode }[] = 
   { section: "account",       label: "حسابي",       icon: <User size={18} /> },
   { section: "orders",        label: "طلباتي",      icon: <Package size={18} /> },
   { section: "purchases",     label: "مشترياتي",    icon: <ShoppingBag size={18} /> },
+  { section: "transactions",  label: "معاملاتي",    icon: <MessageCircle size={18} /> },
   { section: "products",      label: "المنتجات",    icon: <Star size={18} /> },
   { section: "cart",          label: "السلة",       icon: <ShoppingCart size={18} /> },
   { section: "favorites",     label: "المفضلة",     icon: <Heart size={18} /> },
@@ -289,6 +292,7 @@ export function CustomerDashboard() {
           {section === "account"       && <AccountSection user={user} onRefresh={loadUser} />}
           {section === "orders"        && <OrdersSection user={user} purchased={false} />}
           {section === "purchases"     && <OrdersSection user={user} purchased={true} />}
+          {section === "transactions"  && <TransactionsSection user={user} />}
           {section === "products"      && <ProductsSection />}
           {section === "cart"          && <CartSection />}
           {section === "favorites"     && <FavoritesSection />}
@@ -525,6 +529,196 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
                 <div key={n} className={`flex-1 h-1.5 rounded-full transition-all ${n <= order.tracking_stage ? "bg-purple-500" : "bg-white/10"}`} />
               ))}
             </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Section: Transactions (WhatsApp payment orders)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const WA_NUMBER = "213779012833";
+
+function WaCountdown({ expiresAt }: { expiresAt: string | null }) {
+  const [left, setLeft] = useState(0);
+
+  useEffect(() => {
+    if (!expiresAt) { setLeft(0); return; }
+    const deadline = new Date(expiresAt).getTime();
+    const tick = () => setLeft(Math.max(0, deadline - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  if (!expiresAt || left === 0) {
+    return <span className="text-xs text-white/30">انتهت المدة</span>;
+  }
+
+  const h   = Math.floor(left / 3600000);
+  const min = Math.floor((left % 3600000) / 60000);
+  const sec = Math.floor((left % 60000) / 1000);
+  const urgent = left < 30 * 60000;
+
+  return (
+    <span className={`flex items-center gap-1 text-xs font-black tabular-nums ${urgent ? "text-red-400" : "text-purple-300"}`}>
+      <Clock size={11} />
+      {h > 0 ? `${h}س ${String(min).padStart(2,"0")}د` : `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`}
+    </span>
+  );
+}
+
+function TransactionsSection({ user }: { user: UserData }) {
+  const [orders, setOrders]     = useState<OrderData[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [proof, setProof]       = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedId, setUploadedId] = useState<string | null>(null);
+  const [copyOk, setCopyOk]     = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("gf_token");
+    if (!token) return;
+    fetch(`${API_URL}/api/v1/auth/me/orders`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then((data: OrderData[]) => {
+        setOrders(data.filter(o => o.payment_method === "whatsapp"));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user.email]);
+
+  const copyId = (id: string) => {
+    const short = "#" + id.slice(0, 8).toUpperCase();
+    navigator.clipboard.writeText(short);
+    setCopyOk(id);
+    setTimeout(() => setCopyOk(null), 2000);
+  };
+
+  const uploadProof = async (orderId: string) => {
+    if (!proof) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", proof);
+      const res = await fetch(`${API_URL}/api/v1/store-orders/${orderId}/proof`, { method: "POST", body: fd });
+      if (res.ok) { setUploadedId(orderId); setProof(null); }
+    } catch {} finally { setUploading(false); }
+  };
+
+  if (loading) {
+    return <div className="py-12 text-center text-sm text-white/30 animate-pulse">جارٍ التحميل...</div>;
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="glass-panel rounded-3xl p-12 text-center space-y-4">
+        <div className="text-4xl">💬</div>
+        <p className="font-black text-white">لا توجد معاملات عبر واتساب</p>
+        <p className="text-sm text-white/45">عند اختيار "الدفع عبر واتساب" في صفحة الدفع، ستظهر طلباتك هنا مع العداد التنازلي.</p>
+        <a href="/" className="neon-button inline-block px-6 py-2.5 rounded-2xl text-sm font-black text-black mt-1">
+          تسوق الآن
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-black text-white">معاملاتي عبر واتساب</h2>
+        <span className="rounded-xl bg-green-500/15 px-3 py-1 text-xs font-black text-green-400">{orders.length} معاملة</span>
+      </div>
+
+      {orders.map((order) => {
+        const shortId  = "#" + order.id.slice(0, 8).toUpperCase();
+        const waMsg    = encodeURIComponent(`مرحبا، رقم طلبي هو: ${shortId} — المنتج: ${order.product_name} — ${order.product_price}$`);
+        const waLink   = `https://wa.me/${WA_NUMBER}?text=${waMsg}`;
+        const st       = statusLabel(order.status);
+        const hasProof = order.status !== "pending_proof" && order.status !== "new";
+        const isActive = order.status === "activated";
+        const exAt     = order.expires_at ?? null;
+
+        return (
+          <div key={order.id} className="glass-panel rounded-2xl p-5 space-y-4 border border-green-500/15">
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">💬</span>
+                  <code className="font-black text-white text-sm">{shortId}</code>
+                  <span className={`rounded-xl border px-2 py-0.5 text-[10px] font-black ${st.color}`}>{st.label}</span>
+                </div>
+                <p className="text-xs text-white/45">{order.product_name} · {order.product_price}$</p>
+              </div>
+              {!isActive && <WaCountdown expiresAt={exAt} />}
+              {isActive && <CheckCircle size={18} className="text-lime-400 shrink-0" />}
+            </div>
+
+            {/* Actions */}
+            {!isActive && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {/* Copy order id */}
+                <button
+                  onClick={() => copyId(order.id)}
+                  className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-black transition-all ${copyOk === order.id ? "border-lime-500/40 bg-lime-500/10 text-lime-400" : "border-white/10 bg-white/4 text-white/60 hover:text-white hover:bg-white/8"}`}
+                >
+                  {copyOk === order.id ? <><CheckCircle size={13} /> تم النسخ!</> : <><Copy size={13} /> نسخ رقم الطلب</>}
+                </button>
+                {/* WhatsApp link */}
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366]/20 border border-[#25D366]/30 hover:bg-[#25D366]/30 py-2.5 text-xs font-black text-[#25D366] transition-all"
+                >
+                  <MessageCircle size={13} />
+                  تواصل مع الوكيل
+                </a>
+              </div>
+            )}
+
+            {/* Proof upload — if still pending */}
+            {!hasProof && !isActive && uploadedId !== order.id && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-white/55">رفع إثبات الدفع</p>
+                <label className="block cursor-pointer">
+                  <div className={`flex items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-xs transition-colors ${proof ? "border-lime-500/40 bg-lime-500/6 text-lime-400" : "border-white/15 bg-white/3 hover:bg-white/6 text-white/40"}`}>
+                    {proof ? <><CheckCircle size={14} /> {proof.name} — اضغط لتغييره</> : <><Upload size={14} /> ارفع إثبات الدفع (JPG · PNG · PDF)</>}
+                    <input type="file" accept="image/*,.pdf" className="sr-only" onChange={e => setProof(e.target.files?.[0] ?? null)} />
+                  </div>
+                </label>
+                {proof && (
+                  <button
+                    onClick={() => uploadProof(order.id)}
+                    disabled={uploading}
+                    className="neon-button w-full rounded-xl py-2.5 text-xs font-black text-black disabled:opacity-50"
+                  >
+                    {uploading ? "جارٍ الرفع..." : "إرسال الإثبات ✓"}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Proof uploaded confirmation */}
+            {(hasProof || uploadedId === order.id) && !isActive && (
+              <div className="flex items-center gap-2 rounded-xl bg-lime-500/8 border border-lime-500/20 px-3 py-2 text-xs text-lime-400">
+                <CheckCircle size={13} /> إثبات الدفع مرفوع — قيد المراجعة
+              </div>
+            )}
+
+            {/* Activated */}
+            {isActive && (
+              <div className="rounded-xl bg-lime-500/10 border border-lime-500/20 px-3 py-2 text-xs text-lime-400 text-center font-black">
+                ✓ تم التفعيل — يمكنك استخدام الخدمة الآن
+              </div>
+            )}
+
+            {/* Timestamp */}
+            <p className="text-[10px] text-white/25">{formatDate(order.created_at)}</p>
           </div>
         );
       })}

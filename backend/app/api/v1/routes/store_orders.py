@@ -18,6 +18,7 @@ from app.services.email import send_order_activated, send_order_received, send_o
 router = APIRouter()
 
 EXPIRE_MINUTES = 35
+EXPIRE_MINUTES_WHATSAPP = 360  # 6 hours
 
 
 # ── Schemas ────────────────────────────────────────────────────────────────
@@ -84,6 +85,8 @@ class TrackingOut(BaseModel):
 @router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
 def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
     now = datetime.utcnow()
+    is_whatsapp = payload.payment_method == "whatsapp"
+    expire_mins = EXPIRE_MINUTES_WHATSAPP if is_whatsapp else EXPIRE_MINUTES
     order = Order(
         customer_name=payload.customer_name,
         customer_email=payload.customer_email,
@@ -97,7 +100,7 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
         total=payload.product_price,
         status="pending_proof",
         created_at=now,
-        expires_at=now + timedelta(minutes=EXPIRE_MINUTES),
+        expires_at=now + timedelta(minutes=expire_mins),
     )
     db.add(order)
     db.commit()
