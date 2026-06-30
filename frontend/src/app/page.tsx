@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Brain, Code2, Eye, Gamepad2, Headphones, Mail, Medal,
@@ -43,6 +43,27 @@ const products = PRODUCTS.map(p => ({
 
 const AI_PACKAGE_IDS = ["claude-pro-yearly", "claude-max-5x-yearly", "claude-max-20x-yearly"];
 const aiPackageProducts = products.filter((p) => AI_PACKAGE_IDS.includes(p.id));
+
+const EXCLUSIVE_SHOWCASE_SLIDES = [
+  {
+    productId: "claude-max-5x-yearly",
+    image: "/exclusive-offers/claude-max-5x.jpg",
+    alt: "Claude Max 5x",
+    accent: "#a855f7",
+  },
+  {
+    productId: "claude-max-20x-yearly",
+    image: "/exclusive-offers/claude-max-20x.jpg",
+    alt: "Claude Max 20x",
+    accent: "#f97316",
+  },
+  {
+    productId: "claude-pro-yearly",
+    image: "/exclusive-offers/claude-pro.jpg",
+    alt: "Claude Pro",
+    accent: "#8b5cf6",
+  },
+];
 
 const globalStats = [
   { value: "+250,000", label: "عميل سعيد", icon: Users },
@@ -122,12 +143,145 @@ export default function HomePage() {
         <AiPackagesSection />
         <StatsSection />
         <ReviewsCarousel />
+        <ExclusiveOfferShowcase />
         <TrustSection />
         <BrandsStrip />
         <NewsletterSection />
         <Footer />
       </div>
     </main>
+  );
+}
+
+function ExclusiveOfferShowcase() {
+  const [current, setCurrent] = useState(0);
+  const [dragStart, setDragStart] = useState<number | null>(null);
+  const [dragDelta, setDragDelta] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const { addItem } = useCart();
+  const { addNotification } = useNotifications();
+
+  const goTo = useCallback((index: number) => {
+    setCurrent((index + EXCLUSIVE_SHOWCASE_SLIDES.length) % EXCLUSIVE_SHOWCASE_SLIDES.length);
+  }, []);
+
+  const next = useCallback(() => goTo(current + 1), [current, goTo]);
+  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = window.setInterval(next, 5000);
+    return () => window.clearInterval(timer);
+  }, [next, paused]);
+
+  function buyProduct(productId: string) {
+    const product = products.find((p) => p.id === productId);
+    if (!product) return;
+    addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color });
+    addNotification({
+      title: "تمت الإضافة إلى السلة",
+      description: `تم إضافة "${product.name}" إلى سلة المشتريات`,
+      type: "cart",
+    });
+  }
+
+  return (
+    <section
+      className="py-10"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div
+        className="relative mx-auto min-h-[560px] max-w-5xl touch-pan-y overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] px-4 py-7 shadow-[0_30px_90px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:min-h-[660px] sm:px-8"
+        style={{ perspective: "1400px" }}
+        onPointerDown={(e) => {
+          setPaused(true);
+          setDragStart(e.clientX);
+          setDragDelta(0);
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          if (dragStart === null) return;
+          setDragDelta(e.clientX - dragStart);
+        }}
+        onPointerUp={(e) => {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+          if (dragDelta > 70) prev();
+          if (dragDelta < -70) next();
+          setDragStart(null);
+          setDragDelta(0);
+          setPaused(false);
+        }}
+        onPointerCancel={() => {
+          setDragStart(null);
+          setDragDelta(0);
+          setPaused(false);
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.18),transparent_42%),radial-gradient(circle_at_12%_100%,rgba(200,230,0,0.10),transparent_35%)]" />
+
+        {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => {
+          const offset = ((index - current + EXCLUSIVE_SHOWCASE_SLIDES.length + 1) % EXCLUSIVE_SHOWCASE_SLIDES.length) - 1;
+          const isActive = offset === 0;
+          const product = products.find((p) => p.id === slide.productId);
+
+          return (
+            <article
+              key={slide.productId}
+              className="absolute inset-x-4 top-7 transition-all duration-700 ease-out sm:inset-x-8"
+              style={{
+                opacity: isActive ? 1 : 0.38,
+                transform: `translateX(${offset * 68 + (isActive ? dragDelta / 18 : 0)}%) rotateY(${offset * -18}deg) scale(${isActive ? 1 : 0.86})`,
+                zIndex: isActive ? 3 : 1,
+                pointerEvents: isActive ? "auto" : "none",
+              }}
+            >
+              <div
+                className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border bg-black/35 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl transition-transform duration-300 hover:-translate-y-1 sm:p-4"
+                style={{
+                  borderColor: `${slide.accent}55`,
+                  boxShadow: `0 0 42px ${slide.accent}24, 0 28px 80px rgba(0,0,0,0.55)`,
+                }}
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  draggable={false}
+                  className="mx-auto max-h-[430px] w-full select-none rounded-2xl object-contain sm:max-h-[540px]"
+                />
+                <div className="mt-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => buyProduct(slide.productId)}
+                    className="group inline-flex min-h-14 items-center gap-3 rounded-2xl border px-7 py-3 font-black text-white backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] active:scale-95"
+                    style={{
+                      borderColor: `${slide.accent}70`,
+                      background: `linear-gradient(135deg, ${slide.accent}33, rgba(255,255,255,0.08))`,
+                      boxShadow: `0 0 28px ${slide.accent}33`,
+                    }}
+                  >
+                    <ShoppingCart size={19} className="transition-transform group-hover:-translate-y-0.5" />
+                    {product ? `شراء ${product.name}` : "شراء الآن"}
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+
+        <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-2">
+          {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => (
+            <button
+              key={slide.productId}
+              onClick={() => goTo(index)}
+              className={`rounded-full transition-all ${index === current ? "h-2 w-7" : "size-2"}`}
+              style={{ background: index === current ? slide.accent : "rgba(255,255,255,0.22)" }}
+              aria-label={`عرض ${slide.alt}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
