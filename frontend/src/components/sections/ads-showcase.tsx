@@ -253,7 +253,7 @@ function ShowcaseCard({ product, isCenter, onAddToCart }: { product: Product; is
         {/* Buttons */}
         <div className="mt-5 flex flex-col gap-2.5">
           <a
-            href={`/products/${product.id}`}
+            href={`/products?id=${product.id}`}
             className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white transition-all hover:opacity-80"
             style={{ background: `${product.accentColor}22`, border: `1px solid ${product.accentColor}44` }}
           >
