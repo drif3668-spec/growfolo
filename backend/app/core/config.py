@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from pydantic import model_validator
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,7 +14,12 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24 * 7
     frontend_url: str = "http://localhost:3000"
     resend_api_key: str = ""
-    email_from: str = "Growfolo <orders@growfolo.io>"
+    # Accepts MAIL_FROM (primary) or EMAIL_FROM (fallback) env var.
+    # Default uses the verified growol.store domain.
+    email_from: str = Field(
+        default="Growfolo Support <support@growol.store>",
+        validation_alias=AliasChoices("MAIL_FROM", "EMAIL_FROM"),
+    )
     upload_dir: str = "uploads"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

@@ -33,7 +33,7 @@ body{{font-family:Arial,sans-serif;background:#050508;color:#fff;margin:0;paddin
 <body><div class="wrap">
 <div class="hdr"><div class="logo"><span class="p">GROW</span><span class="g">FOLO</span></div><h1>{title}</h1></div>
 <div class="bd">{body}</div>
-<div class="ft">© 2026 Growfolo.io — للدعم: support@growfolo.io</div>
+<div class="ft">© 2026 Growfolo — للدعم: support@growol.store</div>
 </div></body></html>"""
 
 
@@ -51,7 +51,7 @@ def send_order_received(order: dict) -> None:
       <div class="row"><span class="lbl">طريقة الدفع</span><span class="val">{order.get('payment_method','—')}</span></div>
       <div class="row"><span class="lbl">الحالة</span><span class="val"><span class="badge pend">قيد المعالجة</span></span></div>
     </div>
-    <a href="https://growfolo.io" class="btn">العودة إلى Growfolo</a>"""
+    <a href="https://growol.store" class="btn">العودة إلى Growfolo</a>"""
     try:
         resend.Emails.send({"from": settings.email_from, "to": [order["customer_email"]],
                             "subject": f"✅ تم استلام طلبك #{ref} — Growfolo", "html": _html("تم استلام طلبك", body)})
@@ -72,7 +72,7 @@ def send_order_activated(order: dict) -> None:
       <div class="row"><span class="lbl">المنتج</span><span class="val">{order['product_name']}</span></div>
       <div class="row"><span class="lbl">الحالة</span><span class="val"><span class="badge ok">✓ تم التفعيل</span></span></div>
     </div>{note}
-    <a href="https://growfolo.io" class="btn">استمتع باشتراكك الآن 🎉</a>"""
+    <a href="https://growol.store" class="btn">استمتع باشتراكك الآن 🎉</a>"""
     try:
         resend.Emails.send({"from": settings.email_from, "to": [order["customer_email"]],
                             "subject": f"🎉 تم تفعيل {order['product_name']} — Growfolo", "html": _html("تم تفعيل اشتراكك!", body)})
@@ -93,7 +93,7 @@ def send_order_rejected(order: dict) -> None:
       <div class="row"><span class="lbl">السبب</span><span class="val">{reason}</span></div>
       <div class="row"><span class="lbl">الحالة</span><span class="val"><span class="badge no">مرفوض</span></span></div>
     </div>
-    <a href="https://growfolo.io" class="btn">تواصل مع الدعم</a>"""
+    <a href="https://growol.store" class="btn">تواصل مع الدعم</a>"""
     try:
         resend.Emails.send({"from": settings.email_from, "to": [order["customer_email"]],
                             "subject": f"ℹ️ تحديث طلبك #{ref} — Growfolo", "html": _html("تحديث حالة الطلب", body)})

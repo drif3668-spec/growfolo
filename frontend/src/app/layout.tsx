@@ -8,8 +8,8 @@ import { NotificationsProvider } from "@/context/notifications-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Growfolo.io",
-  description: "Modern ecommerce platform for Growfolo.io"
+  title: "Growfolo",
+  description: "منصة Growfolo للخدمات الرقمية — اشتراكات أصلية بأسعار تنافسية",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
