@@ -10,6 +10,7 @@ export type Product = {
   color: string;          // Tailwind gradient classes
   accentColor: string;    // hex for dynamic CSS
   description: string;
+  fullDescription?: string;
   features: string[];
   specs: { label: string; value: string }[];
   badge?: string;
@@ -264,6 +265,18 @@ export const PRODUCTS: Product[] = [
     accentColor: "#f97316",
     description:
       "أقوى خطة Claude Max 20x السنوية للمحترفين والشركات وسير العمل المكثف، مع أولوية أداء طوال العام.",
+    fullDescription:
+      "👑  الخطة الأقوى للمحترفين\n" +
+      "🔥 أقصى أداء للمستخدمين المحترفين والشركات\n\n" +
+      "✅ 25 مليون توكن APL سنة  50 مليون توكن ⭐\n" +
+      "✅ تجديد تلقائي لرصيد APL كل 6 أشهر ⚡\n" +
+      "✅ أولوية قصوى في سرعة الاستجابة\n" +
+      "✅ استخدام مكثف بدون قيود كبيرة\n" +
+      "✅ إنشاء وتحليل المشاريع الضخمة\n" +
+      "✅ كتابة وبرمجة وشرح متقدم باحترافية عالية\n" +
+      "✅ مناسبة للشركات والمطورين والمسوقين المحترفين\n" +
+      "✅ دعم فني وأولوية معالجة الطلبات\n" +
+      "✅ أفضل أداء واستقرار على مدار السنة",
     features: [
       "لأقوى الاستخدامات وسير العمل المكثف",
       "استخدام مكثف بدون قيود كبيرة",

@@ -8,8 +8,31 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { SiteHeader } from "@/components/layout/site-header";
+import { PRODUCTS } from "@/data/products";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+function localToApiProduct(p: (typeof PRODUCTS)[number]) {
+  return {
+    id: p.id, name: p.name, slug: p.id,
+    subtitle: p.subtitle, logo: p.logo,
+    description: p.description,
+    full_description: p.fullDescription ?? null,
+    usage_details: null, requirements: null, benefits: null,
+    price: p.price, old_price: p.oldPrice,
+    discount: p.discount, buyers: p.buyers,
+    image_url: null,
+    accent_color: p.accentColor,
+    logo_color: p.color,
+    category: p.category,
+    badge: p.badge ?? null,
+    rating: p.rating, reviews_count: p.reviews,
+    partners: p.partners ?? [],
+    features: p.features,
+    specs: p.specs,
+    faq: [],
+  };
+}
 
 interface Spec { label: string; value: string }
 interface FAQ { question: string; answer: string }
@@ -66,9 +89,27 @@ export default function ProductPage() {
                 .filter((p) => p.id !== data.id && p.category === data.category)
                 .slice(0, 3)
             )
-          );
+          )
+          .catch(() => {
+            const localRelated = PRODUCTS
+              .filter((p) => p.id !== id && p.category === data.category)
+              .slice(0, 3)
+              .map(localToApiProduct);
+            setRelated(localRelated);
+          });
       })
-      .catch(() => setProduct(null))
+      .catch(() => {
+        // API unavailable — use local static data as fallback
+        const local = PRODUCTS.find((p) => p.id === id);
+        if (local) {
+          setProduct(localToApiProduct(local));
+          const localRelated = PRODUCTS
+            .filter((p) => p.id !== id && p.category === local.category)
+            .slice(0, 3)
+            .map(localToApiProduct);
+          setRelated(localRelated);
+        }
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
