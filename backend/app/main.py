@@ -172,6 +172,19 @@ def _seed_products() -> None:
          "buyers": "5K", "accent_color": "#f97316", "logo_color": "from-slate-950 via-orange-950 to-stone-900",
          "category": "AI", "badge": "للمحترفين", "rating": 5, "reviews_count": 540,
          "description": "أقوى خطة Claude Max 20x السنوية للمحترفين والشركات وسير العمل المكثف.",
+         "full_description": (
+             "👑  الخطة الأقوى للمحترفين\n"
+             "🔥 أقصى أداء للمستخدمين المحترفين والشركات\n\n"
+             "✅ 25 مليون توكن APL سنة  50 مليون توكن ⭐\n"
+             "✅ تجديد تلقائي لرصيد APL كل 6 أشهر ⚡\n"
+             "✅ أولوية قصوى في سرعة الاستجابة\n"
+             "✅ استخدام مكثف بدون قيود كبيرة\n"
+             "✅ إنشاء وتحليل المشاريع الضخمة\n"
+             "✅ كتابة وبرمجة وشرح متقدم باحترافية عالية\n"
+             "✅ مناسبة للشركات والمطورين والمسوقين المحترفين\n"
+             "✅ دعم فني وأولوية معالجة الطلبات\n"
+             "✅ أفضل أداء واستقرار على مدار السنة"
+         ),
          "partners": _json.dumps(["Anthropic", "Claude Max"], ensure_ascii=False),
          "features": _json.dumps(["لأقوى الاستخدامات وسير العمل المكثف","استخدام مكثف بدون قيود كبيرة","مناسبة للشركات والمطورين المحترفين","أعلى أولوية أداء طوال العام"], ensure_ascii=False),
          "specs": _json.dumps([{"label":"الخطة","value":"سنوية"},{"label":"التوفير","value":"$2350 (98%)"},{"label":"الأداء","value":"Max 20x"},{"label":"الفئة","value":"محترفين وشركات"}], ensure_ascii=False),
@@ -183,31 +196,34 @@ def _seed_products() -> None:
     try:
         for p in STATIC:
             existing = db.get(Product, p["id"])
-            if not existing:
-                product = Product(
-                    id=p["id"], name=p["name"], slug=p["slug"],
-                    subtitle=p.get("subtitle", ""), logo=p.get("logo", "📦"),
-                    description=p.get("description", ""),
-                    full_description=p.get("full_description"),
-                    usage_details=p.get("usage_details"),
-                    requirements=p.get("requirements"),
-                    benefits=p.get("benefits"),
-                    price=p["price"], old_price=p.get("old_price", 0),
-                    discount=p.get("discount", ""), buyers=p.get("buyers", ""),
-                    accent_color=p.get("accent_color", "#a855f7"),
-                    logo_color=p.get("logo_color", "from-purple-500 to-purple-900"),
-                    category=p.get("category", "AI"),
-                    badge=p.get("badge"),
-                    rating=p.get("rating", 4.9),
-                    reviews_count=p.get("reviews_count", 0),
-                    partners_json=p.get("partners"),
-                    features_json=p.get("features"),
-                    specs_json=p.get("specs"),
-                    faq_json=p.get("faq"),
-                    is_published=True,
-                    sort_order=p.get("sort_order", 0),
-                )
-                db.add(product)
+            fields = dict(
+                name=p["name"], slug=p["slug"],
+                subtitle=p.get("subtitle", ""), logo=p.get("logo", "📦"),
+                description=p.get("description", ""),
+                full_description=p.get("full_description"),
+                usage_details=p.get("usage_details"),
+                requirements=p.get("requirements"),
+                benefits=p.get("benefits"),
+                price=p["price"], old_price=p.get("old_price", 0),
+                discount=p.get("discount", ""), buyers=p.get("buyers", ""),
+                accent_color=p.get("accent_color", "#a855f7"),
+                logo_color=p.get("logo_color", "from-purple-500 to-purple-900"),
+                category=p.get("category", "AI"),
+                badge=p.get("badge"),
+                rating=p.get("rating", 4.9),
+                reviews_count=p.get("reviews_count", 0),
+                partners_json=p.get("partners"),
+                features_json=p.get("features"),
+                specs_json=p.get("specs"),
+                faq_json=p.get("faq"),
+                is_published=True,
+                sort_order=p.get("sort_order", 0),
+            )
+            if existing:
+                for k, v in fields.items():
+                    setattr(existing, k, v)
+            else:
+                db.add(Product(id=p["id"], **fields))
         db.commit()
     except Exception as exc:
         db.rollback()
