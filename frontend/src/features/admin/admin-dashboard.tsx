@@ -953,9 +953,7 @@ export function AdminDashboard() {
             </>
           )}
 
-          {nav === "products" && (
-            <div className="py-12 text-center text-white/30">قسم المنتجات — قريباً</div>
-          )}
+          {nav === "products" && <ProductsAdmin />}
           {nav === "settings" && (
             <div className="py-12 text-center text-white/30">قسم الإعدادات — قريباً</div>
           )}
@@ -1299,5 +1297,500 @@ export function AdminDashboard() {
         </div>
       </div>
     </main>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRODUCTS ADMIN
+══════════════════════════════════════════════════════════════════════════ */
+interface AdminProduct {
+  id: string; name: string; slug: string; subtitle: string; logo: string;
+  description: string; full_description: string | null;
+  usage_details: string | null; requirements: string | null; benefits: string | null;
+  price: number; old_price: number; discount: string; buyers: string;
+  image_url: string | null; accent_color: string; logo_color: string;
+  category: string; badge: string | null; rating: number; reviews_count: number;
+  partners: string[]; features: string[]; specs: { label: string; value: string }[];
+  faq: { question: string; answer: string }[];
+  is_published: boolean; sort_order: number; created_at: string;
+}
+
+type ProdForm = {
+  name: string; slug: string; subtitle: string; logo: string;
+  description: string; full_description: string; usage_details: string;
+  requirements: string; benefits: string; price: string; old_price: string;
+  discount: string; buyers: string; accent_color: string; logo_color: string;
+  category: string; badge: string; rating: string; reviews_count: string;
+  partners_json: string; features_json: string; specs_json: string; faq_json: string;
+  is_published: boolean; sort_order: string;
+};
+
+const EMPTY_PROD: ProdForm = {
+  name: "", slug: "", subtitle: "", logo: "📦",
+  description: "", full_description: "", usage_details: "",
+  requirements: "", benefits: "", price: "", old_price: "",
+  discount: "", buyers: "", accent_color: "#a855f7",
+  logo_color: "from-purple-500 to-purple-900",
+  category: "AI", badge: "", rating: "4.9", reviews_count: "0",
+  partners_json: "", features_json: "", specs_json: "", faq_json: "",
+  is_published: true, sort_order: "0",
+};
+
+function prodToForm(p: AdminProduct): ProdForm {
+  return {
+    name: p.name, slug: p.slug, subtitle: p.subtitle, logo: p.logo,
+    description: p.description,
+    full_description: p.full_description ?? "",
+    usage_details: p.usage_details ?? "",
+    requirements: p.requirements ?? "",
+    benefits: p.benefits ?? "",
+    price: String(p.price), old_price: String(p.old_price),
+    discount: p.discount, buyers: p.buyers,
+    accent_color: p.accent_color, logo_color: p.logo_color,
+    category: p.category, badge: p.badge ?? "",
+    rating: String(p.rating), reviews_count: String(p.reviews_count),
+    partners_json: p.partners.join(", "),
+    features_json: p.features.join("\n"),
+    specs_json: p.specs.map((s) => `${s.label}: ${s.value}`).join("\n"),
+    faq_json: p.faq.map((f) => `س: ${f.question}\nج: ${f.answer}`).join("\n---\n"),
+    is_published: p.is_published, sort_order: String(p.sort_order),
+  };
+}
+
+function buildPayload(f: ProdForm) {
+  const features = f.features_json.split("\n").map((l) => l.trim()).filter(Boolean);
+  const specs = f.specs_json.split("\n").map((l) => {
+    const idx = l.indexOf(":");
+    if (idx < 0) return null;
+    return { label: l.slice(0, idx).trim(), value: l.slice(idx + 1).trim() };
+  }).filter(Boolean);
+  const faq = f.faq_json.split("---").map((block) => {
+    const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+    const q = lines.find((l) => l.startsWith("س:"))?.replace(/^س:\s*/, "") ?? "";
+    const a = lines.find((l) => l.startsWith("ج:"))?.replace(/^ج:\s*/, "") ?? "";
+    return q ? { question: q, answer: a } : null;
+  }).filter(Boolean);
+  const partners = f.partners_json.split(",").map((s) => s.trim()).filter(Boolean);
+
+  return {
+    name: f.name, slug: f.slug, subtitle: f.subtitle, logo: f.logo,
+    description: f.description,
+    full_description: f.full_description || null,
+    usage_details: f.usage_details || null,
+    requirements: f.requirements || null,
+    benefits: f.benefits || null,
+    price: parseFloat(f.price) || 0,
+    old_price: parseFloat(f.old_price) || 0,
+    discount: f.discount, buyers: f.buyers,
+    accent_color: f.accent_color, logo_color: f.logo_color,
+    category: f.category, badge: f.badge || null,
+    rating: parseFloat(f.rating) || 4.9,
+    reviews_count: parseInt(f.reviews_count) || 0,
+    partners_json: JSON.stringify(partners),
+    features_json: JSON.stringify(features),
+    specs_json: JSON.stringify(specs),
+    faq_json: JSON.stringify(faq),
+    is_published: f.is_published,
+    sort_order: parseInt(f.sort_order) || 0,
+  };
+}
+
+function ProductsAdmin() {
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<AdminProduct | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState<ProdForm>(EMPTY_PROD);
+  const [saving, setSaving] = useState(false);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function load() {
+    setLoading(true);
+    fetch(`${API_URL}/api/v1/products/all`)
+      .then((r) => r.json())
+      .then((d) => setProducts(Array.isArray(d) ? d : []))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, []);
+
+  function startEdit(p: AdminProduct) {
+    setEditing(p);
+    setForm(prodToForm(p));
+    setCreating(false);
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setForm(EMPTY_PROD);
+    setCreating(true);
+  }
+
+  function closeModal() { setEditing(null); setCreating(false); }
+
+  function setF(key: keyof ProdForm, val: string | boolean) {
+    setForm((prev) => ({ ...prev, [key]: val }));
+  }
+
+  async function save() {
+    setSaving(true);
+    try {
+      const payload = buildPayload(form);
+      if (creating) {
+        await fetch(`${API_URL}/api/v1/products`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else if (editing) {
+        await fetch(`${API_URL}/api/v1/products/${editing.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      closeModal();
+      load();
+    } catch {
+      alert("حدث خطأ أثناء الحفظ");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function togglePublish(id: string) {
+    await fetch(`${API_URL}/api/v1/products/${id}/toggle`, { method: "PATCH" });
+    load();
+  }
+
+  async function deleteProduct(id: string) {
+    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    await fetch(`${API_URL}/api/v1/products/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  async function uploadImage(productId: string, file: File) {
+    setUploadingId(productId);
+    const fd = new FormData();
+    fd.append("file", file);
+    await fetch(`${API_URL}/api/v1/products/${productId}/image`, { method: "POST", body: fd });
+    setUploadingId(null);
+    load();
+  }
+
+  const isOpen = editing !== null || creating;
+
+  return (
+    <>
+      {/* Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur">
+          <div className="my-8 w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0d0b14] p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-xl font-black text-white">{creating ? "منتج جديد" : "تعديل المنتج"}</h2>
+              <button onClick={closeModal} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid gap-4" dir="rtl">
+              {/* Row 1: name + slug */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">الاسم *</span>
+                  <input value={form.name} onChange={(e) => setF("name", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">Slug *</span>
+                  <input value={form.slug} onChange={(e) => setF("slug", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                </label>
+              </div>
+
+              {/* Row 2: subtitle + logo */}
+              <div className="grid gap-3 sm:grid-cols-[1fr_120px]">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">العنوان الفرعي</span>
+                  <input value={form.subtitle} onChange={(e) => setF("subtitle", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">اللوغو (emoji)</span>
+                  <input value={form.logo} onChange={(e) => setF("logo", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 text-center text-xl" />
+                </label>
+              </div>
+
+              {/* Row 3: price + old_price + discount + buyers */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">السعر $ *</span>
+                  <input type="number" value={form.price} onChange={(e) => setF("price", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">السعر القديم</span>
+                  <input type="number" value={form.old_price} onChange={(e) => setF("old_price", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">الخصم (نص)</span>
+                  <input value={form.discount} onChange={(e) => setF("discount", e.target.value)} placeholder="-70%"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">المشترين</span>
+                  <input value={form.buyers} onChange={(e) => setF("buyers", e.target.value)} placeholder="18K"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                </label>
+              </div>
+
+              {/* Row 4: accent_color + category + badge */}
+              <div className="grid gap-3 sm:grid-cols-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">لون التمييز (hex)</span>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={form.accent_color} onChange={(e) => setF("accent_color", e.target.value)}
+                      className="size-9 shrink-0 cursor-pointer rounded-lg border border-white/10 bg-transparent p-0.5" />
+                    <input value={form.accent_color} onChange={(e) => setF("accent_color", e.target.value)}
+                      className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-white outline-none" dir="ltr" />
+                  </div>
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">التصنيف</span>
+                  <select value={form.category} onChange={(e) => setF("category", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-[#0d0b14] px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50">
+                    <option value="AI">ذكاء اصطناعي</option>
+                    <option value="Entertainment">ترفيه</option>
+                    <option value="Content">محتوى</option>
+                    <option value="Gaming">ألعاب</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">الشارة (badge)</span>
+                  <input value={form.badge} onChange={(e) => setF("badge", e.target.value)} placeholder="LIFETIME DEAL"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                </label>
+              </div>
+
+              {/* Row 5: rating + reviews + sort_order + published */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">التقييم</span>
+                  <input type="number" step="0.1" max="5" value={form.rating} onChange={(e) => setF("rating", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">عدد التقييمات</span>
+                  <input type="number" value={form.reviews_count} onChange={(e) => setF("reviews_count", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">الترتيب</span>
+                  <input type="number" value={form.sort_order} onChange={(e) => setF("sort_order", e.target.value)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">منشور</span>
+                  <button
+                    type="button"
+                    onClick={() => setF("is_published", !form.is_published)}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-colors ${
+                      form.is_published ? "border-green-500/30 bg-green-500/10 text-green-400" : "border-white/10 bg-white/5 text-white/40"
+                    }`}
+                  >
+                    {form.is_published ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                    {form.is_published ? "نعم" : "لا"}
+                  </button>
+                </label>
+              </div>
+
+              {/* Description */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">الوصف القصير</span>
+                <textarea value={form.description} onChange={(e) => setF("description", e.target.value)} rows={2}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+              </label>
+
+              {/* Partners */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">الشركاء (فاصلة بين كل شريك)</span>
+                <input value={form.partners_json} onChange={(e) => setF("partners_json", e.target.value)} placeholder="Anthropic, OpenRouter"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+              </label>
+
+              {/* Features */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">المميزات (سطر لكل ميزة)</span>
+                <textarea value={form.features_json} onChange={(e) => setF("features_json", e.target.value)} rows={4}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  placeholder={"ميزة 1\nميزة 2\nميزة 3"} />
+              </label>
+
+              {/* Specs */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">المواصفات (كل سطر: الاسم: القيمة)</span>
+                <textarea value={form.specs_json} onChange={(e) => setF("specs_json", e.target.value)} rows={3}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  placeholder={"Context Window: 1,000,000\nStorage: 2 TB\nAccess: Lifetime"} dir="ltr" />
+              </label>
+
+              {/* FAQ */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">الأسئلة الشائعة (افصل بينها بـ ---)</span>
+                <textarea value={form.faq_json} onChange={(e) => setF("faq_json", e.target.value)} rows={4}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  placeholder={"س: السؤال الأول\nج: الجواب الأول\n---\nس: السؤال الثاني\nج: الجواب الثاني"} />
+              </label>
+
+              {/* Full description */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">الوصف الكامل (اختياري)</span>
+                <textarea value={form.full_description} onChange={(e) => setF("full_description", e.target.value)} rows={3}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+              </label>
+
+              {/* Usage details + requirements */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">طريقة الاستخدام</span>
+                  <textarea value={form.usage_details} onChange={(e) => setF("usage_details", e.target.value)} rows={2}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs font-bold text-white/50">المتطلبات</span>
+                  <textarea value={form.requirements} onChange={(e) => setF("requirements", e.target.value)} rows={2}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                </label>
+              </div>
+
+              {/* Benefits */}
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-white/50">لماذا تختاره؟</span>
+                <textarea value={form.benefits} onChange={(e) => setF("benefits", e.target.value)} rows={2}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+              </label>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={closeModal} className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-bold text-white/60 hover:bg-white/5">
+                  إلغاء
+                </button>
+                <button onClick={save} disabled={saving}
+                  className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-black text-white hover:bg-purple-500 disabled:opacity-50">
+                  {saving ? "جاري الحفظ…" : "حفظ"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden file input for image upload */}
+      <input ref={fileRef} type="file" accept="image/*" className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f && uploadingId) uploadImage(uploadingId, f);
+          e.target.value = "";
+        }} />
+
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-xl font-black text-white">إدارة المنتجات</h2>
+        <button onClick={startCreate}
+          className="flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-500">
+          <Plus size={15} /> منتج جديد
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="grid gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/5" />
+          ))}
+        </div>
+      ) : products.length === 0 ? (
+        <div className="py-16 text-center text-white/30">لا توجد منتجات</div>
+      ) : (
+        <div className="grid gap-3">
+          {products.map((p) => (
+            <div key={p.id}
+              className={`flex items-center gap-4 rounded-2xl border p-4 transition-all ${
+                p.is_published ? "border-white/8 bg-[#0d0b14]" : "border-white/5 bg-[#0d0b14]/50 opacity-60"
+              }`}
+            >
+              {/* Logo */}
+              <div
+                className="grid size-12 shrink-0 place-items-center rounded-xl text-2xl"
+                style={{ background: `${p.accent_color}20`, border: `1px solid ${p.accent_color}30` }}
+              >
+                {p.logo}
+              </div>
+
+              {/* Info */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="truncate font-bold text-white">{p.name}</p>
+                  {!p.is_published && (
+                    <span className="rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] font-bold text-white/40">مخفي</span>
+                  )}
+                  {p.badge && (
+                    <span className="rounded-md px-1.5 py-0.5 text-[10px] font-black text-black" style={{ background: p.accent_color }}>
+                      {p.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-white/40">{p.category} · ${p.price} · {p.reviews_count} تقييم</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex shrink-0 items-center gap-2">
+                {/* View */}
+                <a href={`/products/${p.id}`} target="_blank"
+                  className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 hover:text-white"
+                  title="عرض الصفحة">
+                  <Eye size={13} />
+                </a>
+
+                {/* Upload image */}
+                <button
+                  onClick={() => { setUploadingId(p.id); fileRef.current?.click(); }}
+                  className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 hover:text-white"
+                  title="رفع صورة"
+                >
+                  {uploadingId === p.id ? <RefreshCw size={13} className="animate-spin" /> : <ImageIcon size={13} />}
+                </button>
+
+                {/* Toggle published */}
+                <button onClick={() => togglePublish(p.id)}
+                  className={`grid size-8 place-items-center rounded-xl transition-colors ${
+                    p.is_published ? "bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400" : "bg-white/8 text-white/40 hover:bg-green-500/15 hover:text-green-400"
+                  }`}
+                  title={p.is_published ? "إخفاء" : "نشر"}
+                >
+                  {p.is_published ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                </button>
+
+                {/* Edit */}
+                <button onClick={() => startEdit(p)}
+                  className="grid size-8 place-items-center rounded-xl bg-purple-500/12 text-purple-400 hover:bg-purple-500/22"
+                  title="تعديل">
+                  <Pencil size={13} />
+                </button>
+
+                {/* Delete */}
+                <button onClick={() => deleteProduct(p.id)}
+                  className="grid size-8 place-items-center rounded-xl bg-red-500/12 text-red-400 hover:bg-red-500/22"
+                  title="حذف">
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
