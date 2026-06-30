@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Brain, Code2, Eye, Gamepad2, Headphones, Mail, Medal,
+  Brain, Code2, Gamepad2, Headphones, Mail, Medal,
   PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
   Users, Wrench, Zap, BadgeCheck, Globe, Rocket
 } from "lucide-react";
@@ -15,7 +15,6 @@ import { BannerCarousel } from "@/components/sections/banner-carousel";
 import { AdsShowcase } from "@/components/sections/ads-showcase";
 import { AdsSectionSlider } from "@/components/sections/ads-section-slider";
 import { useCart } from "@/context/cart-context";
-import { useFavorites } from "@/context/favorites-context";
 import { useNotifications } from "@/context/notifications-context";
 import { PRODUCTS } from "@/data/products";
 
@@ -40,9 +39,6 @@ const products = PRODUCTS.map(p => ({
   price: `$${p.price}`, price_num: p.price, oldPrice: `$${p.oldPrice}`,
   buyers: p.buyers, color: p.color, rating: p.rating,
 }));
-
-const AI_PACKAGE_IDS = ["claude-pro-yearly", "claude-max-5x-yearly", "claude-max-20x-yearly"];
-const aiPackageProducts = products.filter((p) => AI_PACKAGE_IDS.includes(p.id));
 
 const EXCLUSIVE_SHOWCASE_SLIDES = [
   {
@@ -85,50 +81,6 @@ const NEWSLETTER_STRIP_IMAGES = [
   { src: "/newsletter-strip/claude.jpg", alt: "Claude" },
 ];
 
-function AddToCartBtn({ product }: { product: { id: string; name: string; price_num: number; logo: string; color: string } }) {
-  const { addItem } = useCart();
-  const { addNotification } = useNotifications();
-  return (
-    <button
-      onClick={() => {
-        addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color });
-        addNotification({ title: "تمت الإضافة إلى السلة", description: `تم إضافة "${product.name}" إلى سلة المشتريات`, type: "cart" });
-      }}
-      className="grid size-9 place-items-center rounded-xl bg-purple-700 text-white shadow-[0_0_18px_rgba(168,85,247,0.6)] hover:scale-110 transition-transform"
-      aria-label="إضافة للسلة"
-    >
-      <ShoppingCart size={17} />
-    </button>
-  );
-}
-
-function FavoriteBtn({ product }: { product: (typeof products)[number] }) {
-  const { toggleFavorite, isFavorite } = useFavorites();
-  const { addNotification } = useNotifications();
-  const fav = isFavorite(product.id);
-  return (
-    <button
-      onClick={() => {
-        toggleFavorite({ id: product.id, name: product.name, logo: product.logo, color: product.color, price: product.price_num, rating: product.rating, discount: product.discount });
-        addNotification({
-          title: fav ? "تمت الإزالة من المفضلة" : "تمت الإضافة إلى المفضلة",
-          description: fav ? `تم إزالة "${product.name}" من قائمة المفضلة` : `تم إضافة "${product.name}" إلى قائمة المفضلة`,
-          type: "info",
-        });
-      }}
-      className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 transition-all hover:scale-110 hover:border-yellow-400/40"
-      aria-label={fav ? "إزالة من المفضلة" : "إضافة للمفضلة"}
-      style={{ transition: "transform .2s, border-color .2s" }}
-    >
-      <Star
-        size={15}
-        fill={fav ? "#facc15" : "none"}
-        className="transition-all duration-200"
-        style={{ color: fav ? "#facc15" : "rgba(255,255,255,0.45)", filter: fav ? "drop-shadow(0 0 6px rgba(250,204,21,0.7))" : "none" }}
-      />
-    </button>
-  );
-}
 
 export default function HomePage() {
   return (
@@ -140,7 +92,6 @@ export default function HomePage() {
         <HeroSection />
         <FeatureStrip />
         <CategoriesSection />
-        <AiPackagesSection />
         <StatsSection />
         <ReviewsCarousel />
         <ExclusiveOfferShowcase />
@@ -221,6 +172,7 @@ function ExclusiveOfferShowcase() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.18),transparent_42%),radial-gradient(circle_at_12%_100%,rgba(200,230,0,0.10),transparent_35%)]" />
 
         {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => {
+
           const offset = ((index - current + EXCLUSIVE_SHOWCASE_SLIDES.length + 1) % EXCLUSIVE_SHOWCASE_SLIDES.length) - 1;
           const isActive = offset === 0;
           const product = products.find((p) => p.id === slide.productId);
@@ -252,6 +204,7 @@ function ExclusiveOfferShowcase() {
                 <div className="mt-4 flex justify-center">
                   <button
                     type="button"
+                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={() => buyProduct(slide.productId)}
                     className="group inline-flex min-h-14 items-center gap-3 rounded-2xl border px-7 py-3 font-black text-white backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] active:scale-95"
                     style={{
@@ -268,18 +221,25 @@ function ExclusiveOfferShowcase() {
             </article>
           );
         })}
+      </div>
 
-        <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-2">
-          {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => (
-            <button
-              key={slide.productId}
-              onClick={() => goTo(index)}
-              className={`rounded-full transition-all ${index === current ? "h-2 w-7" : "size-2"}`}
-              style={{ background: index === current ? slide.accent : "rgba(255,255,255,0.22)" }}
-              aria-label={`عرض ${slide.alt}`}
-            />
-          ))}
-        </div>
+      {/* Pagination dots — outside overflow-hidden container */}
+      <div className="mt-5 flex items-center justify-center gap-3">
+        {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => (
+          <button
+            key={slide.productId}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => goTo(index)}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: index === current ? 28 : 10,
+              height: 10,
+              background: index === current ? slide.accent : "rgba(255,255,255,0.22)",
+              boxShadow: index === current ? `0 0 10px ${slide.accent}88` : "none",
+            }}
+            aria-label={`عرض ${slide.alt}`}
+          />
+        ))}
       </div>
     </section>
   );
@@ -334,56 +294,6 @@ function CategoriesSection() {
         ))}
       </div>
     </section>
-  );
-}
-
-function AiPackagesSection() {
-  return (
-    <section id="products" className="pb-10">
-      <SectionTitle title="قسم الذكاء الاصطناعي" />
-      <div className="relative mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {aiPackageProducts.map((p) => <ProductCard key={p.id} product={p} />)}
-      </div>
-    </section>
-  );
-}
-
-function ProductCard({ product: p }: { product: (typeof products)[number] }) {
-  const isAiPackage = AI_PACKAGE_IDS.includes(p.id);
-
-  return (
-    <article className="glass-panel relative overflow-hidden rounded-3xl p-4">
-      <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">{p.discount}</span>
-      <div className={`mx-auto mt-6 grid size-24 place-items-center rounded-3xl bg-gradient-to-br ${p.color} text-3xl font-black shadow-[0_0_28px_rgba(168,85,247,0.45)]`}>
-        {isAiPackage ? (
-          <img
-            src="/products/claude-card-logo.jpg"
-            alt={p.name}
-            className="size-full rounded-3xl object-cover"
-          />
-        ) : (
-          p.logo
-        )}
-      </div>
-      <h3 className="mt-5 text-center text-sm font-bold text-white">{p.name}</h3>
-      <p className="mt-2 text-center text-xs leading-5 text-white/70">اشتراك رسمي<br />تسليم فوري</p>
-      <div className="mt-4 flex items-end justify-between gap-2">
-        <span className="text-2xl font-black text-white">{p.price}</span>
-        <span className="text-sm text-white/40 line-through">{p.oldPrice}</span>
-      </div>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="flex items-center gap-1 text-xs text-yellow-400">
-          <Star size={14} fill="currentColor" /> {p.rating} ({p.buyers})
-        </span>
-        <div className="flex items-center gap-1.5">
-          <FavoriteBtn product={p} />
-          <a href={`/products/${p.id}`} className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/12 transition-colors" aria-label="تفاصيل">
-            <Eye size={15} />
-          </a>
-          <AddToCartBtn product={p} />
-        </div>
-      </div>
-    </article>
   );
 }
 
