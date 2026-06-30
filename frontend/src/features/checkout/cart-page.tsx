@@ -25,16 +25,37 @@ const CURRENCIES = [
   { code: "BRL", flag: "🇧🇷", name: "ريال برازيلي" },
   { code: "RUB", flag: "🇷🇺", name: "روبل روسي" },
   { code: "KWD", flag: "🇰🇼", name: "دينار كويتي" },
+  { code: "BHD", flag: "🇧🇭", name: "دينار بحريني" },
   { code: "QAR", flag: "🇶🇦", name: "ريال قطري" },
   { code: "OMR", flag: "🇴🇲", name: "ريال عُماني" },
   { code: "JOD", flag: "🇯🇴", name: "دينار أردني" },
   { code: "LYD", flag: "🇱🇾", name: "دينار ليبي" },
+  { code: "IQD", flag: "🇮🇶", name: "دينار عراقي" },
+  { code: "LBP", flag: "🇱🇧", name: "ليرة لبنانية" },
   { code: "MXN", flag: "🇲🇽", name: "بيزو مكسيكي" },
   { code: "NGN", flag: "🇳🇬", name: "نيرة نيجيرية" },
   { code: "ZAR", flag: "🇿🇦", name: "راند جنوب أفريقي" },
   { code: "PKR", flag: "🇵🇰", name: "روبية باكستانية" },
   { code: "BDT", flag: "🇧🇩", name: "تاكا بنغلاديشي" },
 ];
+
+const STATIC_USD_RATES: Record<string, number> = {
+  USD: 1,
+  DZD: 250,
+  EGP: 52,
+  SAR: 3.75,
+  AED: 3.67,
+  QAR: 3.64,
+  KWD: 0.31,
+  BHD: 0.38,
+  OMR: 0.38,
+  JOD: 0.71,
+  MAD: 10,
+  TND: 3.2,
+  LYD: 5,
+  IQD: 1310,
+  LBP: 89500,
+};
 
 const MOCK_CART = [
   { id: "p1", name: "ChatGPT Plus", subtitle: "اشتراك شهري", price: 5.99, qty: 1, color: "from-emerald-400 to-teal-600", logo: "◎" },
@@ -48,19 +69,14 @@ export function CartPage() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>(MOCK_CART);
   const [currency, setCurrency] = useState(CURRENCIES[0]);
-  const [rates, setRates] = useState<Record<string, number>>({ USD: 1 });
+  const [rates] = useState<Record<string, number>>(STATIC_USD_RATES);
   const [ratesLoading, setRatesLoading] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setRatesLoading(true);
-    fetch("https://api.exchangerate-api.com/v4/latest/USD")
-      .then((r) => r.json())
-      .then((data) => setRates(data.rates ?? { USD: 1 }))
-      .catch(() => {})
-      .finally(() => setRatesLoading(false));
+    setRatesLoading(false);
   }, []);
 
   useEffect(() => {

@@ -22,10 +22,13 @@ export const CURRENCIES: Currency[] = [
   { code: "INR", flag: "🇮🇳", name: "روبية هندية" },
   { code: "BRL", flag: "🇧🇷", name: "ريال برازيلي" },
   { code: "KWD", flag: "🇰🇼", name: "دينار كويتي" },
+  { code: "BHD", flag: "🇧🇭", name: "دينار بحريني" },
   { code: "QAR", flag: "🇶🇦", name: "ريال قطري" },
   { code: "OMR", flag: "🇴🇲", name: "ريال عُماني" },
   { code: "JOD", flag: "🇯🇴", name: "دينار أردني" },
   { code: "LYD", flag: "🇱🇾", name: "دينار ليبي" },
+  { code: "IQD", flag: "🇮🇶", name: "دينار عراقي" },
+  { code: "LBP", flag: "🇱🇧", name: "ليرة لبنانية" },
   { code: "MXN", flag: "🇲🇽", name: "بيزو مكسيكي" },
   { code: "NGN", flag: "🇳🇬", name: "نيرة نيجيرية" },
   { code: "ZAR", flag: "🇿🇦", name: "راند جنوب أفريقي" },
@@ -33,6 +36,24 @@ export const CURRENCIES: Currency[] = [
   { code: "RUB", flag: "🇷🇺", name: "روبل روسي" },
   { code: "BDT", flag: "🇧🇩", name: "تاكا بنغلاديشي" },
 ];
+
+export const STATIC_USD_RATES: Record<string, number> = {
+  USD: 1,
+  DZD: 250,
+  EGP: 52,
+  SAR: 3.75,
+  AED: 3.67,
+  QAR: 3.64,
+  KWD: 0.31,
+  BHD: 0.38,
+  OMR: 0.38,
+  JOD: 0.71,
+  MAD: 10,
+  TND: 3.2,
+  LYD: 5,
+  IQD: 1310,
+  LBP: 89500,
+};
 
 interface CurrencyCtx {
   currencies: Currency[];
@@ -47,7 +68,7 @@ const Ctx = createContext<CurrencyCtx | null>(null);
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [selected, setSelectedState] = useState<Currency>(CURRENCIES[0]);
-  const [rates, setRates] = useState<Record<string, number>>({ USD: 1 });
+  const [rates] = useState<Record<string, number>>(STATIC_USD_RATES);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -55,12 +76,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem("gf_currency");
       if (saved) { const c = CURRENCIES.find(x => x.code === saved); if (c) setSelectedState(c); }
     } catch {}
-    setLoading(true);
-    fetch("https://api.exchangerate-api.com/v4/latest/USD")
-      .then(r => r.json())
-      .then(d => setRates(d.rates ?? { USD: 1 }))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    setLoading(false);
   }, []);
 
   const setSelected = (c: Currency) => {
