@@ -37,15 +37,26 @@ export function LoginForm() {
         return;
       }
 
-      const data = await res.json() as { access_token: string };
-      localStorage.setItem("gf_token", data.access_token);
+      const data = await res.json() as {
+        access_token?: string;
+        require_verification?: boolean;
+        email?: string;
+      };
 
-      /* Check if admin */
+      // Unverified account — redirect to OTP page
+      if (data.require_verification) {
+        router.push(`/verify-email?email=${encodeURIComponent(data.email ?? email.trim())}`);
+        return;
+      }
+
+      localStorage.setItem("gf_token", data.access_token!);
+
+      /* Check if admin and redirect accordingly */
       try {
-        const payload = JSON.parse(atob(data.access_token.split(".")[1])) as { is_admin?: boolean };
-        router.push(payload.is_admin ? "/admin" : "/");
+        const jwtPayload = JSON.parse(atob(data.access_token!.split(".")[1])) as { is_admin?: boolean };
+        router.push(jwtPayload.is_admin ? "/admin" : "/dashboard");
       } catch {
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch {
       setError("تعذر الاتصال بالخادم، تأكد من تشغيل البكند");

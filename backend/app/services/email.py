@@ -106,3 +106,82 @@ def send_order_confirmation(to_email: str, order_id: str) -> None:
     send_order_received({"id": order_id, "customer_name": "عميلنا العزيز",
                          "customer_email": to_email, "product_name": "منتج Growfolo",
                          "product_price": 0, "payment_method": "—"})
+
+
+# ── Auth emails ──────────────────────────────────────────────────────────────
+
+import random
+import string
+
+
+def generate_otp(length: int = 6) -> str:
+    return "".join(random.choices(string.digits, k=length))
+
+
+def send_otp_email(email: str, name: str, otp: str) -> None:
+    """Send 6-digit OTP for email verification."""
+    print(f"[AUTH] OTP for {email}: {otp}")  # always log for debugging
+    if not settings.resend_api_key:
+        return
+    body = f"""
+    <p style="color:rgba(255,255,255,.75);margin-bottom:24px;line-height:1.7">
+      مرحباً <strong style="color:#fff">{name}</strong>،<br/>
+      شكراً لتسجيلك في <strong style="color:#a855f7">Growfolo</strong>.
+      استخدم الرمز التالي لتأكيد بريدك الإلكتروني:
+    </p>
+    <div style="text-align:center;margin:28px 0">
+      <div style="display:inline-block;background:rgba(168,85,247,.12);
+                  border:2px solid rgba(168,85,247,.45);border-radius:18px;padding:20px 44px">
+        <span style="font-size:42px;font-weight:900;letter-spacing:12px;
+                     color:#a855f7;font-family:monospace">{otp}</span>
+      </div>
+    </div>
+    <p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;line-height:1.6">
+      ⏱ صالح لمدة <strong style="color:#fff">15 دقيقة</strong> فقط<br/>
+      🔒 لا تشارك هذا الرمز مع أي شخص
+    </p>"""
+    try:
+        resend.Emails.send({
+            "from": settings.email_from,
+            "to": [email],
+            "subject": "🔐 رمز تحقق Growfolo — تأكيد البريد الإلكتروني",
+            "html": _html("رمز التحقق من البريد الإلكتروني", body),
+        })
+    except Exception as exc:
+        print(f"[WARN] send_otp_email failed: {exc}")
+
+
+def send_welcome_email(email: str, name: str) -> None:
+    """Send welcome email after successful OTP verification."""
+    if not settings.resend_api_key:
+        return
+    body = f"""
+    <p style="color:rgba(255,255,255,.75);margin-bottom:18px;line-height:1.7">
+      مرحباً <strong style="color:#fff">{name}</strong>،<br/>
+      يسعدنا الترحيب بك في عائلة <strong style="color:#a855f7">Growfolo</strong>! 🎉
+    </p>
+    <div class="card" style="text-align:center;padding:28px 20px;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:12px">🎊</div>
+      <p style="font-size:17px;font-weight:900;color:#84cc16;margin:0 0 8px">
+        مبروك، تم تسجيل حسابك بنجاح!
+      </p>
+      <p style="color:rgba(255,255,255,.5);font-size:13px;margin:0">
+        يمكنك الآن الاستمتاع بجميع خدمات Growfolo الرقمية
+      </p>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="row"><span class="lbl">الاسم</span><span class="val">{name}</span></div>
+      <div class="row"><span class="lbl">البريد</span><span class="val">{email}</span></div>
+      <div class="row" style="border:none"><span class="lbl">الحالة</span>
+        <span class="val"><span class="badge ok">✓ حساب موثّق</span></span></div>
+    </div>
+    <a href="https://growol.store/dashboard" class="btn">انتقل إلى لوحة حسابك ←</a>"""
+    try:
+        resend.Emails.send({
+            "from": settings.email_from,
+            "to": [email],
+            "subject": "🎉 مبروك، تم تسجيل حسابك في Growfolo!",
+            "html": _html("أهلاً وسهلاً بك في Growfolo", body),
+        })
+    except Exception as exc:
+        print(f"[WARN] send_welcome_email failed: {exc}")

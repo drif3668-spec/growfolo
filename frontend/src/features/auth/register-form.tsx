@@ -70,14 +70,14 @@ export function RegisterForm() {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json() as { message?: string; email?: string; detail?: string };
       if (!res.ok) {
         setError(data.detail ?? "حدث خطأ في التسجيل");
         return;
       }
 
-      localStorage.setItem("gf_token", data.access_token);
-      router.push("/");
+      // Backend returns { message: "check_email", email } — no token until OTP verified
+      router.push(`/verify-email?email=${encodeURIComponent(data.email ?? form.email)}`);
     } catch {
       setError("تعذر الاتصال بالخادم، يرجى المحاولة لاحقاً");
     } finally {

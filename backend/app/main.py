@@ -10,6 +10,36 @@ import app.models  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
+
+# ── Migrate: add new columns to existing tables ──────────────────────────────
+def _migrate_add_columns() -> None:
+    """Idempotently add OTP + verification columns (safe for existing DBs)."""
+    from sqlalchemy import text
+
+    db = SessionLocal()
+    try:
+        if settings.is_postgres:
+            db.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE"
+            ))
+            db.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(6)"
+            ))
+            db.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP"
+            ))
+            db.commit()
+        # SQLite: create_all already handles new columns for fresh databases
+    except Exception as exc:
+        db.rollback()
+        print(f"[WARN] Migration: {exc}")
+    finally:
+        db.close()
+
+
+_migrate_add_columns()
+
+
 # ── Seed admin user if not present ──────────────────────────────────────
 def _seed_admin() -> None:
     from sqlalchemy import select
@@ -18,7 +48,12 @@ def _seed_admin() -> None:
 
     db = SessionLocal()
     try:
-        if db.scalar(select(User).where(User.email == "admin@growfolo.io")):
+        existing = db.scalar(select(User).where(User.email == "admin@growfolo.io"))
+        if existing:
+            # Ensure admin is always marked verified (survives column migration)
+            if not existing.is_verified:
+                existing.is_verified = True
+                db.commit()
             return
         admin = User(
             email="admin@growfolo.io",
@@ -26,6 +61,7 @@ def _seed_admin() -> None:
             full_name="Growfolo Admin",
             hashed_password=hash_password("Admin@2026"),
             is_admin=True,
+            is_verified=True,
         )
         db.add(admin)
         db.commit()
