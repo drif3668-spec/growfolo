@@ -59,6 +59,14 @@ const METHODS: Method[] = [
     bg: "from-yellow-900/30 to-yellow-800/10 border-yellow-400/20",
     description: "تحويل BNB عبر Binance Smart Chain",
   },
+  {
+    id: "redotpay",
+    label: "RedotPay",
+    logo: "/payment-methods/redotpay.jpg",
+    color: "text-red-400",
+    bg: "from-red-900/30 to-red-800/10 border-red-500/20",
+    description: "دفع عبر Payment ID",
+  },
 ];
 
 const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }[]; steps: string[] }> = {
@@ -98,6 +106,10 @@ const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }
       { label: "عنوان المحفظة", value: "0xe69071c0e58142e89fa239910436a35e18fe3c5d" },
     ],
     steps: ["افتح محفظتك (Trust Wallet, MetaMask…)", "أرسل BNB على شبكة BSC فقط", "أرسل hash المعاملة"],
+  },
+  redotpay: {
+    fields: [{ label: "Payment ID", value: "1293340175" }],
+    steps: ["افتح RedotPay", "أرسل المبلغ إلى Payment ID أعلاه", "أرسل صورة إثبات الدفع"],
   },
 };
 

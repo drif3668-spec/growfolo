@@ -22,6 +22,9 @@ const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
     { label: "الشبكة", value: "BEP20 (BSC)" },
     { label: "عنوان المحفظة", value: "0xe69071c0e58142e89fa239910436a35e18fe3c5d" },
   ],
+  redotpay: [
+    { label: "Payment ID", value: "1293340175" },
+  ],
   baridimob: [
     { label: "رقم CCP", value: "0023456789 — مفتاح: 14" },
     { label: "الاسم", value: "Growfolo Store" },
@@ -40,6 +43,7 @@ const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
 const PAYMENT_LABELS: Record<string, string> = {
   usdt: "USDT TRC20",
   bnb: "BNB BEP20",
+  redotpay: "RedotPay",
   baridimob: "BaridiMob",
   mobilis: "Flexy Mobilis",
   vodafone: "Vodafone Cash",

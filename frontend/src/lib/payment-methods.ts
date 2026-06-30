@@ -40,6 +40,19 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     steps: ["افتح محفظتك (Trust Wallet / MetaMask)", "أرسل BNB على شبكة BSC فقط", "أرسل hash المعاملة"],
   },
   {
+    id: "redotpay",
+    label: "RedotPay",
+    image: "/payment-methods/redotpay.jpg",
+    color: "#ef233c",
+    bg: "rgba(239,35,60,0.10)",
+    border: "rgba(239,35,60,0.30)",
+    description: "دفع عبر RedotPay Payment ID",
+    fields: [
+      { label: "Payment ID", value: "1293340175" },
+    ],
+    steps: ["افتح RedotPay", "أرسل المبلغ إلى Payment ID أعلاه", "أرسل صورة إثبات الدفع"],
+  },
+  {
     id: "baridimob",
     label: "BaridiMob",
     image: "/payment-methods/baridimob.png",
