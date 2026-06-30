@@ -16,11 +16,11 @@ const FLEXY_EXCHANGE_RATE_DZD = 250;
 const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
   usdt: [
     { label: "الشبكة", value: "TRC20 (TRON)" },
-    { label: "عنوان المحفظة", value: "TQn9Y2khEsLJW1ChVWFMSMeRDow5KNXYZ1" },
+    { label: "عنوان المحفظة", value: "TPQJS1aNK6QiXvfC9yKtS41f47awYAuv7T" },
   ],
   bnb: [
     { label: "الشبكة", value: "BEP20 (BSC)" },
-    { label: "عنوان المحفظة", value: "0x742d35Cc6634C0532925a3b844Bc9e7595f12345" },
+    { label: "عنوان المحفظة", value: "0xe69071c0e58142e89fa239910436a35e18fe3c5d" },
   ],
   baridimob: [
     { label: "رقم CCP", value: "0023456789 — مفتاح: 14" },

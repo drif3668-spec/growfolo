@@ -88,14 +88,14 @@ const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }
   usdt: {
     fields: [
       { label: "الشبكة", value: "TRC20 (TRON)" },
-      { label: "عنوان المحفظة", value: "TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "عنوان المحفظة", value: "TPQJS1aNK6QiXvfC9yKtS41f47awYAuv7T" },
     ],
     steps: ["افتح محفظتك (Trust Wallet, Binance…)", "أرسل USDT على الشبكة TRC20 فقط", "أرسل hash المعاملة"],
   },
   bnb: {
     fields: [
       { label: "الشبكة", value: "BEP20 (BSC)" },
-      { label: "عنوان المحفظة", value: "0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "عنوان المحفظة", value: "0xe69071c0e58142e89fa239910436a35e18fe3c5d" },
     ],
     steps: ["افتح محفظتك (Trust Wallet, MetaMask…)", "أرسل BNB على شبكة BSC فقط", "أرسل hash المعاملة"],
   },

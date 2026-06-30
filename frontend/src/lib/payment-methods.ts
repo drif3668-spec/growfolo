@@ -21,7 +21,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     description: "تحويل USDT عبر شبكة TRON",
     fields: [
       { label: "الشبكة", value: "TRC20 (TRON)" },
-      { label: "عنوان المحفظة", value: "TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "عنوان المحفظة", value: "TPQJS1aNK6QiXvfC9yKtS41f47awYAuv7T" },
     ],
     steps: ["افتح محفظتك (Trust Wallet / Binance)", "أرسل USDT على شبكة TRC20 فقط", "انسخ hash المعاملة وأرسل الوصل"],
   },
@@ -35,7 +35,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     description: "تحويل BNB عبر Binance Smart Chain",
     fields: [
       { label: "الشبكة", value: "BEP20 (BSC)" },
-      { label: "عنوان المحفظة", value: "0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "عنوان المحفظة", value: "0xe69071c0e58142e89fa239910436a35e18fe3c5d" },
     ],
     steps: ["افتح محفظتك (Trust Wallet / MetaMask)", "أرسل BNB على شبكة BSC فقط", "أرسل hash المعاملة"],
   },
