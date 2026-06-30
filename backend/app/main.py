@@ -167,13 +167,16 @@ if settings.app_env == "development":
         "http://127.0.0.1:3001",
     ]
 else:
-    # Accept the configured frontend URL plus any Vercel preview domains
-    cors_origins = [settings.frontend_url]
+    cors_origins = [
+        "https://growol.store",
+        "https://www.growol.store",
+        settings.frontend_url,
+    ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",  # covers preview deployments
+    allow_origins=list(dict.fromkeys(cors_origins)),  # deduplicate
+    allow_origin_regex=r"https://.*\.vercel\.app",    # covers preview deployments
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
