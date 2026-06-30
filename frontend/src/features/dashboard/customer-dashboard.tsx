@@ -263,6 +263,12 @@ export function CustomerDashboard() {
             {NAV_ITEMS.find(n => n.section === section)?.label ?? "لوحة التحكم"}
           </h1>
           <div className="flex items-center gap-3">
+            <a
+              href="/"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-all"
+            >
+              ← المتجر
+            </a>
             <button onClick={() => navigate("notifications")} className="relative text-white/50 hover:text-white">
               <Bell size={20} />
               {notifCtx.unreadCount > 0 && (
@@ -527,89 +533,63 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Section: Products
+// Section: Products  (info-only — buying happens in the main store)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ProductsSection() {
-  const { addItem, openSidebar } = useCart();
-  // Show all products from the local store data
-  const displayed = PRODUCTS;
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">المنتجات المتاحة</h2>
-        <a href="/#products" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
-          عرض المتجر الكامل ←
+    <div className="space-y-5">
+      {/* CTA banner */}
+      <div className="glass-panel rounded-3xl p-6 bg-gradient-to-l from-purple-900/20 to-transparent border-purple-500/20 text-center space-y-3">
+        <div className="text-4xl">🛍️</div>
+        <h2 className="text-lg font-black text-white">تصفح المتجر للشراء</h2>
+        <p className="text-sm text-white/55 max-w-sm mx-auto">
+          عمليات الشراء تتم من المتجر الرئيسي. بعد إتمام أي طلب سيظهر تلقائياً في "طلباتي".
+        </p>
+        <a
+          href="/"
+          className="neon-button inline-flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-black text-sm"
+        >
+          <ShoppingBag size={16} />
+          الذهاب إلى المتجر
         </a>
       </div>
 
+      {/* Products preview — info only, no buy buttons */}
+      <h3 className="font-black text-white/70 text-sm">نظرة عامة على المنتجات</h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        {displayed.map(p => (
-          <div
+        {PRODUCTS.map(p => (
+          <a
             key={p.id}
-            className="glass-panel rounded-2xl p-4 space-y-3 hover:border-white/20 transition-all"
+            href="/"
+            className="glass-panel rounded-2xl p-4 space-y-2 hover:border-white/20 transition-all group"
             style={{ borderColor: `${p.accentColor}22` }}
           >
-            {/* Logo + name */}
             <div className="flex items-center gap-3">
               <div
-                className="grid size-11 shrink-0 place-items-center rounded-xl text-xl font-black"
+                className="grid size-10 shrink-0 place-items-center rounded-xl text-lg font-black"
                 style={{ background: `${p.accentColor}22`, border: `1px solid ${p.accentColor}33` }}
               >
                 {p.logo}
               </div>
-              <div className="min-w-0">
-                <p className="font-black text-white text-sm truncate">{p.name}</p>
-                <p className="text-xs text-white/40 truncate">{p.subtitle}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-black text-white text-sm truncate group-hover:text-purple-300 transition-colors">
+                  {p.name}
+                </p>
+                <p className="text-xs text-white/35 truncate">{p.subtitle}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="font-black text-sm" style={{ color: p.accentColor }}>${p.price}</p>
+                <p className="text-[10px] text-white/30 line-through">${p.oldPrice}</p>
               </div>
             </div>
-
-            {/* Price row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-lg font-black" style={{ color: p.accentColor }}>${p.price}</span>
-                <span className="text-xs text-white/30 line-through">${p.oldPrice}</span>
-                <span
-                  className="text-[10px] font-black px-1.5 py-0.5 rounded-lg text-black"
-                  style={{ background: p.accentColor }}
-                >
-                  {p.discount}
-                </span>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  addItem({ id: p.id, name: p.name, price: p.price, logo: p.logo, color: p.accentColor });
-                  openSidebar();
-                }}
-                className="flex-1 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 py-2 text-xs font-semibold text-white/70 hover:text-white transition-colors"
-              >
-                + السلة
-              </button>
-              <a
-                href={`/checkout?product=${encodeURIComponent(p.name)}&price=${p.price}`}
-                className="flex-1 rounded-xl py-2 text-center text-xs font-black text-black transition-all hover:scale-[1.02]"
-                style={{ background: p.accentColor, boxShadow: `0 0 14px ${p.accentColor}40` }}
-              >
-                اشترِ الآن
-              </a>
-            </div>
-          </div>
+          </a>
         ))}
       </div>
 
-      {/* Footer link to homepage store section */}
-      <a
-        href="/#products"
-        className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/3 py-3 text-sm text-white/50 hover:text-white hover:border-white/15 transition-all"
-      >
-        <ShoppingBag size={16} />
-        عرض المتجر الكامل مع التفاصيل
-      </a>
+      <p className="text-center text-xs text-white/30 pt-1">
+        اضغط على أي منتج للانتقال إلى المتجر
+      </p>
     </div>
   );
 }
@@ -626,7 +606,7 @@ function CartSection() {
       <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
         <ShoppingCart size={40} className="mx-auto text-white/20" />
         <p className="text-white/40 text-sm">سلة التسوق فارغة</p>
-        <a href="/products" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
+        <a href="/" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
           تصفح المنتجات
         </a>
       </div>
@@ -687,7 +667,7 @@ function FavoritesSection() {
       <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
         <Heart size={40} className="mx-auto text-white/20" />
         <p className="text-white/40 text-sm">لا توجد منتجات مفضلة بعد</p>
-        <a href="/products" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
+        <a href="/" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
           تصفح المنتجات
         </a>
       </div>
