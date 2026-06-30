@@ -11,6 +11,7 @@ import {
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
 import { useNotifications } from "@/context/notifications-context";
+import { PRODUCTS } from "@/data/products";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -530,55 +531,84 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ProductsSection() {
-  interface Product { id: string; name: string; slug: string; price: number; image_url: string | null; description: string }
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading,  setLoading]  = useState(true);
   const { addItem, openSidebar } = useCart();
-
-  useEffect(() => {
-    fetch(`${API_URL}/api/v1/products`)
-      .then(r => r.json())
-      .then((d: Product[]) => setProducts(Array.isArray(d) ? d : []))
-      .catch(() => {/* silent */})
-      .finally(() => setLoading(false));
-  }, []);
+  // Show all products from the local store data
+  const displayed = PRODUCTS;
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-black text-white">المنتجات المتاحة</h2>
-      {loading && <p className="animate-pulse text-sm text-white/40 py-8 text-center">جارٍ التحميل…</p>}
-      {!loading && products.length === 0 && (
-        <div className="glass-panel rounded-3xl p-12 text-center">
-          <p className="text-white/40 text-sm">لا توجد منتجات حالياً</p>
-        </div>
-      )}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-black text-white">المنتجات المتاحة</h2>
+        <a href="/#products" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+          عرض المتجر الكامل ←
+        </a>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
-        {products.map(p => (
-          <div key={p.id} className="glass-panel rounded-2xl p-5 space-y-3 hover:border-purple-500/30 transition-all">
-            {p.image_url && (
-              <img src={p.image_url} alt={p.name} className="h-12 w-12 rounded-xl object-contain bg-white/5" />
-            )}
-            <div>
-              <p className="font-black text-white">{p.name}</p>
-              {p.description && <p className="text-xs text-white/45 mt-1 line-clamp-2">{p.description}</p>}
+        {displayed.map(p => (
+          <div
+            key={p.id}
+            className="glass-panel rounded-2xl p-4 space-y-3 hover:border-white/20 transition-all"
+            style={{ borderColor: `${p.accentColor}22` }}
+          >
+            {/* Logo + name */}
+            <div className="flex items-center gap-3">
+              <div
+                className="grid size-11 shrink-0 place-items-center rounded-xl text-xl font-black"
+                style={{ background: `${p.accentColor}22`, border: `1px solid ${p.accentColor}33` }}
+              >
+                {p.logo}
+              </div>
+              <div className="min-w-0">
+                <p className="font-black text-white text-sm truncate">{p.name}</p>
+                <p className="text-xs text-white/40 truncate">{p.subtitle}</p>
+              </div>
             </div>
+
+            {/* Price row */}
             <div className="flex items-center justify-between">
-              <span className="text-lg font-black text-lime-400">${p.price}</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-lg font-black" style={{ color: p.accentColor }}>${p.price}</span>
+                <span className="text-xs text-white/30 line-through">${p.oldPrice}</span>
+                <span
+                  className="text-[10px] font-black px-1.5 py-0.5 rounded-lg text-black"
+                  style={{ background: p.accentColor }}
+                >
+                  {p.discount}
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
               <button
                 onClick={() => {
-                  addItem({ id: p.id, name: p.name, price: p.price, logo: p.image_url ?? "G", color: "#a855f7" });
+                  addItem({ id: p.id, name: p.name, price: p.price, logo: p.logo, color: p.accentColor });
                   openSidebar();
                 }}
-                className="rounded-xl bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-black text-white transition-colors"
+                className="flex-1 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 py-2 text-xs font-semibold text-white/70 hover:text-white transition-colors"
               >
-                أضف للسلة
+                + السلة
               </button>
+              <a
+                href={`/checkout?product=${encodeURIComponent(p.name)}&price=${p.price}`}
+                className="flex-1 rounded-xl py-2 text-center text-xs font-black text-black transition-all hover:scale-[1.02]"
+                style={{ background: p.accentColor, boxShadow: `0 0 14px ${p.accentColor}40` }}
+              >
+                اشترِ الآن
+              </a>
             </div>
           </div>
         ))}
       </div>
-      <a href="/products" className="block text-center text-sm text-purple-400 hover:text-purple-300 py-2">
-        عرض جميع المنتجات في صفحة المتجر ←
+
+      {/* Footer link to homepage store section */}
+      <a
+        href="/#products"
+        className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/3 py-3 text-sm text-white/50 hover:text-white hover:border-white/15 transition-all"
+      >
+        <ShoppingBag size={16} />
+        عرض المتجر الكامل مع التفاصيل
       </a>
     </div>
   );

@@ -6,7 +6,7 @@ import { PaymentMethodImage } from "@/components/payments/payment-method-image";
 import { PaymentMethodShowcase } from "@/components/payments/payment-method-showcase";
 import { PAYMENT_METHODS } from "@/lib/payment-methods";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const EXPIRE_MS = 35 * 60 * 1000;
 const LS_KEY = "gf_order_v2";
 
@@ -108,18 +108,34 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
   const [err, setErr] = useState("");
   const [expired, setExpired] = useState(false);
 
-  /* Restore from localStorage */
+  /* Restore from localStorage + pre-fill logged-in user data */
   useEffect(() => {
     const s = load();
-    if (!s) return;
-    setStep(s.step);
-    setOrderId(s.orderId);
-    setCustomer(s.customer);
-    setMethod(s.method);
-    setStartedAt(s.startedAt);
-    setDone(s.done);
-    if (s.startedAt && s.startedAt + EXPIRE_MS < Date.now()) setExpired(true);
-  }, []);
+    if (s) {
+      setStep(s.step);
+      setOrderId(s.orderId);
+      setCustomer(s.customer);
+      setMethod(s.method);
+      setStartedAt(s.startedAt);
+      setDone(s.done);
+      if (s.startedAt && s.startedAt + EXPIRE_MS < Date.now()) setExpired(true);
+    }
+
+    // Pre-fill name+email from logged-in account (only if fields are empty)
+    const token = localStorage.getItem("gf_token");
+    if (!token) return;
+    void fetch(`${API_URL}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then((user: { full_name?: string | null; username?: string | null; email?: string } | null) => {
+        if (!user) return;
+        setCustomer(prev => ({
+          ...prev,
+          name:  prev.name  || (user.full_name ?? user.username ?? ""),
+          email: prev.email || (user.email ?? ""),
+        }));
+      })
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const persist = useCallback((patch: Partial<SavedState>) => {
     const prev = load() ?? { step: 1, orderId: null, product: defaultProduct, customer: EMPTY_CUSTOMER, method: null, startedAt: null, done: false };
@@ -185,12 +201,20 @@ export function CheckoutWizard({ product }: { product?: { name: string; price: n
           سيتم مراجعة إثبات الدفع وتفعيل طلبك خلال دقائق. تحقق من بريدك الإلكتروني.
         </p>
         {orderId && <p className="mt-4 rounded-xl bg-white/5 px-4 py-2 font-mono text-sm text-purple-400">#{orderId.slice(0, 8).toUpperCase()}</p>}
-        <button
-          onClick={() => { clear(); window.location.href = "/"; }}
-          className="neon-button mt-8 rounded-2xl px-10 py-3.5 font-black text-black"
-        >
-          العودة للرئيسية
-        </button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <a
+            href="/dashboard"
+            className="neon-button rounded-2xl px-7 py-3.5 font-black text-black"
+          >
+            متابعة الطلب في حسابي ←
+          </a>
+          <button
+            onClick={() => { clear(); window.location.href = "/"; }}
+            className="rounded-2xl border border-white/15 bg-white/5 px-7 py-3.5 font-black text-white hover:bg-white/10 transition-colors"
+          >
+            العودة للرئيسية
+          </button>
+        </div>
         <div className="mt-8 w-full max-w-5xl px-2">
           <PaymentMethodShowcase />
         </div>
