@@ -151,6 +151,36 @@ def send_otp_email(email: str, name: str, otp: str) -> None:
         print(f"[WARN] send_otp_email failed: {exc}")
 
 
+def send_password_changed_email(email: str, name: str) -> None:
+    """Notify user that their password was changed successfully."""
+    if not settings.resend_api_key:
+        return
+    body = f"""
+    <p style="color:rgba(255,255,255,.75);margin-bottom:18px;line-height:1.7">
+      مرحباً <strong style="color:#fff">{name}</strong>،<br/>
+      تم تغيير كلمة مرور حسابك في <strong style="color:#a855f7">Growfolo</strong> بنجاح.
+    </p>
+    <div class="card" style="text-align:center;padding:24px;margin-bottom:20px">
+      <div style="font-size:32px;margin-bottom:10px">🔒</div>
+      <p style="font-size:15px;font-weight:900;color:#84cc16;margin:0 0 8px">
+        تم تحديث كلمة المرور بنجاح
+      </p>
+      <p style="color:rgba(255,255,255,.45);font-size:12px;margin:0">
+        إذا لم تقم بهذا التغيير، تواصل مع الدعم فوراً
+      </p>
+    </div>
+    <a href="https://growol.store/dashboard" class="btn">الذهاب إلى حسابي</a>"""
+    try:
+        resend.Emails.send({
+            "from": settings.email_from,
+            "to": [email],
+            "subject": "🔒 تم تغيير كلمة مرور حسابك في Growfolo",
+            "html": _html("تم تغيير كلمة المرور", body),
+        })
+    except Exception as exc:
+        print(f"[WARN] send_password_changed_email failed: {exc}")
+
+
 def send_welcome_email(email: str, name: str) -> None:
     """Send welcome email after successful OTP verification."""
     if not settings.resend_api_key:

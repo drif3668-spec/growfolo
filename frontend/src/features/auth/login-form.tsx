@@ -146,13 +146,18 @@ export function LoginForm() {
           )}
         </button>
 
-        {/* Register link */}
-        <p className="mt-5 text-center text-sm text-white/45">
-          ليس لديك حساب؟{" "}
-          <a href="/register" className="font-bold text-purple-400 hover:text-purple-300">
-            إنشاء حساب
+        {/* Forgot password + register link */}
+        <div className="mt-5 flex flex-col items-center gap-2 text-center text-sm text-white/45">
+          <a href="/forgot-password" className="font-semibold text-white/50 hover:text-purple-400 transition-colors">
+            نسيت كلمة المرور؟
           </a>
-        </p>
+          <span>
+            ليس لديك حساب؟{" "}
+            <a href="/register" className="font-bold text-purple-400 hover:text-purple-300">
+              إنشاء حساب
+            </a>
+          </span>
+        </div>
 
         <a
           href="/"

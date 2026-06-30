@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -20,3 +20,6 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     otp_code: Mapped[str | None] = mapped_column(String(6), nullable=True)
     otp_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Profile enhancements
+    profile_picture: Mapped[str | None] = mapped_column(Text, nullable=True)  # base64 or URL
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

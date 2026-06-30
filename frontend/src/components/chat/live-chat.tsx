@@ -399,6 +399,7 @@ export function LiveChat() {
         `}</style>
         <button
           onClick={openChat}
+          data-chat-trigger
           aria-label="فتح الدعم"
           className="fixed bottom-6 left-6 z-50 grid size-[62px] place-items-center transition-transform duration-200 hover:scale-110 active:scale-95"
           style={{

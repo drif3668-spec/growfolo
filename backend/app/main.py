@@ -17,17 +17,19 @@ def _migrate_add_columns() -> None:
     from sqlalchemy import text
 
     db = SessionLocal()
+    pg_stmts = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(6)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP",
+        # Back-fill created_at for existing rows that don't have it yet
+        "UPDATE users SET created_at = NOW() WHERE created_at IS NULL",
+    ]
     try:
         if settings.is_postgres:
-            db.execute(text(
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE"
-            ))
-            db.execute(text(
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(6)"
-            ))
-            db.execute(text(
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP"
-            ))
+            for stmt in pg_stmts:
+                db.execute(text(stmt))
             db.commit()
         # SQLite: create_all already handles new columns for fresh databases
     except Exception as exc:
