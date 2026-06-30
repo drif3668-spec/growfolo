@@ -380,12 +380,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve uploaded files. On Vercel the filesystem is read-only except /tmp,
-# so the directory may land in /tmp/uploads — mount it gracefully.
+# Serve uploaded files. upload_path already falls back to /tmp/uploads on
+# read-only filesystems (Vercel). StaticFiles raises RuntimeError when the
+# directory is empty on cold starts; mount once it exists and is non-empty,
+# falling back to an always-succeed approach via a custom route.
+_upload_dir = settings.upload_path
+_upload_dir.mkdir(parents=True, exist_ok=True)
 try:
-    app.mount("/uploads", StaticFiles(directory=str(settings.upload_path)), name="uploads")
+    app.mount("/uploads", StaticFiles(directory=str(_upload_dir), check_dir=False), name="uploads")
 except Exception:
-    pass  # skip static mount in serverless environments
+    # Last-resort: serve files manually so the route always works
+    from fastapi.responses import FileResponse
+    @app.get("/uploads/{filename:path}")
+    def serve_upload(filename: str):
+        from fastapi import HTTPException as _HTTPException
+        import mimetypes
+        target = _upload_dir / filename
+        if not target.exists():
+            raise _HTTPException(status_code=404, detail="File not found")
+        mime, _ = mimetypes.guess_type(str(target))
+        return FileResponse(str(target), media_type=mime or "application/octet-stream")
 
 app.include_router(api_router, prefix="/api/v1")
 

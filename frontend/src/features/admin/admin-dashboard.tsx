@@ -5,7 +5,7 @@ import {
   MessageCircle, Package, ReceiptText, Send, ShieldCheck,
   Users, CheckCircle, RefreshCw, Eye, Clock, ExternalLink,
   ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, ToggleLeft, ToggleRight, Pencil, X,
-  Gift, Tag, Percent, Copy, Truck, BookOpen, Star,
+  Gift, Tag, Percent, Copy, Truck, BookOpen, Star, Download, ZoomIn,
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -95,6 +95,23 @@ function getProofUrls(order: Order): string[] {
     if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
   } catch {}
   return [order.payment_proof_url];
+}
+
+function getFileType(url: string): "image" | "pdf" | "unknown" {
+  const lower = url.toLowerCase();
+  if (/\.(jpg|jpeg|png|gif|webp|bmp|avif|svg)(\?|$)/.test(lower)) return "image";
+  if (/\.pdf(\?|$)/.test(lower)) return "pdf";
+  return "unknown";
+}
+
+function getFilename(url: string): string {
+  return decodeURIComponent(url.split("/").pop()?.split("?")[0] ?? url);
+}
+
+function buildProofUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+  return base + url;
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -192,6 +209,7 @@ export function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [proofModal, setProofModal] = useState<string | null>(null);
   const [statusNote, setStatusNote] = useState("");
   const [updating, setUpdating] = useState(false);
   const [trackingStage, setTrackingStage] = useState(1);
@@ -633,17 +651,61 @@ export function AdminDashboard() {
                     {proofUrls.length > 0 && (
                       <div className="mb-4 grid gap-2">
                         <p className="text-xs font-black text-white/45">إيصالات الدفع ({proofUrls.length})</p>
-                        {proofUrls.map((url, index) => (
-                          <a
-                            key={`${url}-${index}`}
-                            href={`${API_URL}${url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 rounded-2xl border border-lime-500/25 bg-lime-500/8 px-4 py-3 text-sm font-semibold text-lime-400 hover:bg-lime-500/15"
-                          >
-                            <ExternalLink size={14} /> عرض إيصال الدفع {index + 1}
-                          </a>
-                        ))}
+                        {proofUrls.map((url, index) => {
+                          const fullUrl = buildProofUrl(url);
+                          const type = getFileType(url);
+                          const filename = getFilename(url);
+                          return (
+                            <div key={`${url}-${index}`} className="overflow-hidden rounded-2xl border border-lime-500/20 bg-lime-500/5">
+                              {type === "image" && (
+                                <button
+                                  onClick={() => setProofModal(fullUrl)}
+                                  className="block w-full cursor-zoom-in overflow-hidden"
+                                  title="انقر للتكبير"
+                                >
+                                  <img
+                                    src={fullUrl}
+                                    alt={`إيصال ${index + 1}`}
+                                    className="h-32 w-full object-cover transition-transform hover:scale-105"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                  />
+                                </button>
+                              )}
+                              {type === "pdf" && (
+                                <div className="flex items-center justify-center h-16 bg-red-500/8 border-b border-lime-500/10">
+                                  <span className="text-xs text-red-400 font-bold">PDF</span>
+                                </div>
+                              )}
+                              <div className="p-3">
+                                <p className="mb-2 truncate text-[10px] text-white/35 font-mono">{filename}</p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setProofModal(fullUrl)}
+                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-lime-500/15 px-2 py-2 text-xs font-bold text-lime-400 hover:bg-lime-500/25 transition-colors"
+                                  >
+                                    <ZoomIn size={11} /> عرض
+                                  </button>
+                                  <a
+                                    href={fullUrl}
+                                    download={filename}
+                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/8 px-2 py-2 text-xs font-bold text-white/60 hover:bg-white/15 transition-colors"
+                                  >
+                                    <Download size={11} /> تنزيل
+                                  </a>
+                                  <a
+                                    href={fullUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center rounded-xl bg-white/5 px-2.5 py-2 text-white/40 hover:bg-white/10 transition-colors"
+                                    title="فتح في تبويب جديد"
+                                  >
+                                    <ExternalLink size={11} />
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -1328,6 +1390,79 @@ export function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* ── Proof viewer modal ───────────────────────────────────────── */}
+      {proofModal && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/92 p-4"
+          onClick={() => setProofModal(null)}
+        >
+          <div
+            className="flex w-full max-w-4xl flex-col gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Toolbar */}
+            <div className="flex items-center justify-between gap-3">
+              <span className="truncate text-xs font-mono text-white/40">{getFilename(proofModal)}</span>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={proofModal}
+                  download={getFilename(proofModal)}
+                  className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Download size={13} /> تنزيل
+                </a>
+                <a
+                  href={proofModal}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-xl bg-lime-500/20 px-4 py-2 text-xs font-bold text-lime-400 hover:bg-lime-500/30 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink size={13} /> فتح في تبويب
+                </a>
+                <button
+                  onClick={() => setProofModal(null)}
+                  className="grid size-9 place-items-center rounded-xl bg-white/10 text-white hover:bg-red-500/30 hover:text-red-400 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            {/* Content */}
+            <div className="flex max-h-[80vh] items-center justify-center overflow-auto rounded-2xl bg-black/40">
+              {getFileType(proofModal) === "image" ? (
+                <img
+                  src={proofModal}
+                  alt="إثبات الدفع"
+                  className="max-h-[78vh] max-w-full rounded-2xl object-contain"
+                  style={{ boxShadow: "0 0 80px rgba(0,0,0,0.9)" }}
+                />
+              ) : getFileType(proofModal) === "pdf" ? (
+                <iframe
+                  src={proofModal}
+                  title="إثبات الدفع PDF"
+                  className="h-[78vh] w-full rounded-2xl"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-4 p-16 text-white/40">
+                  <ImageIcon size={48} />
+                  <p className="text-sm">لا يمكن معاينة هذا الملف مباشرة.</p>
+                  <a
+                    href={proofModal}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-bold text-lime-400 underline"
+                  >
+                    افتح الملف في تبويب جديد
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
