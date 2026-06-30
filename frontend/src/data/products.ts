@@ -11,6 +11,7 @@ export type Product = {
   accentColor: string;    // hex for dynamic CSS
   description: string;
   fullDescription?: string;
+  duration?: string;      // e.g. "سنة"
   features: string[];
   specs: { label: string; value: string }[];
   badge?: string;
@@ -61,12 +62,13 @@ export const PRODUCTS: Product[] = [
   {
     id: "chatgpt-plus",
     name: "ChatGPT Plus",
-    subtitle: "GPT-4o Monthly Access",
+    subtitle: "GPT-4o Yearly Access",
     logo: "◎",
-    price: 5.99,
-    oldPrice: 9.99,
-    discount: "-40%",
+    price: 29,
+    oldPrice: 49.99,
+    discount: "-42%",
     buyers: "12K",
+    duration: "سنة",
     color: "from-emerald-400 to-teal-600",
     accentColor: "#10b981",
     description:
@@ -96,10 +98,11 @@ export const PRODUCTS: Product[] = [
     name: "Cursor Pro",
     subtitle: "AI-Powered Code Editor",
     logo: "⚡",
-    price: 8.99,
-    oldPrice: 19.99,
+    price: 45,
+    oldPrice: 99,
     discount: "-55%",
     buyers: "6K",
+    duration: "سنة",
     color: "from-blue-500 to-violet-700",
     accentColor: "#6366f1",
     description:
@@ -162,10 +165,11 @@ export const PRODUCTS: Product[] = [
     name: "Netflix Premium",
     subtitle: "4K Ultra HD Streaming",
     logo: "▶",
-    price: 4.99,
-    oldPrice: 9.99,
+    price: 25,
+    oldPrice: 49.99,
     discount: "-50%",
     buyers: "15K",
+    duration: "سنة",
     color: "from-red-900 via-red-700 to-red-600",
     accentColor: "#ef4444",
     description:

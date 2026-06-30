@@ -238,6 +238,9 @@ function ShowcaseCard({ product, isCenter, onAddToCart }: { product: Product; is
           ))}
           <span className="text-xs text-white/60">{product.rating} ({product.reviews})</span>
         </div>
+        {product.duration && (
+          <p className="mt-1 text-center text-xs font-semibold text-white/50">المدة: {product.duration}</p>
+        )}
 
         {/* Price */}
         <div className="mt-4 text-center">
