@@ -486,7 +486,7 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
           <p className="text-white/40 text-sm">
             {purchased ? "لا توجد مشتريات مفعّلة بعد" : "لم تقم بأي طلب حتى الآن"}
           </p>
-          <a href="/products" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
+          <a href="/#products" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
             تصفح المنتجات
           </a>
         </div>

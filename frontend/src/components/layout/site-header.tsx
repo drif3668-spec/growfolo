@@ -2,16 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Search, ShoppingCart, Sparkle, UserRound, ChevronDown } from "lucide-react";
+import { Menu, Search, ShoppingCart, Sparkle, UserRound, ChevronDown, LayoutDashboard } from "lucide-react";
 import { SidebarMenu } from "@/components/layout/sidebar-menu";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCart } from "@/context/cart-context";
 import { useCurrency } from "@/context/currency-context";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+interface AuthUser { name: string | null; is_admin: boolean; picture: string | null }
+
 export function SiteHeader() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currencyDropOpen, setCurrencyDropOpen] = useState(false);
   const currencyDropRef = useRef<HTMLDivElement>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   const { count, openSidebar } = useCart();
   const { currencies, selected, setSelected } = useCurrency();
@@ -24,6 +29,18 @@ export function SiteHeader() {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Load logged-in user info from token
+  useEffect(() => {
+    const token = localStorage.getItem("gf_token");
+    if (!token) return;
+    void fetch(`${API_URL}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then((u: { full_name?: string | null; username?: string | null; is_admin?: boolean; profile_picture?: string | null } | null) => {
+        if (u) setAuthUser({ name: u.full_name ?? u.username ?? null, is_admin: u.is_admin ?? false, picture: u.profile_picture ?? null });
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -113,13 +130,35 @@ export function SiteHeader() {
               </span>
             </button>
 
-            <Link
-              href="/login"
-              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-purple-300 transition-colors"
-            >
-              <UserRound size={24} />
-              <span className="hidden sm:inline">تسجيل الدخول</span>
-            </Link>
+            {authUser ? (
+              /* Logged-in: show avatar + dashboard link */
+              <a
+                href={authUser.is_admin ? "/admin" : "/dashboard"}
+                className="flex items-center gap-2 rounded-2xl border border-purple-500/35 bg-purple-500/12 px-3 py-2 text-sm font-semibold text-purple-300 hover:bg-purple-500/22 transition-colors"
+                aria-label="حسابي"
+              >
+                {authUser.picture ? (
+                  <img src={authUser.picture} alt="avatar" className="size-6 rounded-full object-cover" />
+                ) : (
+                  <div className="grid size-6 place-items-center rounded-full bg-purple-600 text-[10px] font-black text-white">
+                    {(authUser.name ?? "U").slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden sm:inline max-w-[90px] truncate">
+                  {authUser.name ?? "حسابي"}
+                </span>
+                <LayoutDashboard size={14} className="hidden sm:block opacity-60" />
+              </a>
+            ) : (
+              /* Guest: show login link */
+              <Link
+                href="/login"
+                className="flex items-center gap-2 text-sm font-semibold text-white hover:text-purple-300 transition-colors"
+              >
+                <UserRound size={24} />
+                <span className="hidden sm:inline">تسجيل الدخول</span>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
