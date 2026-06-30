@@ -7,6 +7,8 @@ import { ArrowRight, Copy, Check, Upload, ExternalLink } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PaymentMethodImage } from "@/components/payments/payment-method-image";
 
+const FLEXY_PHONE = "0654103330";
+
 type Method = {
   id: string;
   label: string;
@@ -76,8 +78,12 @@ const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }
     steps: ["افتح تطبيق BaridiMob", "اختر تحويل CCP", "أدخل رقم الحساب والمفتاح", "أرسل صورة التأكيد"],
   },
   flexy: {
-    fields: [{ label: "رقم الهاتف", value: "07XXXXXXXX (Mobilis)" }],
-    steps: ["اشترِ رصيد Flexy من أي نقطة بيع", "أرسل الرصيد على الرقم أعلاه", "أرسل صورة إثبات الإرسال"],
+    fields: [{ label: "رقم الهاتف", value: `${FLEXY_PHONE} (Mobilis)` }],
+    steps: [
+      "لا ترسل أكثر من 15$ في العملية الواحدة",
+      "قسّم المبلغ إلى عدة عمليات إذا كان طلبك أكبر من 15$",
+      "ارفع كل إيصالات الدفع لإكمال مراجعة الطلب",
+    ],
   },
   usdt: {
     fields: [
@@ -214,6 +220,32 @@ export default function PaymentPage() {
                 ))}
               </ol>
             </div>
+
+            {selected === "flexy" && (
+              <div className="mb-5 grid gap-3">
+                <div className="rounded-2xl border border-lime-500/30 bg-lime-500/10 px-4 py-3">
+                  <p className="text-sm font-black text-lime-300">تنبيه Flexy Mobilis</p>
+                  <p className="mt-2 text-sm leading-7 text-white/70">
+                    تنبيه: لا يمكنك إرسال أكثر من 15 دولارًا في العملية الواحدة عبر Flexy Mobilis. إذا كانت قيمة طلبك أكبر، يرجى تقسيم المبلغ إلى عدة عمليات، ثم رفع جميع إيصالات الدفع لإكمال الطلب.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+                  <p className="text-xs text-white/45">سعر الصرف الحالي</p>
+                  <p className="mt-1 text-sm font-black text-white">250 دينار جزائري = 1 دولار أمريكي</p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    { src: "/payment-guides/flexy/mobilis-number.jpg", alt: "رقم Flexy Mobilis" },
+                    { src: "/payment-guides/flexy/mobilis-receipt-1.jpg", alt: "مثال إيصال Flexy" },
+                    { src: "/payment-guides/flexy/mobilis-receipt-2.jpg", alt: "مثال إيصال Flexy" },
+                  ].map((image) => (
+                    <div key={image.src} className="overflow-hidden rounded-2xl border border-lime-500/20 bg-black/35">
+                      <img src={image.src} alt={image.alt} className="h-36 w-full object-cover object-center" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Proof Upload */}
             <label className="block cursor-pointer">

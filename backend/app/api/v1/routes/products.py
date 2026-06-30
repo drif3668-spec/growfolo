@@ -3,7 +3,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -115,10 +115,15 @@ def upload_image(
     return product
 
 
-@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: str, db: Session = Depends(get_db)) -> None:
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_product(product_id: str, db: Session = Depends(get_db)) -> Response:
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="المنتج غير موجود")
     db.delete(product)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

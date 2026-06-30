@@ -8,6 +8,10 @@ import { PAYMENT_METHOD_MAP } from "@/lib/payment-methods";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TIMER_MINUTES = 45;
+const FLEXY_PHONE = "0654103330";
+const FLEXY_MAX_PAYMENT_USD = 15;
+const FLEXY_MAX_RECEIPTS = 4;
+const FLEXY_EXCHANGE_RATE_DZD = 250;
 
 const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
   usdt: [
@@ -23,7 +27,7 @@ const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
     { label: "الاسم", value: "Growfolo Store" },
   ],
   mobilis: [
-    { label: "رقم Mobilis", value: "0770 123 456" },
+    { label: "رقم Mobilis", value: FLEXY_PHONE },
   ],
   vodafone: [
     { label: "رقم Vodafone Cash", value: "0100 123 4567" },
@@ -89,6 +93,7 @@ export default function PayPage() {
   const [country, setCountry] = useState("");
   const [notes, setNotes] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [flexyProofFiles, setFlexyProofFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
 
   // Submission state
@@ -164,7 +169,13 @@ export default function PayPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!proofFile) { setSubmitError("يرجى رفع إثبات الدفع"); return; }
+    const isMobilis = payMethod === "mobilis";
+    const proofsToUpload = isMobilis ? flexyProofFiles : (proofFile ? [proofFile] : []);
+    if (proofsToUpload.length === 0) { setSubmitError("يرجى رفع إثبات الدفع"); return; }
+    if (isMobilis && proofsToUpload.length > FLEXY_MAX_RECEIPTS) {
+      setSubmitError("يمكنك رفع 4 إيصالات Flexy Mobilis كحد أقصى");
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
 
@@ -197,7 +208,7 @@ export default function PayPage() {
 
       // 2. Upload proof
       const form = new FormData();
-      form.append("file", proofFile);
+      proofsToUpload.forEach((proof) => form.append(isMobilis ? "files" : "file", proof));
       const proofRes = await fetch(`${API_URL}/api/v1/store-orders/${order.id}/proof`, {
         method: "POST",
         body: form,
@@ -239,6 +250,10 @@ export default function PayPage() {
   }
 
   const selectedMethod = PAYMENT_METHOD_MAP[payMethod] ?? PAYMENT_METHOD_MAP.usdt;
+  const isMobilis = payMethod === "mobilis";
+  const flexyTotal = checkoutData?.total ?? 0;
+  const flexySuggestedParts = Math.max(1, Math.ceil(flexyTotal / FLEXY_MAX_PAYMENT_USD));
+  const flexyDzdTotal = flexyTotal * FLEXY_EXCHANGE_RATE_DZD;
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black text-white" dir="rtl">
@@ -343,6 +358,45 @@ export default function PayPage() {
               </div>
             ))}
           </div>
+          {isMobilis && (
+            <div className="relative mt-5 grid gap-4">
+              <div className="rounded-2xl border border-lime-500/30 bg-lime-500/10 p-4">
+                <p className="text-sm font-black text-lime-300">تنبيه مهم قبل الدفع</p>
+                <p className="mt-2 text-sm leading-7 text-white/70">
+                  تنبيه: لا يمكنك إرسال أكثر من 15 دولارًا في العملية الواحدة عبر Flexy Mobilis. إذا كانت قيمة طلبك أكبر، يرجى تقسيم المبلغ إلى عدة عمليات، ثم رفع جميع إيصالات الدفع لإكمال الطلب.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                  <p className="text-xs text-white/40">سعر الصرف الحالي</p>
+                  <p className="mt-1 text-sm font-black text-white">250 دينار جزائري = 1 دولار أمريكي</p>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                  <p className="text-xs text-white/40">حد العملية الواحدة</p>
+                  <p className="mt-1 text-sm font-black text-lime-300">15$ كحد أقصى</p>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                  <p className="text-xs text-white/40">عدد الدفعات المقترح</p>
+                  <p className="mt-1 text-sm font-black text-purple-300">{Math.min(flexySuggestedParts, FLEXY_MAX_RECEIPTS)} دفعة</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-4">
+                <p className="text-xs text-white/40">القيمة التقريبية بالدينار</p>
+                <p className="mt-1 text-2xl font-black text-white">{flexyDzdTotal.toLocaleString("fr-DZ")} DZD</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr_0.8fr]">
+                {[
+                  { src: "/payment-guides/flexy/mobilis-number.jpg", alt: "رقم Flexy Mobilis الجديد" },
+                  { src: "/payment-guides/flexy/mobilis-receipt-1.jpg", alt: "مثال إيصال Flexy Mobilis" },
+                  { src: "/payment-guides/flexy/mobilis-receipt-2.jpg", alt: "مثال إيصال Flexy Mobilis آخر" },
+                ].map((image) => (
+                  <div key={image.src} className="overflow-hidden rounded-2xl border border-lime-500/20 bg-black/35">
+                    <img src={image.src} alt={image.alt} className="h-44 w-full object-cover object-center sm:h-52" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Amount to send */}
@@ -433,32 +487,82 @@ export default function PayPage() {
           {/* Proof upload */}
           <div className="glass-card p-6">
             <h2 className="mb-4 text-base font-black text-white">إثبات الدفع</h2>
-            <label
-              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) setProofFile(f); }}
-              className={`flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-6 text-center transition-all ${dragOver ? "border-purple-500 bg-purple-500/10" : proofFile ? "border-green-500/50 bg-green-500/5" : "border-white/15 bg-white/3 hover:border-white/30"}`}
-            >
-              {proofFile ? (
-                <>
-                  <Check size={28} className="text-green-400" />
-                  <p className="text-sm font-bold text-green-400">{proofFile.name}</p>
-                  <p className="text-xs text-white/40">انقر لتغيير الملف</p>
-                </>
-              ) : (
-                <>
+            {isMobilis ? (
+              <div className="grid gap-3">
+                <p className="rounded-2xl border border-lime-500/20 bg-lime-500/8 px-4 py-3 text-sm leading-7 text-white/70">
+                  يمكنك رفع حتى 4 إيصالات Flexy Mobilis. ارفع كل إيصال بعد كل عملية تحويل منفصلة.
+                </p>
+                <label
+                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={e => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    const incoming = Array.from(e.dataTransfer.files).slice(0, FLEXY_MAX_RECEIPTS - flexyProofFiles.length);
+                    setFlexyProofFiles((prev) => [...prev, ...incoming].slice(0, FLEXY_MAX_RECEIPTS));
+                  }}
+                  className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-6 text-center transition-all ${dragOver ? "border-purple-500 bg-purple-500/10" : flexyProofFiles.length ? "border-green-500/50 bg-green-500/5" : "border-white/15 bg-white/3 hover:border-white/30"}`}
+                >
                   <Upload size={28} className="text-white/40" />
-                  <p className="text-sm font-bold text-white/60">اسحب وأفلت إثبات الدفع هنا</p>
-                  <p className="text-xs text-white/30">أو انقر للاختيار · صورة أو PDF</p>
-                </>
-              )}
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                className="sr-only"
-                onChange={e => { const f = e.target.files?.[0]; if (f) setProofFile(f); }}
-              />
-            </label>
+                  <p className="text-sm font-bold text-white/60">اضغط أو اسحب إيصال Flexy Mobilis</p>
+                  <p className="text-xs text-white/30">تم رفع {flexyProofFiles.length} من {FLEXY_MAX_RECEIPTS}</p>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    className="sr-only"
+                    multiple
+                    onChange={e => {
+                      const incoming = Array.from(e.target.files ?? []).slice(0, FLEXY_MAX_RECEIPTS - flexyProofFiles.length);
+                      setFlexyProofFiles((prev) => [...prev, ...incoming].slice(0, FLEXY_MAX_RECEIPTS));
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+                {flexyProofFiles.length > 0 && (
+                  <div className="grid gap-2">
+                    {flexyProofFiles.map((file, index) => (
+                      <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/5 px-3 py-2">
+                        <span className="truncate text-sm font-semibold text-lime-400">إيصال {index + 1}: {file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setFlexyProofFiles((prev) => prev.filter((_, i) => i !== index))}
+                          className="rounded-lg bg-red-500/10 px-2 py-1 text-xs font-bold text-red-300 hover:bg-red-500/20"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <label
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) setProofFile(f); }}
+                className={`flex min-h-36 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-6 text-center transition-all ${dragOver ? "border-purple-500 bg-purple-500/10" : proofFile ? "border-green-500/50 bg-green-500/5" : "border-white/15 bg-white/3 hover:border-white/30"}`}
+              >
+                {proofFile ? (
+                  <>
+                    <Check size={28} className="text-green-400" />
+                    <p className="text-sm font-bold text-green-400">{proofFile.name}</p>
+                    <p className="text-xs text-white/40">انقر لتغيير الملف</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={28} className="text-white/40" />
+                    <p className="text-sm font-bold text-white/60">اسحب وأفلت إثبات الدفع هنا</p>
+                    <p className="text-xs text-white/30">أو انقر للاختيار · صورة أو PDF</p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="sr-only"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) setProofFile(f); }}
+                />
+              </label>
+            )}
           </div>
 
           {submitError && (
@@ -470,7 +574,7 @@ export default function PayPage() {
           {/* Submit button */}
           <button
             type="submit"
-            disabled={submitting || expired}
+            disabled={submitting || expired || (isMobilis ? flexyProofFiles.length === 0 : !proofFile)}
             className="neon-button w-full rounded-2xl py-5 text-lg font-black text-black disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ boxShadow: "0 0 40px rgba(168,85,247,0.5)" }}
           >

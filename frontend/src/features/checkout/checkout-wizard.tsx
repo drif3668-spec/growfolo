@@ -10,6 +10,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const EXPIRE_MS_LEGACY = 35 * 60 * 1000;
 const LS_KEY = "gf_order_v2";
 const WA_NUMBER = "213779012833";
+const FLEXY_MAX_RECEIPTS = 4;
+const FLEXY_MAX_PAYMENT_USD = 15;
+const FLEXY_EXCHANGE_RATE_DZD = 250;
 
 /* ── Full countries list ────────────────────────────────────────────────── */
 const COUNTRIES = [
@@ -267,6 +270,7 @@ export function CheckoutWizard({
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [proof,     setProof]     = useState<File | null>(null);
+  const [flexyProofs, setFlexyProofs] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [done,      setDone]      = useState(false);
   const [err,       setErr]       = useState("");
@@ -342,11 +346,17 @@ export function CheckoutWizard({
 
   /* ── Submit standard proof upload ───────────────────────────────────── */
   const submitProof = async () => {
-    if (!proof || !orderId) return;
+    const isMobilis = method === "mobilis";
+    const proofs = isMobilis ? flexyProofs : (proof ? [proof] : []);
+    if (proofs.length === 0 || !orderId) return;
+    if (isMobilis && proofs.length > FLEXY_MAX_RECEIPTS) {
+      setErr("يمكنك رفع 4 إيصالات Flexy Mobilis كحد أقصى");
+      return;
+    }
     setUploading(true);
     try {
       const fd = new FormData();
-      fd.append("file", proof);
+      proofs.forEach((proofFile) => fd.append(isMobilis ? "files" : "file", proofFile));
       const res = await fetch(`${API_URL}/api/v1/store-orders/${orderId}/proof`, { method: "POST", body: fd });
       if (!res.ok) throw new Error();
       setDone(true);
@@ -364,6 +374,7 @@ export function CheckoutWizard({
 
   const selectedMethod = PAYMENT_METHODS.find((m) => m.id === method);
   const isWhatsApp     = method === "whatsapp";
+  const isMobilis      = method === "mobilis";
 
   /* ── DONE screen ───────────────────────────────────────────────────── */
   if (done) {
@@ -606,6 +617,42 @@ export function CheckoutWizard({
             </div>
           </div>
 
+          {isMobilis && (
+            <div className="mb-5 grid gap-3">
+              <div className="rounded-2xl border border-lime-500/30 bg-lime-500/10 px-4 py-3">
+                <p className="text-sm font-black text-lime-300">تنبيه Flexy Mobilis</p>
+                <p className="mt-2 text-sm leading-7 text-white/70">
+                  تنبيه: لا يمكنك إرسال أكثر من 15 دولارًا في العملية الواحدة عبر Flexy Mobilis. إذا كانت قيمة طلبك أكبر، يرجى تقسيم المبلغ إلى عدة عمليات، ثم رفع جميع إيصالات الدفع لإكمال الطلب.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+                  <p className="text-xs text-white/45">سعر الصرف الحالي</p>
+                  <p className="mt-1 text-sm font-black text-white">250 DZD = 1 USD</p>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+                  <p className="text-xs text-white/45">حد العملية الواحدة</p>
+                  <p className="mt-1 text-sm font-black text-lime-300">{FLEXY_MAX_PAYMENT_USD}$</p>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
+                  <p className="text-xs text-white/45">المبلغ بالدينار</p>
+                  <p className="mt-1 text-sm font-black text-purple-300">{(defaultProduct.price * FLEXY_EXCHANGE_RATE_DZD).toLocaleString("fr-DZ")} DZD</p>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { src: "/payment-guides/flexy/mobilis-number.jpg", alt: "رقم Flexy Mobilis" },
+                  { src: "/payment-guides/flexy/mobilis-receipt-1.jpg", alt: "مثال إيصال Flexy" },
+                  { src: "/payment-guides/flexy/mobilis-receipt-2.jpg", alt: "مثال إيصال Flexy" },
+                ].map((image) => (
+                  <div key={image.src} className="overflow-hidden rounded-2xl border border-lime-500/20 bg-black/35">
+                    <img src={image.src} alt={image.alt} className="h-36 w-full object-cover object-center" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Steps */}
           <div className="mb-5">
             <p className="mb-2 text-xs font-bold text-white/50">خطوات الدفع</p>
@@ -620,21 +667,53 @@ export function CheckoutWizard({
           </div>
 
           {/* Proof upload */}
-          <label className="block cursor-pointer">
-            <p className="mb-2 text-sm font-bold text-white/75">رفع إثبات الدفع *</p>
-            <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${proof ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
-              {proof ? (
-                <><Check size={22} className="text-lime-400" /><p className="text-sm font-semibold text-lime-400">{proof.name}</p><p className="text-xs text-white/35">اضغط لتغيير الملف</p></>
-              ) : (
-                <><Upload size={22} className="text-white/30" /><p className="text-sm text-white/55">اسحب الصورة هنا أو اضغط للرفع</p><p className="text-xs text-white/30">JPG · PNG · PDF</p></>
-              )}
-              <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
+          {isMobilis ? (
+            <div className="grid gap-3">
+              <p className="mb-1 text-sm font-bold text-white/75">رفع إيصالات Flexy Mobilis *</p>
+              <label className="block cursor-pointer">
+                <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${flexyProofs.length ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
+                  <Upload size={22} className="text-white/30" />
+                  <p className="text-sm text-white/55">ارفع الإيصالات واحدًا تلو الآخر أو دفعة واحدة</p>
+                  <p className="text-xs text-white/30">تم رفع {flexyProofs.length} من {FLEXY_MAX_RECEIPTS}</p>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => {
+                      const incoming = Array.from(e.target.files ?? []).slice(0, FLEXY_MAX_RECEIPTS - flexyProofs.length);
+                      setFlexyProofs((prev) => [...prev, ...incoming].slice(0, FLEXY_MAX_RECEIPTS));
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </div>
+              </label>
+              {flexyProofs.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/5 px-3 py-2">
+                  <span className="truncate text-sm font-semibold text-lime-400">إيصال {index + 1}: {file.name}</span>
+                  <button type="button" onClick={() => setFlexyProofs((prev) => prev.filter((_, i) => i !== index))} className="rounded-lg bg-red-500/10 px-2 py-1 text-xs font-bold text-red-300">
+                    حذف
+                  </button>
+                </div>
+              ))}
             </div>
-          </label>
+          ) : (
+            <label className="block cursor-pointer">
+              <p className="mb-2 text-sm font-bold text-white/75">رفع إثبات الدفع *</p>
+              <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${proof ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
+                {proof ? (
+                  <><Check size={22} className="text-lime-400" /><p className="text-sm font-semibold text-lime-400">{proof.name}</p><p className="text-xs text-white/35">اضغط لتغيير الملف</p></>
+                ) : (
+                  <><Upload size={22} className="text-white/30" /><p className="text-sm text-white/55">اسحب الصورة هنا أو اضغط للرفع</p><p className="text-xs text-white/30">JPG · PNG · PDF</p></>
+                )}
+                <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
+              </div>
+            </label>
+          )}
 
           {err && <p className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">{err}</p>}
 
-          <button onClick={submitProof} disabled={!proof || uploading} className="neon-button mt-5 w-full rounded-2xl py-4 font-black text-black disabled:opacity-50">
+          <button onClick={submitProof} disabled={(isMobilis ? flexyProofs.length === 0 : !proof) || uploading} className="neon-button mt-5 w-full rounded-2xl py-4 font-black text-black disabled:opacity-50">
             {uploading ? "جارٍ الرفع..." : "تم الدفع ✓"}
           </button>
 

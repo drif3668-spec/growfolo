@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import shutil
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -57,6 +58,9 @@ class OrderOut(BaseModel):
     product_price: float
     payment_method: str | None
     payment_proof_url: str | None
+    payment_proof_urls: list[str] = Field(default_factory=list)
+    payment_parts_count: int = 0
+    payment_total_paid: float = 0
     status: str
     admin_notes: str | None
     tracking_stage: int
@@ -152,20 +156,48 @@ def get_order(order_id: str, db: Session = Depends(get_db)) -> Order:
     return order
 
 
+def _existing_proof_urls(order: Order) -> list[str]:
+    return order.payment_proof_urls
+
+
 @router.post("/{order_id}/proof", response_model=OrderOut)
-def upload_proof(order_id: str, file: UploadFile = File(...), db: Session = Depends(get_db)) -> Order:
+def upload_proof(
+    order_id: str,
+    files: list[UploadFile] | None = File(default=None),
+    file: UploadFile | None = File(None),
+    db: Session = Depends(get_db),
+) -> Order:
     order = db.get(Order, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
 
-    ext = Path(file.filename or "proof.jpg").suffix or ".jpg"
-    filename = f"proof_{order_id}{ext}"
-    dest = settings.upload_path / filename
+    uploaded_files = list(files or [])
+    if file is not None:
+        uploaded_files.append(file)
+    if not uploaded_files:
+        raise HTTPException(status_code=400, detail="يرجى رفع إثبات الدفع")
 
-    with dest.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
+    is_mobilis = order.payment_method == "mobilis"
+    existing = _existing_proof_urls(order)
+    if is_mobilis and len(existing) + len(uploaded_files) > 4:
+        raise HTTPException(status_code=400, detail="Flexy Mobilis يسمح برفع 4 إيصالات كحد أقصى")
+    if not is_mobilis and len(uploaded_files) > 1:
+        raise HTTPException(status_code=400, detail="هذه الطريقة تسمح بإثبات دفع واحد فقط")
 
-    order.payment_proof_url = f"/uploads/{filename}"
+    saved_urls: list[str] = []
+    for proof in uploaded_files:
+        ext = Path(proof.filename or "proof.jpg").suffix or ".jpg"
+        filename = f"proof_{order_id}_{uuid4().hex[:8]}{ext}"
+        dest = settings.upload_path / filename
+
+        with dest.open("wb") as f:
+            shutil.copyfileobj(proof.file, f)
+        saved_urls.append(f"/uploads/{filename}")
+
+    if is_mobilis:
+        order.payment_proof_url = json.dumps([*existing, *saved_urls], ensure_ascii=False)
+    else:
+        order.payment_proof_url = saved_urls[0]
     order.status = "processing"
     db.commit()
     db.refresh(order)

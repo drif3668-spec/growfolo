@@ -61,8 +61,12 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     bg: "rgba(34,197,94,0.10)",
     border: "rgba(34,197,94,0.28)",
     description: "دفع عبر Flexy Mobilis",
-    fields: [{ label: "رقم Mobilis", value: "07XXXXXXXX" }],
-    steps: ["اشتر رصيد Flexy من نقطة البيع", "أرسل الرصيد على الرقم أعلاه", "أرسل إثبات الإرسال"],
+    fields: [{ label: "رقم Mobilis", value: "0654103330" }],
+    steps: [
+      "لا ترسل أكثر من 15$ في العملية الواحدة",
+      "إذا كان طلبك أكبر من 15$ قسّم المبلغ إلى عدة عمليات",
+      "ارفع كل إيصالات الدفع لإكمال مراجعة الطلب",
+    ],
   },
   {
     id: "instapay",
@@ -78,4 +82,3 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 export const PAYMENT_METHOD_MAP = Object.fromEntries(PAYMENT_METHODS.map((method) => [method.id, method])) as Record<string, PaymentMethod>;
-

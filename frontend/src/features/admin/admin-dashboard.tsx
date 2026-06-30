@@ -17,7 +17,8 @@ type Order = {
   id: string; customer_name: string; customer_email: string; customer_whatsapp: string | null;
   customer_country: string | null; customer_telegram: string | null; customer_notes: string | null;
   product_name: string; product_price: number; payment_method: string | null;
-  payment_proof_url: string | null; status: string; admin_notes: string | null;
+  payment_proof_url: string | null; payment_proof_urls?: string[]; payment_parts_count?: number; payment_total_paid?: number;
+  status: string; admin_notes: string | null;
   tracking_stage: number; tracking_notes: string | null;
   created_at: string; expires_at: string | null;
 };
@@ -83,6 +84,18 @@ const STATUS: Record<string, { label: string; color: string; bg: string }> = {
   rejected:      { label: "مرفوض",             color: "text-red-400",    bg: "bg-red-500/15" },
   expired:       { label: "منتهي الوقت",       color: "text-white/40",   bg: "bg-white/8" },
 };
+
+function getProofUrls(order: Order): string[] {
+  if (Array.isArray(order.payment_proof_urls) && order.payment_proof_urls.length > 0) {
+    return order.payment_proof_urls;
+  }
+  if (!order.payment_proof_url) return [];
+  try {
+    const parsed = JSON.parse(order.payment_proof_url);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+  } catch {}
+  return [order.payment_proof_url];
+}
 
 /* ════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
@@ -541,6 +554,7 @@ export function AdminDashboard() {
                   )}
                   {orders.map((order) => {
                     const s = STATUS[order.status] ?? STATUS.new;
+                    const proofUrls = getProofUrls(order);
                     return (
                       <button
                         key={order.id}
@@ -560,7 +574,7 @@ export function AdminDashboard() {
                         </div>
                         <div className="shrink-0 text-right">
                           <p className="font-black text-white">{order.product_price}$</p>
-                          {order.payment_proof_url && <span className="text-[10px] text-lime-400">وصل مرفوع ✓</span>}
+                          {proofUrls.length > 0 && <span className="text-[10px] text-lime-400">{proofUrls.length} وصل مرفوع ✓</span>}
                         </div>
                         <Eye size={14} className="shrink-0 text-white/25" />
                       </button>
@@ -569,7 +583,9 @@ export function AdminDashboard() {
                 </div>
 
                 {/* Detail panel */}
-                {selectedOrder ? (
+                {selectedOrder ? (() => {
+                  const proofUrls = getProofUrls(selectedOrder);
+                  return (
                   <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-5 overflow-y-auto" style={{ maxHeight: 600 }}>
                     <div className="mb-4 flex items-start justify-between gap-2">
                       <div>
@@ -587,6 +603,8 @@ export function AdminDashboard() {
                         { l: "المنتج", v: selectedOrder.product_name },
                         { l: "السعر", v: `${selectedOrder.product_price}$` },
                         { l: "طريقة الدفع", v: selectedOrder.payment_method ?? "—" },
+                        { l: "عدد الدفعات", v: `${proofUrls.length || selectedOrder.payment_parts_count || 0}` },
+                        { l: "إجمالي المدفوع", v: `${selectedOrder.payment_total_paid ?? selectedOrder.product_price}$` },
                         { l: "البريد", v: selectedOrder.customer_email },
                         { l: "WhatsApp", v: selectedOrder.customer_whatsapp ?? "—" },
                         { l: "الدولة", v: selectedOrder.customer_country ?? "—" },
@@ -604,16 +622,22 @@ export function AdminDashboard() {
                       )}
                     </div>
 
-                    {/* Proof link */}
-                    {selectedOrder.payment_proof_url && (
-                      <a
-                        href={`${API_URL}${selectedOrder.payment_proof_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mb-4 flex items-center gap-2 rounded-2xl border border-lime-500/25 bg-lime-500/8 px-4 py-3 text-sm font-semibold text-lime-400 hover:bg-lime-500/15"
-                      >
-                        <ExternalLink size={14} /> عرض إثبات الدفع
-                      </a>
+                    {/* Proof links */}
+                    {proofUrls.length > 0 && (
+                      <div className="mb-4 grid gap-2">
+                        <p className="text-xs font-black text-white/45">إيصالات الدفع ({proofUrls.length})</p>
+                        {proofUrls.map((url, index) => (
+                          <a
+                            key={`${url}-${index}`}
+                            href={`${API_URL}${url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 rounded-2xl border border-lime-500/25 bg-lime-500/8 px-4 py-3 text-sm font-semibold text-lime-400 hover:bg-lime-500/15"
+                          >
+                            <ExternalLink size={14} /> عرض إيصال الدفع {index + 1}
+                          </a>
+                        ))}
+                      </div>
                     )}
 
                     {/* ── Tracking stage ────────────────────────────── */}
@@ -703,7 +727,8 @@ export function AdminDashboard() {
                       </div>
                     )}
                   </div>
-                ) : (
+                  );
+                })() : (
                   <div className="flex items-center justify-center rounded-3xl border border-white/8 bg-[#0d0b14] text-sm text-white/25" style={{ minHeight: 200 }}>
                     اختر طلباً لعرض التفاصيل
                   </div>

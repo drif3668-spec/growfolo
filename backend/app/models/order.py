@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -44,6 +45,26 @@ class Order(Base):
     total: Mapped[float] = mapped_column(Numeric(10, 2), default=0)
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
+
+    @property
+    def payment_proof_urls(self) -> list[str]:
+        if not self.payment_proof_url:
+            return []
+        try:
+            parsed = json.loads(self.payment_proof_url)
+            if isinstance(parsed, list):
+                return [str(item) for item in parsed if item]
+        except (TypeError, ValueError):
+            pass
+        return [self.payment_proof_url]
+
+    @property
+    def payment_parts_count(self) -> int:
+        return len(self.payment_proof_urls)
+
+    @property
+    def payment_total_paid(self) -> float:
+        return float(self.product_price or 0)
 
 
 class OrderItem(Base):
