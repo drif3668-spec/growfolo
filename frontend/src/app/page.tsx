@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Brain, Code2, Eye, Gamepad2, Headphones, Mail, Medal,
@@ -50,19 +51,17 @@ const globalStats = [
   { value: "+90", label: "دولة حول العالم", icon: Globe },
 ];
 
-const BRANDS = [
-  { name: "ChatGPT", emoji: "🤖" },
-  { name: "Claude", emoji: "✳" },
-  { name: "Gemini", emoji: "♊" },
-  { name: "Perplexity", emoji: "🔵" },
-  { name: "Midjourney", emoji: "🎨" },
-  { name: "Cursor", emoji: "⚡" },
-  { name: "GitHub Copilot", emoji: "🐙" },
-  { name: "Canva", emoji: "🖌" },
-  { name: "Netflix", emoji: "▶" },
-  { name: "Spotify", emoji: "🎵" },
-  { name: "Adobe", emoji: "🅰" },
-  { name: "ElevenLabs", emoji: "🔊" },
+const NEWSLETTER_STRIP_IMAGES = [
+  { src: "/newsletter-strip/figma.jpg", alt: "Figma" },
+  { src: "/newsletter-strip/gemini.jpg", alt: "Gemini" },
+  { src: "/newsletter-strip/chatgpt.jpg", alt: "ChatGPT" },
+  { src: "/newsletter-strip/netflix.jpg", alt: "Netflix" },
+  { src: "/newsletter-strip/grok.jpg", alt: "Grok" },
+  { src: "/newsletter-strip/spotify.jpg", alt: "Spotify" },
+  { src: "/newsletter-strip/perplexity.jpg", alt: "Perplexity" },
+  { src: "/newsletter-strip/adobe.jpg", alt: "Adobe" },
+  { src: "/newsletter-strip/ai-cloud.jpg", alt: "AI Cloud" },
+  { src: "/newsletter-strip/claude.jpg", alt: "Claude" },
 ];
 
 function AddToCartBtn({ product }: { product: { id: string; name: string; price_num: number; logo: string; color: string } }) {
@@ -275,13 +274,73 @@ function TrustSection() {
 }
 
 function BrandsStrip() {
+  const stripRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef({ active: false, x: 0, scrollLeft: 0 });
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    const timer = window.setInterval(() => {
+      if (dragRef.current.active) return;
+      const next = strip.scrollLeft + 150;
+      strip.scrollTo({
+        left: next >= strip.scrollWidth - strip.clientWidth - 4 ? 0 : next,
+        behavior: "smooth",
+      });
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <section className="glass-panel overflow-hidden rounded-3xl py-5">
-      <div className="flex animate-none items-center gap-8 overflow-x-auto px-6 pb-2 [scrollbar-width:none]">
-        {BRANDS.map((b) => (
-          <div key={b.name} className="flex shrink-0 flex-col items-center gap-2">
-            <div className="grid size-12 place-items-center rounded-2xl bg-white/8 text-2xl">{b.emoji}</div>
-            <span className="text-xs text-white/50">{b.name}</span>
+      <style>{`
+        @keyframes newsletter-logo-float {
+          0%, 100% { transform: translateY(0) rotateX(0deg); }
+          50% { transform: translateY(-9px) rotateX(5deg); }
+        }
+      `}</style>
+      <div
+        ref={stripRef}
+        className="flex cursor-grab select-none items-center gap-4 overflow-x-auto px-5 py-3 active:cursor-grabbing [scrollbar-width:none] sm:gap-5 sm:px-6"
+        dir="ltr"
+        style={{ WebkitOverflowScrolling: "touch" }}
+        onPointerDown={(e) => {
+          const strip = stripRef.current;
+          if (!strip) return;
+          dragRef.current = { active: true, x: e.clientX, scrollLeft: strip.scrollLeft };
+          strip.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          const strip = stripRef.current;
+          if (!strip || !dragRef.current.active) return;
+          strip.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.x);
+        }}
+        onPointerUp={(e) => {
+          dragRef.current.active = false;
+          stripRef.current?.releasePointerCapture(e.pointerId);
+        }}
+        onPointerCancel={() => {
+          dragRef.current.active = false;
+        }}
+      >
+        {NEWSLETTER_STRIP_IMAGES.map((image, idx) => (
+          <div
+            key={image.src}
+            className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl border border-white/10 bg-white shadow-[0_14px_38px_rgba(0,0,0,0.32)] transition duration-300 hover:scale-105 hover:border-lime-300/50 hover:shadow-[0_16px_44px_rgba(200,230,0,0.16)] sm:size-24 md:size-28"
+            style={{
+              animation: "newsletter-logo-float 4.6s ease-in-out infinite",
+              animationDelay: `${idx * 120}ms`,
+            }}
+          >
+            <img
+              src={image.src}
+              alt={image.alt}
+              draggable={false}
+              className="size-full object-cover object-center"
+            />
+            <span className="pointer-events-none absolute inset-x-2 top-1 h-1/3 rounded-full bg-white/20 blur-md" />
           </div>
         ))}
       </div>
