@@ -144,6 +144,51 @@ def send_proof_uploaded_admin(order: dict, proofs: list[dict]) -> None:
         print(f"[WARN] send_proof_uploaded_admin failed: {exc}")
 
 
+def send_newsletter_welcome(email: str) -> None:
+    """Send welcome email with 25% discount to new newsletter subscriber."""
+    if not settings.resend_api_key:
+        return
+    body = """
+    <p style="color:rgba(255,255,255,.75);margin-bottom:18px;line-height:1.8">
+      مرحباً بك في <strong style="color:#a855f7">GrowFolo</strong>! 🎉<br/>
+      شكراً لاشتراكك في نشرتنا البريدية.
+    </p>
+    <div class="card" style="text-align:center;padding:28px 20px;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:12px">🎁</div>
+      <p style="font-size:20px;font-weight:900;color:#84cc16;margin:0 0 8px">
+        لقد حصلت على خصم 25% على جميع منتجاتنا!
+      </p>
+      <p style="color:rgba(255,255,255,.5);font-size:13px;margin:0">
+        حصري لك كمشترك جديد في النشرة البريدية
+      </p>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="row">
+        <span class="lbl">للاستفادة من الخصم</span>
+        <span class="val">تواصل معنا عبر واتساب</span>
+      </div>
+      <div class="row" style="border:none">
+        <span class="lbl">رقم واتساب</span>
+        <span class="val" dir="ltr" style="font-size:18px;font-weight:900;color:#25D366">0779012833</span>
+      </div>
+    </div>
+    <a href="https://wa.me/213779012833?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D8%A9%20%D9%85%D9%86%20%D8%AE%D8%B5%D9%85%2025%25%20%D8%A7%D9%84%D9%86%D8%B4%D8%B1%D8%A9%20%D8%A7%D9%84%D8%A8%D8%B1%D9%8A%D8%AF%D9%8A%D8%A9" class="btn">
+      تواصل معنا عبر واتساب الآن 💬
+    </a>
+    <p style="color:rgba(255,255,255,.25);font-size:11px;text-align:center;margin-top:20px;line-height:1.6">
+      ملاحظة: هذه رسالة آلية، يرجى عدم الرد عليها مباشرة.
+    </p>"""
+    try:
+        resend.Emails.send({
+            "from": settings.email_from,
+            "to": [email],
+            "subject": "🎉 مرحباً بك في GrowFolo — خصم 25% خاص بك!",
+            "html": _html("مرحباً بك في GrowFolo", body),
+        })
+    except Exception as exc:
+        print(f"[WARN] send_newsletter_welcome failed: {exc}")
+
+
 # Legacy compatibility
 def send_order_confirmation(to_email: str, order_id: str) -> None:
     send_order_received({"id": order_id, "customer_name": "عميلنا العزيز",

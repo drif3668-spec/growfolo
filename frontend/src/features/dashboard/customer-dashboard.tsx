@@ -146,7 +146,13 @@ export function CustomerDashboard() {
   useEffect(() => { void loadUser(); }, [loadUser]);
 
   const handleLogout = () => {
-    localStorage.removeItem("gf_token");
+    // Clear all user-specific data so the next user starts clean
+    const keysToRemove = [
+      "gf_token", "gf_cart", "gf_my_email", "gf_pay_method",
+      "gf_checkout_data", "gf_order_v2",
+      "gf_instapay_order_code", "gf_baridimob_order_code",
+    ];
+    keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch {} });
     router.push("/login");
   };
 
@@ -793,7 +799,7 @@ function ProductsSection() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function CartSection() {
-  const { items, removeItem, updateQty, totalUSD, clear, count } = useCart();
+  const { items, removeItem, updateQty, totalUSD, clear, count, openSidebar } = useCart();
 
   if (count === 0) {
     return (
@@ -841,9 +847,13 @@ function CartSection() {
         <span className="text-white/60 text-sm">الإجمالي</span>
         <span className="text-xl font-black text-lime-400">${totalUSD.toFixed(2)}</span>
       </div>
-      <a href="/checkout" className="neon-button block w-full py-3.5 rounded-2xl text-center font-black text-black">
+      {/* Opens the full cart sidebar with payment method selection and checkout */}
+      <button
+        onClick={openSidebar}
+        className="neon-button block w-full py-3.5 rounded-2xl text-center font-black text-black"
+      >
         إتمام الشراء ←
-      </a>
+      </button>
     </div>
   );
 }

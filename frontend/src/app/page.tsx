@@ -413,17 +413,60 @@ function BrandsStrip() {
 }
 
 function NewsletterSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/v1/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      setStatus(res.ok ? "done" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
+
   return (
     <section className="glass-panel my-8 grid items-center gap-5 rounded-3xl p-6 md:grid-cols-[1fr_1.1fr_auto]">
       <div>
         <h2 className="text-2xl font-black">كن أول من يعرف!</h2>
         <p className="mt-2 text-sm text-white/65">اشترك بنشرتنا البريدية ليصلك كل جديد</p>
       </div>
-      <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 text-white/55">
-        <Mail size={21} className="text-purple-400" />
-        <input className="w-full bg-transparent outline-none placeholder:text-white/45" placeholder="ادخل بريدك الإلكتروني" type="email" />
-      </label>
-      <button className="neon-button min-h-14 rounded-2xl px-9 font-black text-black">اشترك الآن</button>
+      {status === "done" ? (
+        <div className="flex items-center gap-2 rounded-2xl border border-lime-500/30 bg-lime-500/10 px-4 py-3 text-sm text-lime-400 md:col-span-2">
+          ✓ تم الاشتراك! تفقد بريدك الإلكتروني للحصول على خصم 25%
+        </div>
+      ) : (
+        <>
+          <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 text-white/55">
+            <Mail size={21} className="text-purple-400" />
+            <input
+              className="w-full bg-transparent outline-none placeholder:text-white/45"
+              placeholder="ادخل بريدك الإلكتروني"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              disabled={status === "loading"}
+            />
+          </label>
+          <button
+            onClick={handleSubscribe}
+            disabled={status === "loading" || !email.trim()}
+            className="neon-button min-h-14 rounded-2xl px-9 font-black text-black disabled:opacity-60"
+          >
+            {status === "loading" ? "..." : "اشترك الآن"}
+          </button>
+          {status === "error" && (
+            <p className="text-xs text-red-400 md:col-span-3 -mt-2">حدث خطأ، حاول مرة أخرى</p>
+          )}
+        </>
+      )}
     </section>
   );
 }

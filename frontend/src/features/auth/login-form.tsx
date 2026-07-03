@@ -49,6 +49,14 @@ export function LoginForm() {
         return;
       }
 
+      // Clear any previous user's session data before saving new token
+      const sessionKeys = [
+        "gf_cart", "gf_my_email", "gf_pay_method",
+        "gf_checkout_data", "gf_order_v2",
+        "gf_instapay_order_code", "gf_baridimob_order_code",
+      ];
+      sessionKeys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+
       localStorage.setItem("gf_token", data.access_token!);
 
       /* Check if admin and redirect accordingly */
