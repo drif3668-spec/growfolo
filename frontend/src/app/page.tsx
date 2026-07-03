@@ -486,7 +486,7 @@ function Footer() {
         <FooterColumn title="روابط سريعة" links={[
           { label: "المدونة",                href: "/blog" },
           { label: "الصفحة التعريفية",      href: "#about" },
-          { label: "سياسة الخصوصية",        href: "#" },
+          { label: "سياسة الخصوصية",        href: "/privacy" },
           { label: "الاستبدال والاسترجاع",  href: "/refund-policy" },
         ]} />
         <FooterColumn title="خدمة العملاء" links={[
