@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Menu, Search, ShoppingCart, Sparkle, UserRound, ChevronDown, LayoutDashboard } from "lucide-react";
 import { SidebarMenu } from "@/components/layout/sidebar-menu";
-import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCart } from "@/context/cart-context";
 import { useCurrency } from "@/context/currency-context";
 
@@ -45,7 +44,6 @@ export function SiteHeader() {
 
   return (
     <>
-      <CartSidebar />
       <SidebarMenu open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <header className="sticky top-0 z-40 bg-[#050508]/88 px-4 pb-3 pt-1 backdrop-blur-xl">

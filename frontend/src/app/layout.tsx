@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { LiveChat } from "@/components/chat/live-chat";
 import { CartProvider } from "@/context/cart-context";
+import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { CurrencyProvider } from "@/context/currency-context";
 import { FavoritesProvider } from "@/context/favorites-context";
 import { NotificationsProvider } from "@/context/notifications-context";
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             <CartProvider>
               <CurrencyProvider>
                 {children}
+                <CartSidebar />
                 <LiveChat />
               </CurrencyProvider>
             </CartProvider>

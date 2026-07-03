@@ -739,32 +739,22 @@ function TransactionsSection({ user }: { user: UserData }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ProductsSection() {
+  const { addItem, openSidebar } = useCart();
+
   return (
     <div className="space-y-5">
-      {/* CTA banner */}
-      <div className="glass-panel rounded-3xl p-6 bg-gradient-to-l from-purple-900/20 to-transparent border-purple-500/20 text-center space-y-3">
-        <div className="text-4xl">🛍️</div>
-        <h2 className="text-lg font-black text-white">تصفح المتجر للشراء</h2>
-        <p className="text-sm text-white/55 max-w-sm mx-auto">
-          عمليات الشراء تتم من المتجر الرئيسي. بعد إتمام أي طلب سيظهر تلقائياً في "طلباتي".
-        </p>
-        <a
-          href="/"
-          className="neon-button inline-flex items-center gap-2 px-7 py-3 rounded-2xl font-black text-black text-sm"
-        >
-          <ShoppingBag size={16} />
-          الذهاب إلى المتجر
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-black text-white">المنتجات المتاحة</h2>
+        <a href="/" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+          المتجر الكامل ←
         </a>
       </div>
 
-      {/* Products preview — info only, no buy buttons */}
-      <h3 className="font-black text-white/70 text-sm">نظرة عامة على المنتجات</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         {PRODUCTS.map(p => (
-          <a
+          <div
             key={p.id}
-            href="/"
-            className="glass-panel rounded-2xl p-4 space-y-2 hover:border-white/20 transition-all group"
+            className="glass-panel rounded-2xl p-4 space-y-3 transition-all"
             style={{ borderColor: `${p.accentColor}22` }}
           >
             <div className="flex items-center gap-3">
@@ -775,23 +765,35 @@ function ProductsSection() {
                 {p.logo}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-black text-white text-sm truncate group-hover:text-purple-300 transition-colors">
-                  {p.name}
-                </p>
+                <p className="font-black text-white text-sm truncate">{p.name}</p>
                 <p className="text-xs text-white/35 truncate">{p.subtitle}</p>
               </div>
               <div className="text-right shrink-0">
                 <p className="font-black text-sm" style={{ color: p.accentColor }}>${p.price}</p>
-                <p className="text-[10px] text-white/30 line-through">${p.oldPrice}</p>
+                {p.oldPrice && (
+                  <p className="text-[10px] text-white/30 line-through">${p.oldPrice}</p>
+                )}
               </div>
             </div>
-          </a>
+            <button
+              onClick={() => {
+                addItem({
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  logo: p.logo,
+                  color: p.color,
+                });
+                openSidebar();
+              }}
+              className="w-full rounded-xl py-2 text-xs font-black text-black transition-all hover:opacity-90 active:scale-95"
+              style={{ background: `linear-gradient(135deg, ${p.accentColor}, ${p.accentColor}bb)` }}
+            >
+              إضافة إلى السلة ←
+            </button>
+          </div>
         ))}
       </div>
-
-      <p className="text-center text-xs text-white/30 pt-1">
-        اضغط على أي منتج للانتقال إلى المتجر
-      </p>
     </div>
   );
 }

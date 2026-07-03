@@ -129,7 +129,7 @@ export default function PayPage() {
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // Load checkout data on mount
+  // Load checkout data and user info on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem("gf_checkout_data");
@@ -141,6 +141,20 @@ export default function PayPage() {
       const savedEmail = localStorage.getItem("gf_my_email");
       if (savedEmail) setEmail(savedEmail);
     } catch {}
+
+    // Auto-fill from logged-in account
+    const token = localStorage.getItem("gf_token");
+    if (token) {
+      fetch(`${API_URL}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then((u: { full_name?: string | null; username?: string | null; email?: string } | null) => {
+          if (!u) return;
+          if (u.email) setEmail(u.email);
+          if (u.full_name) setFullName(u.full_name);
+          else if (u.username) setFullName(u.username);
+        })
+        .catch(() => {});
+    }
   }, []);
 
   // Timer
