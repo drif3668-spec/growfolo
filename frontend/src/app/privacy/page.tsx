@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight, Shield, Database, Cookie, Lock,
   Users, ServerCog, UserCog, Bell, Baby, Archive,
@@ -5,10 +7,6 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 
-export const metadata = {
-  title: "سياسة الخصوصية — Growfolo",
-  description: "تعرف على سياسة الخصوصية الخاصة بمنصة Growfolo وكيفية حماية بياناتك الشخصية.",
-};
 
 const LAST_UPDATED = new Date().toLocaleDateString("ar-DZ", {
   year: "numeric", month: "long", day: "numeric",
