@@ -6,7 +6,7 @@ import {
   Home, User, Package, ShoppingBag, ShoppingCart, Heart,
   Bell, MessageCircle, Settings, LogOut, Menu, X, Camera,
   Eye, EyeOff, CheckCircle, AlertCircle, ChevronRight,
-  Shield, Edit3, Save, Star, Clock, Copy, Upload,
+  Shield, Edit3, Save, Star, Clock, Copy, Upload, Percent,
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useFavorites } from "@/context/favorites-context";
@@ -18,7 +18,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 type Section =
   | "home" | "account" | "orders" | "purchases" | "transactions"
   | "products" | "cart" | "favorites" | "notifications"
-  | "support" | "settings";
+  | "support" | "settings" | "discounts";
 
 interface UserData {
   id: string;
@@ -109,6 +109,7 @@ const NAV_ITEMS: { section: Section; label: string; icon: React.ReactNode }[] = 
   { section: "products",      label: "المنتجات",    icon: <Star size={18} /> },
   { section: "cart",          label: "السلة",       icon: <ShoppingCart size={18} /> },
   { section: "favorites",     label: "المفضلة",     icon: <Heart size={18} /> },
+  { section: "discounts",     label: "خصومات %",    icon: <Percent size={18} /> },
   { section: "notifications", label: "الإشعارات",   icon: <Bell size={18} /> },
   { section: "support",       label: "الدعم",       icon: <MessageCircle size={18} /> },
   { section: "settings",      label: "الإعدادات",   icon: <Settings size={18} /> },
@@ -302,6 +303,7 @@ export function CustomerDashboard() {
           {section === "products"      && <ProductsSection />}
           {section === "cart"          && <CartSection />}
           {section === "favorites"     && <FavoritesSection />}
+          {section === "discounts"     && <DiscountsSection user={user} />}
           {section === "notifications" && <NotificationsSection />}
           {section === "support"       && <SupportSection user={user} />}
           {section === "settings"      && <SettingsSection user={user} onRefresh={loadUser} />}
@@ -795,6 +797,174 @@ function ProductsSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// Section: Discounts
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface SavedDiscount {
+  id: number;
+  code: string;
+  percent: number;
+  description: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+}
+
+function DiscountsSection({ user }: { user: UserData }) {
+  const [redemptionCode, setRedemptionCode] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [savedDiscounts, setSavedDiscounts] = useState<SavedDiscount[]>([]);
+  const [loadingMy, setLoadingMy] = useState(true);
+
+  const token = typeof window !== "undefined" ? localStorage.getItem("gf_token") : null;
+  const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+
+  useEffect(() => {
+    async function fetchMy() {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/discounts/my`, { headers });
+        if (res.ok) setSavedDiscounts(await res.json());
+      } catch {}
+      setLoadingMy(false);
+    }
+    fetchMy();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
+
+  async function handleRedeem(e: React.FormEvent) {
+    e.preventDefault();
+    const code = redemptionCode.trim().toUpperCase();
+    if (!code) return;
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${API_URL}/api/v1/discounts/redeem`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ redemption_code: code }),
+      });
+      if (res.ok) {
+        const dc: SavedDiscount = await res.json();
+        setSavedDiscounts((p) => [dc, ...p.filter((d) => d.id !== dc.id)]);
+        setStatus("success");
+        setRedemptionCode("");
+      } else {
+        const err = await res.json();
+        setErrorMsg(err.detail ?? "كود غير صالح");
+        setStatus("error");
+      }
+    } catch {
+      setErrorMsg("حدث خطأ، حاول مجدداً");
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="glass-panel rounded-3xl p-6">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="grid size-10 place-items-center rounded-2xl bg-lime-500/15">
+            <Percent size={20} className="text-lime-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-white">خصوماتي</h2>
+            <p className="text-xs text-white/40">أدخل كود الحصول على الخصم الذي حصلت عليه</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Redeem form */}
+      <div className="glass-panel rounded-3xl p-6 space-y-4">
+        <p className="text-sm font-bold text-white/70">استرداد كود الخصم</p>
+        <form onSubmit={handleRedeem} className="flex gap-3">
+          <input
+            value={redemptionCode}
+            onChange={(e) => {
+              setRedemptionCode(e.target.value.toUpperCase());
+              if (status !== "idle") setStatus("idle");
+            }}
+            placeholder="WELCOME2026"
+            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/50"
+          />
+          <button
+            type="submit"
+            disabled={status === "loading" || !redemptionCode.trim()}
+            className="neon-button shrink-0 rounded-2xl px-5 py-3 text-sm font-black text-black disabled:opacity-50"
+          >
+            {status === "loading" ? "..." : "تفعيل"}
+          </button>
+        </form>
+
+        {status === "success" && (
+          <div className="flex items-start gap-3 rounded-2xl border border-lime-500/30 bg-lime-500/10 p-4">
+            <CheckCircle size={20} className="shrink-0 text-lime-400 mt-0.5" />
+            <div>
+              <p className="font-black text-lime-400">🎉 مبروك! لقد حصلت على رمز خصم بنجاح</p>
+              <p className="mt-1 text-xs text-white/60">
+                تم حفظ رمز الخصم في حسابك تلقائياً. سيُطبَّق الخصم عند إتمام الشراء دون الحاجة لإدخاله مجدداً.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
+            <AlertCircle size={18} className="shrink-0 text-red-400" />
+            <p className="text-sm text-red-400">{errorMsg}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Saved discounts */}
+      <div className="space-y-3">
+        <p className="text-xs font-bold text-white/40 px-1">خصوماتي المحفوظة</p>
+        {loadingMy ? (
+          <div className="glass-panel rounded-3xl p-8 text-center text-white/30 text-sm">جارٍ التحميل...</div>
+        ) : savedDiscounts.length === 0 ? (
+          <div className="glass-panel rounded-3xl p-10 text-center space-y-2">
+            <Percent size={36} className="mx-auto text-white/15" />
+            <p className="text-white/30 text-sm">لا توجد خصومات محفوظة بعد</p>
+            <p className="text-white/20 text-xs">أدخل كود الحصول على الخصم أعلاه للبدء</p>
+          </div>
+        ) : (
+          savedDiscounts.map((dc) => (
+            <div
+              key={dc.id}
+              className={`glass-panel rounded-2xl p-4 flex items-center gap-4 ${!dc.is_active ? "opacity-50" : ""}`}
+            >
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime-500/15">
+                <Percent size={16} className="text-lime-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-sm font-black text-lime-400">{dc.code}</span>
+                  <span className="rounded-full bg-lime-500/15 px-2 py-0.5 text-[10px] font-black text-lime-400">
+                    -{dc.percent}%
+                  </span>
+                  {!dc.is_active && (
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/40">معطّل</span>
+                  )}
+                </div>
+                {dc.description && <p className="mt-0.5 text-xs text-white/40">{dc.description}</p>}
+                {dc.expires_at && (
+                  <p className="mt-0.5 text-[10px] text-white/30">
+                    ينتهي: {new Date(dc.expires_at).toLocaleDateString("ar-DZ")}
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0 text-right">
+                <span className="text-2xl font-black text-lime-400">-{dc.percent}%</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Section: Cart
 // ═══════════════════════════════════════════════════════════════════════════════
 

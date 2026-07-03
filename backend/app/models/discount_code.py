@@ -11,6 +11,7 @@ class DiscountCode(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    redemption_code: Mapped[str | None] = mapped_column(String(50), unique=True, index=True, nullable=True)
     percent: Mapped[int] = mapped_column(Integer, default=35)
     order_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)

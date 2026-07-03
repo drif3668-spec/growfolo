@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.models.proof import OrderProof
 from app.models.subscriber import Subscriber
 from app.models.user import User
+from app.models.user_discount import UserDiscount
 
-__all__ = ["BannerSlide", "BlogPost", "ChatMessage", "ChatSession", "DiscountCode", "Order", "OrderItem", "OrderProof", "Product", "Subscriber", "User"]
+__all__ = ["BannerSlide", "BlogPost", "ChatMessage", "ChatSession", "DiscountCode", "Order", "OrderItem", "OrderProof", "Product", "Subscriber", "User", "UserDiscount"]
 

@@ -64,6 +64,24 @@ export function CartSidebar() {
     } catch {}
   }, []);
 
+  // Auto-apply user's saved discount when sidebar opens
+  useEffect(() => {
+    if (!sidebarOpen || appliedDiscount) return;
+    const token = typeof window !== "undefined" ? localStorage.getItem("gf_token") : null;
+    if (!token) return;
+    fetch(`${API_URL}/api/v1/discounts/my`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((list: Array<{ code: string; percent: number; is_active: boolean }> | null) => {
+        if (!list) return;
+        const active = list.find((d) => d.is_active);
+        if (active) setAppliedDiscount({ code: active.code, percent: active.percent });
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarOpen]);
+
   // Persist payment method
   useEffect(() => {
     try { localStorage.setItem("gf_pay_method", payMethod); } catch {}

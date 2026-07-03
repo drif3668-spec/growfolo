@@ -24,17 +24,17 @@ type Order = {
 };
 
 type DiscountCode = {
-  id: number; code: string; percent: number; order_id: string | null;
+  id: number; code: string; redemption_code: string | null; percent: number; order_id: string | null;
   description: string | null; expires_at: string | null;
   max_uses: number; used_count: number; is_active: boolean; created_at: string;
 };
 
 type DiscountForm = {
-  code: string; percent: number; order_id: string; description: string;
+  code: string; redemption_code: string; percent: number; order_id: string; description: string;
   expires_at: string; max_uses: number;
 };
 
-const EMPTY_DC: DiscountForm = { code: "", percent: 35, order_id: "", description: "", expires_at: "", max_uses: 1 };
+const EMPTY_DC: DiscountForm = { code: "", redemption_code: "", percent: 35, order_id: "", description: "", expires_at: "", max_uses: 1 };
 
 type NavSection = "orders" | "products" | "banners" | "chat" | "settings" | "discounts" | "blog";
 
@@ -274,6 +274,7 @@ export function AdminDashboard() {
     try {
       const body = {
         code: dcForm.code.trim() || undefined,
+        redemption_code: dcForm.redemption_code.trim() || undefined,
         percent: dcForm.percent,
         order_id: dcForm.order_id.trim() || undefined,
         description: dcForm.description.trim() || undefined,
@@ -1262,7 +1263,16 @@ export function AdminDashboard() {
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <label className="grid gap-1 text-xs font-semibold text-white/50">
-                    الكود (فارغ = توليد تلقائي)
+                    كود الحصول على الخصم (للعميل)
+                    <input
+                      value={dcForm.redemption_code}
+                      onChange={(e) => setDcForm((p) => ({ ...p, redemption_code: e.target.value.toUpperCase() }))}
+                      placeholder="WELCOME2026"
+                      className="rounded-xl border border-lime-500/30 bg-lime-500/5 px-3 py-2 text-sm text-lime-300 outline-none placeholder:text-white/20 focus:border-lime-500/60"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                    رمز الخصم الفعلي (فارغ = توليد تلقائي)
                     <input
                       value={dcForm.code}
                       onChange={(e) => setDcForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
@@ -1361,6 +1371,12 @@ export function AdminDashboard() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
+                      {dc.redemption_code && (
+                        <div className="mb-1 flex items-center gap-1.5">
+                          <span className="text-[10px] text-white/35">كود الحصول:</span>
+                          <span className="font-mono text-xs font-bold text-lime-400/80">{dc.redemption_code}</span>
+                        </div>
+                      )}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                         <span className="font-black text-white"><Percent size={11} className="inline mb-0.5" /> {dc.percent}%</span>
                         <span className="text-white/40">الاستخدام: {dc.used_count}/{dc.max_uses}</span>

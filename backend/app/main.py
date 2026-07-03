@@ -45,6 +45,8 @@ def _migrate_add_columns() -> None:
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS faq_json TEXT",
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT TRUE",
         "ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0",
+        # discount_codes — redemption code (two-tier discount system)
+        "ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS redemption_code VARCHAR(50)",
     ]
     try:
         if settings.is_postgres:
