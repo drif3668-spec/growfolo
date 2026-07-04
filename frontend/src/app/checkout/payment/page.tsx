@@ -79,8 +79,8 @@ const METHODS: Method[] = [
 
 const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }[]; steps: string[] }> = {
   vodafone: {
-    fields: [{ label: "رقم Vodafone Cash", value: "0100 123 4567" }],
-    steps: ["افتح تطبيق Vodafone Cash", "اختر تحويل أموال", "أدخل الرقم أعلاه والمبلغ", "أرسل صورة إثبات الدفع"],
+    fields: [{ label: "رمز الطلب", value: "سيظهر في صفحة الدفع" }],
+    steps: ["انسخ رمز الطلب", "تواصل عبر واتساب لإتمام الدفع", "ارفع صورة إثبات الدفع"],
   },
   instapay: {
     fields: [{ label: "معرف InstaPay", value: "growfolo@instapay" }],
@@ -171,6 +171,18 @@ export default function PaymentPage() {
       return "BD-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
     }
   });
+  const [vodafoneCode] = useState<string>(() => {
+    const key = "gf_vodafone_order_code";
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) return saved;
+      const code = "VC-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+      localStorage.setItem(key, code);
+      return code;
+    } catch {
+      return "VC-" + Array.from({ length: 6 }, () => "0123456789ABCDEFGHJKMNPQRSTVWXYZ"[Math.floor(Math.random() * 32)]).join("");
+    }
+  });
 
   const handleConfirm = async () => {
     if (!proof) return;
@@ -242,10 +254,11 @@ export default function PaymentPage() {
             </h2>
 
             {/* Fields */}
-            {(selected === "instapay" || selected === "baridimob") ? (() => {
+            {(selected === "instapay" || selected === "baridimob" || selected === "vodafone") ? (() => {
               const isInsta = selected === "instapay";
-              const orderCode = isInsta ? instaPayCode : bariDiMobCode;
-              const methodLabel = isInsta ? "InstaPay" : "BaridiMob";
+              const isBaridiMob = selected === "baridimob";
+              const orderCode = isInsta ? instaPayCode : isBaridiMob ? bariDiMobCode : vodafoneCode;
+              const methodLabel = isInsta ? "InstaPay" : isBaridiMob ? "BaridiMob" : "Vodafone Cash";
               return (
               <div className="mb-5 flex flex-col items-center gap-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر {methodLabel}</p>

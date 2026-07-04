@@ -99,9 +99,9 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     color: "#e60000",
     bg: "rgba(230,0,0,0.10)",
     border: "rgba(230,0,0,0.30)",
-    description: "تحويل عبر Vodafone Cash",
-    fields: [{ label: "رقم Vodafone Cash", value: "0100 123 4567" }],
-    steps: ["افتح Vodafone Cash", "اختر تحويل أموال", "أدخل الرقم والمبلغ", "أرسل صورة إثبات الدفع"],
+    description: "إتمام الدفع عبر رمز الطلب وواتساب",
+    fields: [{ label: "رمز الطلب", value: "سيظهر بعد إنشاء الطلب" }],
+    steps: ["انسخ رمز الطلب", "تواصل عبر واتساب لإتمام الدفع", "ارفع صورة إثبات الدفع"],
   },
 ];
 

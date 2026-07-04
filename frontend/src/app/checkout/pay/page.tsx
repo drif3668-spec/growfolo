@@ -33,7 +33,7 @@ const PAYMENT_INFO: Record<string, Array<{ label: string; value: string }>> = {
     { label: "رقم Mobilis", value: FLEXY_PHONE },
   ],
   vodafone: [
-    { label: "رقم Vodafone Cash", value: "0100 123 4567" },
+    { label: "رمز الطلب", value: "سيظهر في صفحة الدفع" },
   ],
   instapay: [
     { label: "معرف InstaPay", value: "growfolo@instapay" },
@@ -238,6 +238,8 @@ export default function PayPage() {
             ? `[رمز الطلب: ${instaPayCode}]${notes ? " | " + notes : ""}`
             : payMethod === "baridimob"
             ? `[رمز الطلب: ${bariDiMobCode}]${notes ? " | " + notes : ""}`
+            : payMethod === "vodafone"
+            ? `[رمز الطلب: ${orderId}]${notes ? " | " + notes : ""}`
             : (notes || null),
           product_name: productName,
           product_price: productPrice,
@@ -396,10 +398,11 @@ export default function PayPage() {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            {(payMethod === "instapay" || payMethod === "baridimob") ? (() => {
+            {(payMethod === "instapay" || payMethod === "baridimob" || payMethod === "vodafone") ? (() => {
               const isInsta = payMethod === "instapay";
-              const orderCode = isInsta ? instaPayCode : bariDiMobCode;
-              const methodLabel = isInsta ? "InstaPay" : "BaridiMob";
+              const isBaridiMob = payMethod === "baridimob";
+              const orderCode = isInsta ? instaPayCode : isBaridiMob ? bariDiMobCode : orderId;
+              const methodLabel = isInsta ? "InstaPay" : isBaridiMob ? "BaridiMob" : "Vodafone Cash";
               return (
               <div className="flex flex-col items-center gap-4 py-2">
                 <p className="text-xs font-bold uppercase tracking-widest text-white/45">رمز طلبك عبر {methodLabel}</p>

@@ -375,6 +375,9 @@ export function CheckoutWizard({
   const selectedMethod = PAYMENT_METHODS.find((m) => m.id === method);
   const isWhatsApp     = method === "whatsapp";
   const isMobilis      = method === "mobilis";
+  const isVodafone     = method === "vodafone";
+  const orderCode      = orderId ? "#" + orderId.slice(0, 8).toUpperCase() : "";
+  const vodafoneWaLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`مرحباً، أريد إتمام الدفع عبر Vodafone Cash. رمز طلبي: ${orderCode}`)}`;
 
   /* ── DONE screen ───────────────────────────────────────────────────── */
   if (done) {
@@ -599,7 +602,7 @@ export function CheckoutWizard({
 
           {/* Payment fields */}
           <div className="mb-5 grid gap-3">
-            {selectedMethod.fields.map((f) => (
+            {(isVodafone && orderId ? [{ label: "رمز الطلب", value: orderCode }] : selectedMethod.fields).map((f) => (
               <div key={f.label} className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
                 <p className="mb-1 text-xs text-white/45">{f.label}</p>
                 <div className="flex items-center justify-between gap-2">
@@ -616,6 +619,24 @@ export function CheckoutWizard({
               </div>
             </div>
           </div>
+
+          {isVodafone && orderId && (
+            <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-center">
+              <p className="text-sm font-black text-red-300">إتمام الدفع عبر واتساب</p>
+              <p className="mt-2 text-sm leading-7 text-white/65">
+                انسخ رمز الطلب وتواصل معنا عبر واتساب لإتمام دفع Vodafone Cash، ثم ارفع إثبات الدفع هنا.
+              </p>
+              <a
+                href={vodafoneWaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 py-3 text-sm font-black text-white shadow-[0_0_20px_#25D36640] transition-all hover:bg-[#20ba58] active:scale-[0.98]"
+              >
+                <MessageCircle size={18} />
+                تواصل عبر واتساب لإتمام الدفع
+              </a>
+            </div>
+          )}
 
           {isMobilis && (
             <div className="mb-5 grid gap-3">
