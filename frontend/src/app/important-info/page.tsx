@@ -12,6 +12,12 @@ const VISUAL_ITEMS = [
     title: "Claude Cloud Lifetime",
     description: "معلومات مرئية مهمة حول الخدمة وخطوات الربط والمميزات.",
   },
+  {
+    src: "/important-info/payment-methods-overview.jpg",
+    alt: "طرق الدفع المتاحة",
+    title: "طرق الدفع المتاحة",
+    description: "نظرة مرئية على وسائل الدفع المتاحة ومزايا الأمان والدعم.",
+  },
 ];
 
 export default function ImportantInfoPage() {
