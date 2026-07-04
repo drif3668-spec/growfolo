@@ -92,6 +92,17 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     fields: [{ label: "معرف InstaPay", value: "growfolo@instapay" }],
     steps: ["افتح تطبيق InstaPay", "ابحث عن المعرف أعلاه وأدخل المبلغ", "أرسل صورة الإيصال"],
   },
+  {
+    id: "vodafone",
+    label: "Vodafone Cash",
+    image: "/payment-methods/vodafone.png",
+    color: "#e60000",
+    bg: "rgba(230,0,0,0.10)",
+    border: "rgba(230,0,0,0.30)",
+    description: "تحويل عبر Vodafone Cash",
+    fields: [{ label: "رقم Vodafone Cash", value: "0100 123 4567" }],
+    steps: ["افتح Vodafone Cash", "اختر تحويل أموال", "أدخل الرقم والمبلغ", "أرسل صورة إثبات الدفع"],
+  },
 ];
 
 export const PAYMENT_METHOD_MAP = Object.fromEntries(PAYMENT_METHODS.map((method) => [method.id, method])) as Record<string, PaymentMethod>;

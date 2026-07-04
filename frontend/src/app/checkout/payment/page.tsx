@@ -67,12 +67,20 @@ const METHODS: Method[] = [
     bg: "from-red-900/30 to-red-800/10 border-red-500/20",
     description: "دفع عبر Payment ID",
   },
+  {
+    id: "vodafone",
+    label: "Vodafone Cash",
+    logo: "/payment-methods/vodafone.png",
+    color: "text-red-400",
+    bg: "from-red-900/30 to-red-800/10 border-red-500/20",
+    description: "تحويل عبر Vodafone Cash",
+  },
 ];
 
 const PAYMENT_DETAILS: Record<string, { fields: { label: string; value: string }[]; steps: string[] }> = {
   vodafone: {
-    fields: [{ label: "رقم Vodafone Cash", value: "01XXXXXXXXX" }],
-    steps: ["افتح تطبيق Vodafone Cash", "اختر تحويل أموال", "أدخل الرقم أعلاه والمبلغ", "أرسل لقطة الشاشة"],
+    fields: [{ label: "رقم Vodafone Cash", value: "0100 123 4567" }],
+    steps: ["افتح تطبيق Vodafone Cash", "اختر تحويل أموال", "أدخل الرقم أعلاه والمبلغ", "أرسل صورة إثبات الدفع"],
   },
   instapay: {
     fields: [{ label: "معرف InstaPay", value: "growfolo@instapay" }],
