@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 
-from app.api.v1.routes import auth, banners, blog, chat, checkout, discounts, newsletter, orders, products, store_orders, uploads
+from app.api.v1.routes import auth, banners, blog, chat, checkout, discounts, github_oauth, newsletter, orders, products, store_orders, uploads
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(github_oauth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(products.router, prefix="/products", tags=["products"])
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(checkout.router, prefix="/checkout", tags=["checkout"])
@@ -14,4 +15,3 @@ api_router.include_router(banners.router, prefix="/banners", tags=["banners"])
 api_router.include_router(discounts.router, prefix="/discounts", tags=["discounts"])
 api_router.include_router(blog.router, prefix="/blog", tags=["blog"])
 api_router.include_router(newsletter.router, prefix="/newsletter", tags=["newsletter"])
-
