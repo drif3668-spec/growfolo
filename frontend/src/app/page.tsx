@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Brain, Code2, Gamepad2, Headphones, Mail, Medal,
   PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
-  Users, Wrench, Zap, BadgeCheck, Globe, Rocket
+  Users, Wrench, Zap, BadgeCheck, Globe, Rocket, FileCheck2
 } from "lucide-react";
 import { HeroScene } from "@/components/three/hero-scene";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -17,6 +17,7 @@ import { AdsSectionSlider } from "@/components/sections/ads-section-slider";
 import { useCart } from "@/context/cart-context";
 import { useNotifications } from "@/context/notifications-context";
 import { PRODUCTS } from "@/data/products";
+import { CERTIFICATES } from "@/data/certificates";
 
 const features = [
   { title: "تسليم فوري", text: "تسليم الخدمة بسرعة 1 دقيقة", icon: Zap },
@@ -93,6 +94,7 @@ export default function HomePage() {
         <FeatureStrip />
         <CategoriesSection />
         <StatsSection />
+        <CertificatesSection />
         <ReviewsCarousel />
         <ExclusiveOfferShowcase />
         <TrustSection />
@@ -101,6 +103,40 @@ export default function HomePage() {
         <Footer />
       </div>
     </main>
+  );
+}
+
+function CertificatesSection() {
+  return (
+    <section className="py-10">
+      <div className="mb-5 text-right">
+        <p className="mb-2 text-sm font-black text-lime-300">الشهادات</p>
+        <h2 className="text-2xl font-black text-white md:text-3xl">وثائق وشهادات Growfolo</h2>
+      </div>
+      <div className="grid gap-3">
+        {CERTIFICATES.map((certificate, index) => (
+          <a
+            key={certificate.slug}
+            href={`/certificates/${certificate.slug}`}
+            className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-3xl border border-white/12 bg-white/[0.055] px-5 py-4 text-right shadow-[0_18px_55px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-lime-300/45 hover:bg-white/[0.08] hover:shadow-[0_22px_70px_rgba(132,204,22,0.13)]"
+            style={{ animationDelay: `${index * 120}ms` }}
+          >
+            <span
+              className="grid size-11 shrink-0 place-items-center rounded-2xl border bg-black/25 transition-transform duration-300 group-hover:scale-110"
+              style={{ borderColor: `${certificate.accent}66`, color: certificate.accent }}
+            >
+              <FileCheck2 size={21} />
+            </span>
+            <span className="flex-1 font-black text-white">{certificate.buttonLabel}</span>
+            <span className="text-lg text-white/35 transition-transform duration-300 group-hover:-translate-x-1">←</span>
+            <span
+              className="pointer-events-none absolute inset-y-0 right-0 w-1 opacity-80"
+              style={{ background: certificate.accent }}
+            />
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }
 
