@@ -4,7 +4,7 @@ import { useCallback, useEffect } from "react";
 import {
   X, LogIn, UserPlus, ShoppingBag, ShoppingCart,
   Heart, MessageCircle, Shield, HelpCircle, Bell,
-  Info,
+  Info, FileCheck2,
 } from "lucide-react";
 import { useNotifications } from "@/context/notifications-context";
 import { useFavorites } from "@/context/favorites-context";
@@ -44,6 +44,7 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
     { href: "/wishlist", label: "المفضلة",          icon: Heart,          highlight: false, badge: favCount },
     { href: "/notifications", label: "الإشعارات",  icon: Bell,           highlight: false, badge: unreadCount },
     { href: "/important-info", label: "معلومات مهمة", icon: Info,        highlight: false, badge: 0 },
+    { href: "/certificates/company-registration-algeria", label: "الشهادات", icon: FileCheck2, highlight: false, badge: 0 },
     { href: "/contact",  label: "تواصل معنا",       icon: MessageCircle,  highlight: false, badge: 0 },
     { href: "/privacy",  label: "سياسة الخصوصية",  icon: Shield,         highlight: false, badge: 0 },
     { href: "/faq",      label: "الأسئلة الشائعة",  icon: HelpCircle,     highlight: false, badge: 0 },
