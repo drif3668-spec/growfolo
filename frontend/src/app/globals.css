@@ -14,6 +14,33 @@
   --green: #84cc16;
   --green-bright: #4ade80;
   --line: rgba(168, 85, 247, 0.22);
+
+  /* ── Growfolo design tokens (single source of truth) ─────────────────── */
+  --gf-bg: #070b14;
+  --gf-surface: #0e1524;
+  --gf-surface-2: #131c2e;
+  --gf-line: rgba(255, 255, 255, 0.08);
+  --gf-line-strong: rgba(255, 255, 255, 0.16);
+  --gf-text: #f8fafc;
+  --gf-text-muted: #94a3b8;
+  --gf-brand: #10b981;
+  --gf-brand-strong: #059669;
+  --gf-brand-soft: rgba(16, 185, 129, 0.12);
+  --gf-accent: #38bdf8;
+  --gf-danger: #f43f5e;
+  --gf-warning: #f59e0b;
+
+  --gf-radius-sm: 10px;
+  --gf-radius: 14px;
+  --gf-radius-lg: 20px;
+  --gf-radius-pill: 9999px;
+
+  --gf-shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.4);
+  --gf-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
+  --gf-shadow-lg: 0 24px 60px rgba(2, 6, 23, 0.55);
+
+  --gf-font-body: "Tajawal", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gf-font-display: "Cairo", "Tajawal", system-ui, sans-serif;
 }
 
 * {
@@ -29,7 +56,32 @@ body {
     radial-gradient(circle at 50% 56%, rgba(168, 85, 247, 0.1), transparent 30rem),
     #050508;
   color: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--gf-font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--gf-font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Keyboard users must always see where focus is. */
+:focus-visible {
+  outline: 2px solid var(--gf-brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 a {
