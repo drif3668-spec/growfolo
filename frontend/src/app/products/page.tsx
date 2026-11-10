@@ -1,588 +1,164 @@
-"use client";
-
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import {
-  BadgeCheck, ChevronDown, ChevronRight, ChevronUp,
-  ShoppingCart, Star, Zap,
-} from "lucide-react";
-import { useCart } from "@/context/cart-context";
+import Link from "next/link";
+import type { Route } from "next";
 import { SiteHeader } from "@/components/layout/site-header";
-import { PRODUCTS } from "@/data/products";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { ProductCard } from "@/components/store/product-card";
+import { getProducts, groupByCategory } from "@/lib/server-api";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "";
+export const revalidate = 300;
 
-/* ── Types ─────────────────────────────────────────────────────── */
-interface Spec { label: string; value: string }
-interface FAQ  { question: string; answer: string }
+export const metadata = {
+  title: "المتجر",
+  description: "كل الاشتراكات والأدوات الرقمية المتاحة في Growfolo مع الأسعار والتصنيفات.",
+};
 
-interface ApiProduct {
-  id: string; name: string; slug: string; subtitle: string; logo: string;
-  description: string; full_description: string | null;
-  usage_details: string | null; requirements: string | null; benefits: string | null;
-  price: number; old_price: number; discount: string; buyers: string;
-  image_url: string | null; accent_color: string; logo_color: string;
-  category: string; badge: string | null; rating: number; reviews_count: number;
-  partners: string[]; features: string[]; specs: Spec[]; faq: FAQ[];
+const SORTS = [
+  { key: "featured", label: "المميزة" },
+  { key: "price-asc", label: "الأرخص" },
+  { key: "price-desc", label: "الأغلى" },
+  { key: "rating", label: "الأعلى تقييماً" },
+] as const;
+
+type SearchParams = Promise<{ q?: string; category?: string; sort?: string }>;
+
+function buildHref(params: { q?: string; category?: string; sort?: string }) {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set("q", params.q);
+  if (params.category) sp.set("category", params.category);
+  if (params.sort && params.sort !== "featured") sp.set("sort", params.sort);
+  const s = sp.toString();
+  return s ? `/products?${s}` : "/products";
 }
 
-function localToApi(p: (typeof PRODUCTS)[number]): ApiProduct {
-  return {
-    id: p.id, name: p.name, slug: p.id,
-    subtitle: p.subtitle, logo: p.logo,
-    description: p.description,
-    full_description: p.fullDescription ?? null,
-    usage_details: null, requirements: null, benefits: null,
-    price: p.price, old_price: p.oldPrice,
-    discount: p.discount, buyers: p.buyers,
-    image_url: null, accent_color: p.accentColor, logo_color: p.color,
-    category: p.category, badge: p.badge ?? null,
-    rating: p.rating, reviews_count: p.reviews,
-    partners: p.partners ?? [], features: p.features, specs: p.specs, faq: [],
-  };
-}
+export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
+  const { q = "", category = "", sort = "featured" } = await searchParams;
+  const all = await getProducts();
+  const categories = groupByCategory(all);
 
-/* ── Category tabs ─────────────────────────────────────────────── */
-const CATEGORIES = [
-  { id: "AI",            label: "الذكاء الاصطناعي",  icon: "🤖", active: true,  color: "#a855f7", description: "أدوات AI للإنتاجية والبرمجة والإبداع" },
-  { id: "Entertainment", label: "منتجات الترفيه",     icon: "🎬", active: false, color: "#ef4444", description: "نتفليكس، سبوتيفاي، ديزني+ والمزيد" },
-  { id: "Content",       label: "صناعة المحتوى",      icon: "🎨", active: false, color: "#f59e0b", description: "أدوبي، كانفا، كابكت وأدوات الإبداع" },
-  { id: "Gaming",        label: "شحن الألعاب",         icon: "🎮", active: false, color: "#10b981", description: "PUBG، فري فاير، بلايستيشن وأكثر" },
-];
+  const needle = q.trim().toLowerCase();
+  let items = all.filter((p) => {
+    const matchCategory = !category || (p.category ?? "") === category;
+    const matchQuery =
+      !needle ||
+      p.name.toLowerCase().includes(needle) ||
+      (p.subtitle ?? "").toLowerCase().includes(needle) ||
+      (p.description ?? "").toLowerCase().includes(needle);
+    return matchCategory && matchQuery;
+  });
 
-/* ════════════════════════════════════════════════════════════════
-   MAIN PAGE — wraps everything in Suspense (required for useSearchParams)
-════════════════════════════════════════════════════════════════ */
-export default function ProductsPage() {
-  return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-[#050508]">
-        <SiteHeader />
-        <div className="mx-auto max-w-6xl px-4 py-20 animate-pulse">
-          <div className="h-10 w-56 rounded-2xl bg-white/8 mb-8" />
-          <div className="grid gap-5 sm:grid-cols-3">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-64 rounded-3xl bg-white/5" />)}
-          </div>
-        </div>
-      </main>
-    }>
-      <ProductsContent />
-    </Suspense>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════
-   INNER CONTENT — reads ?id= query param
-════════════════════════════════════════════════════════════════ */
-function ProductsContent() {
-  const searchParams = useSearchParams();
-  const productId = searchParams.get("id");
-
-  if (productId) return <ProductDetail id={productId} />;
-  return <ProductListing />;
-}
-
-/* ════════════════════════════════════════════════════════════════
-   PRODUCT LISTING
-════════════════════════════════════════════════════════════════ */
-function ProductListing() {
-  const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("AI");
-
-  useEffect(() => {
-    fetch(`${API}/api/v1/products`)
-      .then((r) => r.json())
-      .then((d) => setProducts(Array.isArray(d) ? d : []))
-      .catch(() => setProducts(PRODUCTS.map(localToApi)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filtered = products.filter((p) => p.category === activeCategory);
-  const catInfo = CATEGORIES.find((c) => c.id === activeCategory)!;
+  if (sort === "price-asc") items = [...items].sort((a, b) => Number(a.price) - Number(b.price));
+  else if (sort === "price-desc") items = [...items].sort((a, b) => Number(b.price) - Number(a.price));
+  else if (sort === "rating")
+    items = [...items].sort((a, b) => Number(b.rating ?? 0) - Number(a.rating ?? 0));
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <>
       <SiteHeader />
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <nav aria-label="مسار التنقل" className="mb-4 text-xs text-[var(--gf-text-muted)]">
+          <Link href="/" className="hover:text-[var(--gf-brand)]">
+            الرئيسية
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-[var(--gf-text)]">المتجر</span>
+        </nav>
 
-      {/* Header */}
-      <section className="relative overflow-hidden py-16">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 size-[600px] rounded-full bg-purple-600/10 blur-[120px]" />
-        </div>
-        <div className="relative mx-auto max-w-6xl px-4">
-          <a href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">
-            ← الرئيسية
-          </a>
-          <h1 className="text-4xl font-black text-white md:text-5xl">
-            تصفح <span className="text-purple-400">المنتجات</span>
-          </h1>
-          <p className="mt-3 text-lg text-white/50">اشتراكات احترافية بأسعار لا تصدق</p>
-        </div>
-      </section>
+        <h1 className="text-3xl font-black text-[var(--gf-text)]">المتجر</h1>
+        <p className="mt-2 text-sm text-[var(--gf-text-muted)]">
+          {items.length} منتجاً متاحاً — الأسعار تُحسب من الكتالوج عند إتمام الطلب.
+        </p>
 
-      {/* Category tabs */}
-      <div className="sticky top-0 z-10 border-b border-white/8 bg-[#050508]/95 backdrop-blur-lg">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => cat.active && setActiveCategory(cat.id)}
-                className={`relative flex shrink-0 items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${
-                  activeCategory === cat.id
-                    ? "bg-white/10 text-white"
-                    : cat.active
-                    ? "text-white/50 hover:bg-white/5 hover:text-white/80"
-                    : "cursor-not-allowed text-white/25"
+        {/* Filters work without JavaScript: a plain GET form. */}
+        <form method="get" className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <div className="flex-1">
+            <label htmlFor="q" className="sr-only">
+              البحث
+            </label>
+            <input
+              id="q"
+              name="q"
+              defaultValue={q}
+              placeholder="ابحث عن اسم الأداة أو الاشتراك…"
+              className="h-11 w-full rounded-[var(--gf-radius-sm)] border border-[var(--gf-line-strong)] bg-[var(--gf-surface)] px-3 text-sm text-[var(--gf-text)] placeholder:text-[var(--gf-text-muted)]"
+            />
+          </div>
+          {category && <input type="hidden" name="category" value={category} />}
+          <label htmlFor="sort" className="sr-only">
+            الترتيب
+          </label>
+          <select
+            id="sort"
+            name="sort"
+            defaultValue={sort}
+            className="h-11 rounded-[var(--gf-radius-sm)] border border-[var(--gf-line-strong)] bg-[var(--gf-surface)] px-3 text-sm text-[var(--gf-text)]"
+          >
+            {SORTS.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="h-11 rounded-[var(--gf-radius-sm)] bg-[var(--gf-brand)] px-6 text-sm font-bold text-[#052e1c] transition hover:bg-[var(--gf-brand-strong)] hover:text-white"
+          >
+            تطبيق
+          </button>
+        </form>
+
+        {categories.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link
+              href={buildHref({ q, sort }) as Route}
+              className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                category
+                  ? "border-[var(--gf-line)] text-[var(--gf-text-muted)] hover:border-[var(--gf-brand)]"
+                  : "border-[var(--gf-brand)] bg-[var(--gf-brand-soft)] text-[var(--gf-brand)]"
+              }`}
+            >
+              كل التصنيفات
+            </Link>
+            {categories.map((c) => (
+              <Link
+                key={c.name}
+                href={buildHref({ q, sort, category: c.name }) as Route}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                  category === c.name
+                    ? "border-[var(--gf-brand)] bg-[var(--gf-brand-soft)] text-[var(--gf-brand)]"
+                    : "border-[var(--gf-line)] text-[var(--gf-text-muted)] hover:border-[var(--gf-brand)]"
                 }`}
               >
-                <span className="text-lg">{cat.icon}</span>
-                <span>{cat.label}</span>
-                {!cat.active && (
-                  <span className="rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] font-black text-white/30">قريباً</span>
-                )}
-                {activeCategory === cat.id && (
-                  <span className="absolute bottom-0 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full" style={{ background: catInfo.color }} />
-                )}
-              </button>
+                {c.name}
+                <span className="ms-2 text-xs opacity-60">{c.count}</span>
+              </Link>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        {catInfo.active ? (
-          loading ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-64 animate-pulse rounded-3xl bg-white/5" />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="text-5xl">📦</p>
-              <p className="mt-4 text-lg text-white/40">لا توجد منتجات متاحة حالياً</p>
-            </div>
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
-          )
-        ) : (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div
-              className="mb-6 grid size-24 place-items-center rounded-3xl text-5xl"
-              style={{ background: `${catInfo.color}15`, border: `1px solid ${catInfo.color}30` }}
-            >
-              {catInfo.icon}
-            </div>
-            <h2 className="text-3xl font-black text-white">{catInfo.label}</h2>
-            <p className="mt-3 max-w-xs text-white/45">{catInfo.description}</p>
-            <span className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-black text-white/40">
-              قريباً — يتم التحضير لها الآن
-            </span>
-          </div>
         )}
-      </div>
-    </main>
-  );
-}
 
-function ProductCard({ product }: { product: ApiProduct }) {
-  return (
-    <a
-      href={`/products?id=${product.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-[#0d0b14] p-5 transition-all hover:border-white/20 hover:shadow-[0_8px_40px_rgba(0,0,0,0.5)]"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity group-hover:opacity-100"
-        style={{ boxShadow: `inset 0 0 60px ${product.accent_color}10` }}
-      />
-      {product.badge && (
-        <span className="mb-4 self-start rounded-xl px-3 py-1 text-[11px] font-black text-black" style={{ background: product.accent_color }}>
-          {product.badge}
-        </span>
-      )}
-      <div
-        className="mb-4 grid size-16 shrink-0 place-items-center rounded-2xl text-4xl font-black transition-transform group-hover:scale-105"
-        style={{ background: `linear-gradient(135deg, ${product.accent_color}30, ${product.accent_color}10)`, border: `1px solid ${product.accent_color}40`, boxShadow: `0 0 30px ${product.accent_color}20` }}
-      >
-        {product.logo}
-      </div>
-      <div className="flex-1">
-        <h3 className="font-black text-white">{product.name}</h3>
-        <p className="mt-0.5 text-sm text-white/45">{product.subtitle}</p>
-        <div className="mt-2 flex items-center gap-1.5">
-          <Star size={12} className="fill-yellow-400 text-yellow-400" />
-          <span className="text-xs font-bold text-yellow-400">{product.rating}</span>
-          {product.reviews_count > 0 && <span className="text-xs text-white/30">({product.reviews_count.toLocaleString()})</span>}
-          {product.buyers && <span className="mr-auto text-xs text-white/30">{product.buyers}+ عميل</span>}
-        </div>
-      </div>
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-black text-white">${product.price}</span>
-          {product.old_price > 0 && <span className="text-sm text-white/30 line-through">${product.old_price}</span>}
-        </div>
-        {product.discount && (
-          <span className="rounded-lg px-2 py-0.5 text-xs font-black text-black" style={{ background: product.accent_color }}>{product.discount}</span>
-        )}
-      </div>
-      <div className="mt-3 flex items-center gap-1 text-xs font-bold opacity-0 transition-opacity group-hover:opacity-100" style={{ color: product.accent_color }}>
-        عرض التفاصيل <ChevronRight size={13} />
-      </div>
-    </a>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════
-   PRODUCT DETAIL
-════════════════════════════════════════════════════════════════ */
-function ProductDetail({ id }: { id: string }) {
-  const { addItem, openSidebar } = useCart();
-  const [product, setProduct] = useState<ApiProduct | null>(null);
-  const [related, setRelated] = useState<ApiProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetch(`${API}/api/v1/products/${id}`)
-      .then((r) => { if (!r.ok) throw new Error("not found"); return r.json(); })
-      .then((data: ApiProduct) => {
-        setProduct(data);
-        return fetch(`${API}/api/v1/products`)
-          .then((r) => r.json())
-          .then((all: ApiProduct[]) =>
-            setRelated((Array.isArray(all) ? all : []).filter((p) => p.id !== data.id && p.category === data.category).slice(0, 3))
-          )
-          .catch(() => {
-            setRelated(PRODUCTS.filter((p) => p.id !== id && p.category === data.category).slice(0, 3).map(localToApi));
-          });
-      })
-      .catch(() => {
-        const local = PRODUCTS.find((p) => p.id === id);
-        if (local) {
-          setProduct(localToApi(local));
-          setRelated(PRODUCTS.filter((p) => p.id !== id && p.category === local.category).slice(0, 3).map(localToApi));
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-[#050508]">
-        <SiteHeader />
-        <div className="mx-auto max-w-5xl px-4 py-16 animate-pulse">
-          <div className="h-6 w-48 rounded-xl bg-white/8 mb-10" />
-          <div className="grid gap-10 md:grid-cols-[auto_1fr]">
-            <div className="size-52 rounded-3xl bg-white/8" />
-            <div className="flex flex-col gap-4">
-              <div className="h-12 w-80 rounded-2xl bg-white/8" />
-              <div className="h-4 w-48 rounded-xl bg-white/5" />
-              <div className="h-20 w-full rounded-2xl bg-white/5" />
-              <div className="h-16 w-56 rounded-2xl bg-white/8" />
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!product) {
-    return (
-      <main className="flex min-h-screen flex-col bg-[#050508] text-white">
-        <SiteHeader />
-        <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <p className="text-2xl font-black text-white/30">المنتج غير موجود</p>
-          <a href="/products" className="neon-button rounded-2xl px-6 py-3 font-black text-black">العودة للمنتجات</a>
-        </div>
-      </main>
-    );
-  }
-
-  function handleAddToCart() {
-    if (!product) return;
-    addItem({ id: product.id, name: product.name, price: product.price, logo: product.logo, color: product.accent_color });
-    openSidebar();
-  }
-
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#050508] text-white" dir="rtl">
-      <SiteHeader />
-
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% -20%, ${product.accent_color}18 0%, transparent 70%)` }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050508]/50 to-[#050508]" />
-        <div className="pointer-events-none absolute left-1/4 top-8 size-72 rounded-full blur-[100px] opacity-20" style={{ background: product.accent_color }} />
-
-        <div className="relative mx-auto max-w-5xl px-4 py-16">
-          {/* Breadcrumb */}
-          <div className="mb-8 flex items-center gap-2 text-sm text-white/40">
-            <a href="/" className="hover:text-white transition-colors">الرئيسية</a>
-            <span>/</span>
-            <a href="/products" className="hover:text-white transition-colors">المنتجات</a>
-            <span>/</span>
-            <span className="text-white/70">{product.name}</span>
-          </div>
-
-          <div className="grid gap-10 md:grid-cols-[auto_1fr]">
-            {/* Visual */}
-            <div className="relative mx-auto flex shrink-0 flex-col items-center">
-              <div
-                className="relative grid size-52 shrink-0 place-items-center rounded-3xl text-7xl font-black text-white"
-                style={{
-                  background: `linear-gradient(145deg, ${product.accent_color}40 0%, ${product.accent_color}15 50%, ${product.accent_color}05 100%)`,
-                  border: `1px solid ${product.accent_color}50`,
-                  boxShadow: `0 0 0 1px ${product.accent_color}20, 0 30px 80px ${product.accent_color}35, 0 0 120px ${product.accent_color}20`,
-                  transform: "perspective(600px) rotateY(-5deg) rotateX(2deg)",
-                }}
-              >
-                {product.image_url ? (
-                  <img src={`${API}${product.image_url}`} alt={product.name} className="size-36 object-contain" />
-                ) : (
-                  <span>{product.logo}</span>
-                )}
-                <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: "linear-gradient(145deg, rgba(255,255,255,0.12) 0%, transparent 60%)" }} />
-              </div>
-              <div className="mt-2 h-12 w-40 rounded-b-3xl opacity-20 blur-sm" style={{ background: `linear-gradient(to bottom, ${product.accent_color}50, transparent)` }} />
-            </div>
-
-            {/* Info */}
-            <div className="flex flex-col justify-center">
-              {product.badge && (
-                <span className="mb-3 inline-block self-start rounded-xl px-3 py-1 text-xs font-black text-black" style={{ background: product.accent_color }}>
-                  {product.badge}
-                </span>
-              )}
-              <h1 className="text-4xl font-black text-white md:text-5xl">{product.name}</h1>
-              <p className="mt-1.5 text-lg text-white/50">{product.subtitle}</p>
-
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className={i < Math.round(product.rating) ? "fill-yellow-400 text-yellow-400" : "fill-white/15 text-white/15"} />
-                  ))}
-                  <span className="text-sm font-bold text-yellow-400">{product.rating}</span>
-                  <span className="text-sm text-white/35">({product.reviews_count.toLocaleString()} تقييم)</span>
-                </div>
-                {product.buyers && (
-                  <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/50">{product.buyers}+ عميل</span>
-                )}
-              </div>
-
-              <p className="mt-4 max-w-xl leading-8 text-white/65">{product.description}</p>
-
-              <div className="mt-6 flex items-end gap-3">
-                <span className="text-5xl font-black" style={{ color: product.accent_color }}>${product.price}</span>
-                {product.old_price > 0 && (
-                  <div className="mb-1.5 flex flex-col">
-                    <span className="text-lg text-white/30 line-through">${product.old_price}</span>
-                    {product.discount && (
-                      <span className="mt-0.5 self-start rounded-lg px-2 py-0.5 text-xs font-black text-black" style={{ background: product.accent_color }}>
-                        وفّر {product.discount}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  className="flex items-center gap-3 rounded-2xl px-8 py-4 text-base font-black text-black transition-all hover:scale-105 hover:brightness-110"
-                  style={{ background: product.accent_color, boxShadow: `0 0 30px ${product.accent_color}55` }}
-                >
-                  <ShoppingCart size={20} /> إضافة للسلة
-                </button>
-                <a
-                  href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}&id=${product.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-base font-bold text-white hover:bg-white/10 transition-colors"
-                >
-                  شراء الآن
-                </a>
-              </div>
-
-              {product.partners.length > 0 && (
-                <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-white/35">
-                  <span>بالشراكة مع:</span>
-                  {product.partners.map((p) => (
-                    <span key={p} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 font-bold text-white/60">{p}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Body ── */}
-      <div className="mx-auto max-w-5xl px-4 pb-20">
-        <div className="grid gap-6 md:grid-cols-[1fr_300px]">
-
-          {/* Main column */}
-          <div className="flex flex-col gap-6">
-            {product.features.length > 0 && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-7">
-                <h2 className="mb-5 text-xl font-black text-white">ماذا تحصل عليه؟</h2>
-                <ul className="grid gap-3.5">
-                  {product.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <BadgeCheck size={18} className="mt-0.5 shrink-0" style={{ color: product.accent_color }} />
-                      <span className="leading-6 text-white/75">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {product.full_description && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-7">
-                <h2 className="mb-4 text-xl font-black text-white">عن المنتج</h2>
-                <p className="leading-9 text-white/70 whitespace-pre-line text-[15px]">{product.full_description}</p>
-              </div>
-            )}
-
-            {product.usage_details && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-7">
-                <h2 className="mb-4 text-xl font-black text-white">طريقة الاستخدام</h2>
-                <p className="leading-8 text-white/65 whitespace-pre-line">{product.usage_details}</p>
-              </div>
-            )}
-
-            {product.benefits && (
-              <div className="rounded-3xl p-7" style={{ background: `linear-gradient(135deg, ${product.accent_color}10, ${product.accent_color}05)`, border: `1px solid ${product.accent_color}25` }}>
-                <h2 className="mb-4 text-xl font-black text-white">لماذا تختاره؟</h2>
-                <p className="leading-8 text-white/70 whitespace-pre-line">{product.benefits}</p>
-              </div>
-            )}
-
-            {product.faq.length > 0 && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-7">
-                <h2 className="mb-5 text-xl font-black text-white">أسئلة شائعة</h2>
-                <div className="flex flex-col gap-2">
-                  {product.faq.map((item, i) => (
-                    <div key={i} className="overflow-hidden rounded-2xl border border-white/6 bg-white/3">
-                      <button
-                        onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                        className="flex w-full items-center justify-between gap-4 p-4 text-right font-bold text-white hover:bg-white/3 transition-colors"
-                      >
-                        <span>{item.question}</span>
-                        {openFaq === i ? <ChevronUp size={16} className="shrink-0 text-white/40" /> : <ChevronDown size={16} className="shrink-0 text-white/40" />}
-                      </button>
-                      {openFaq === i && (
-                        <div className="border-t border-white/6 px-4 pb-4 pt-3 text-sm leading-7 text-white/60">{item.answer}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="flex flex-col gap-5">
-            {product.specs.length > 0 && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-6">
-                <h2 className="mb-4 font-black text-white">المواصفات</h2>
-                <div className="grid gap-2.5">
-                  {product.specs.map((s) => (
-                    <div key={s.label} className="flex items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2.5">
-                      <span className="text-xs text-white/45">{s.label}</span>
-                      <span className="text-xs font-black text-white">{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.requirements && (
-              <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-6">
-                <h2 className="mb-3 font-black text-white">المتطلبات</h2>
-                <p className="text-sm leading-7 text-white/55 whitespace-pre-line">{product.requirements}</p>
-              </div>
-            )}
-
-            <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-6">
-              <h2 className="mb-4 font-black text-white">ضماناتنا</h2>
-              <div className="grid gap-3 text-xs text-white/60">
-                {[
-                  { icon: "⚡", text: "تسليم فوري خلال دقائق" },
-                  { icon: "🔒", text: "دفع آمن 100%" },
-                  { icon: "🔄", text: "ضمان الاسترجاع 30 يوماً" },
-                  { icon: "💬", text: "دعم 24/7" },
-                ].map((g) => (
-                  <div key={g.text} className="flex items-center gap-2.5">
-                    <span className="text-base">{g.icon}</span><span>{g.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Sticky buy box */}
-            <div
-              className="sticky top-20 rounded-3xl p-5 text-center"
-              style={{ background: `linear-gradient(135deg, ${product.accent_color}18, ${product.accent_color}08)`, border: `1px solid ${product.accent_color}30` }}
-            >
-              <p className="text-3xl font-black text-white">${product.price}</p>
-              {product.old_price > 0 && <p className="mt-0.5 text-sm text-white/35 line-through">${product.old_price}</p>}
-              <button
-                onClick={handleAddToCart}
-                className="mt-4 w-full rounded-2xl py-3.5 text-sm font-black text-black transition-all hover:brightness-110"
-                style={{ background: product.accent_color }}
-              >
-                إضافة للسلة
-              </button>
-              <a
-                href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}&id=${product.id}`}
-                className="mt-2 block w-full rounded-2xl border border-white/15 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-colors"
-              >
-                شراء الآن
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Trust strip */}
-        <div className="mt-8 rounded-3xl border border-white/8 bg-[#0d0b14] p-5">
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/45">
-            {[
-              { icon: Zap, text: "تفعيل فوري" },
-              { icon: BadgeCheck, text: "اشتراك أصلي 100%" },
-              { icon: Star, text: `${product.rating}/5 تقييم العملاء` },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-2">
-                <Icon size={15} style={{ color: product.accent_color }} /><span>{text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Related */}
-        {related.length > 0 && (
-          <div className="mt-12">
-            <h2 className="mb-6 text-2xl font-black text-white">منتجات مشابهة</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {related.map((rel) => (
-                <a
-                  key={rel.id}
-                  href={`/products?id=${rel.id}`}
-                  className="group flex items-center gap-4 rounded-3xl border border-white/8 bg-[#0d0b14] p-4 transition-all hover:border-white/20"
-                >
-                  <div className="grid size-14 shrink-0 place-items-center rounded-2xl text-2xl font-black transition-transform group-hover:scale-110" style={{ background: `${rel.accent_color}22`, border: `1px solid ${rel.accent_color}33` }}>
-                    {rel.logo}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-white">{rel.name}</p>
-                    <p className="mt-0.5 text-sm font-black" style={{ color: rel.accent_color }}>${rel.price}</p>
-                  </div>
-                </a>
+        <div className="mt-8">
+          {items.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {items.map((p, i) => (
+                <ProductCard key={p.id} product={p} priority={i < 4} />
               ))}
             </div>
-          </div>
-        )}
-      </div>
-    </main>
+          ) : (
+            <div className="rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-surface)] p-8 text-center">
+              <p className="text-sm font-bold text-[var(--gf-text)]">لا توجد نتائج مطابقة</p>
+              <p className="mt-1 text-sm text-[var(--gf-text-muted)]">
+                جرّب كلمة بحث أقصر أو أزل فلتر التصنيف.
+              </p>
+              <Link
+                href="/products"
+                className="mt-4 inline-block text-sm font-bold text-[var(--gf-brand)]"
+              >
+                إعادة تعيين الفلاتر
+              </Link>
+            </div>
+          )}
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
