@@ -4,12 +4,16 @@ import { CheckoutWizard } from "@/features/checkout/checkout-wizard";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string; price?: string; method?: string }>;
+  searchParams: Promise<{ product?: string; price?: string; method?: string; id?: string }>;
 }) {
   const params = await searchParams;
   const product =
     params.product && params.price
-      ? { name: decodeURIComponent(params.product), price: parseFloat(params.price) }
+      ? {
+          id: params.id ? decodeURIComponent(params.id) : undefined,
+          name: decodeURIComponent(params.product),
+          price: parseFloat(params.price),
+        }
       : undefined;
   const defaultMethod = params.method ?? null;
 

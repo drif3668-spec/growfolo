@@ -397,7 +397,7 @@ function ProductDetail({ id }: { id: string }) {
                   <ShoppingCart size={20} /> إضافة للسلة
                 </button>
                 <a
-                  href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}`}
+                  href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}&id=${product.id}`}
                   className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-base font-bold text-white hover:bg-white/10 transition-colors"
                 >
                   شراء الآن
@@ -535,7 +535,7 @@ function ProductDetail({ id }: { id: string }) {
                 إضافة للسلة
               </button>
               <a
-                href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}`}
+                href={`/checkout?product=${encodeURIComponent(product.name)}&price=${product.price}&id=${product.id}`}
                 className="mt-2 block w-full rounded-2xl border border-white/15 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-colors"
               >
                 شراء الآن

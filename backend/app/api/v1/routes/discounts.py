@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.routes.auth import _get_current_user as get_current_user
 from app.db.session import get_db
+from app.api.deps import require_admin
 from app.models.discount_code import DiscountCode
 from app.models.user import User
 from app.models.user_discount import UserDiscount
@@ -76,12 +77,12 @@ def _gen_code() -> str:
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[DiscountOut])
+@router.get("", response_model=list[DiscountOut], dependencies=[Depends(require_admin)])
 def list_codes(db: Session = Depends(get_db)) -> list[DiscountCode]:
     return list(db.scalars(select(DiscountCode).order_by(DiscountCode.created_at.desc())))
 
 
-@router.post("", response_model=DiscountOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=DiscountOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_code(payload: DiscountCreate, db: Session = Depends(get_db)) -> DiscountCode:
     code_str = payload.code.strip().upper() if payload.code else _gen_code()
     existing = db.scalar(select(DiscountCode).where(DiscountCode.code == code_str))
@@ -114,6 +115,7 @@ def create_code(payload: DiscountCreate, db: Session = Depends(get_db)) -> Disco
     "/{code_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    dependencies=[Depends(require_admin)],
 )
 def delete_code(code_id: int, db: Session = Depends(get_db)) -> Response:
     dc = db.get(DiscountCode, code_id)
@@ -124,7 +126,7 @@ def delete_code(code_id: int, db: Session = Depends(get_db)) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.patch("/{code_id}/toggle", response_model=DiscountOut)
+@router.patch("/{code_id}/toggle", response_model=DiscountOut, dependencies=[Depends(require_admin)])
 def toggle_code(code_id: int, db: Session = Depends(get_db)) -> DiscountCode:
     dc = db.get(DiscountCode, code_id)
     if not dc:
@@ -149,7 +151,7 @@ def validate_code(payload: ValidateRequest, db: Session = Depends(get_db)) -> Di
     return dc
 
 
-@router.post("/use/{code}", response_model=DiscountOut)
+@router.post("/use/{code}", response_model=DiscountOut, dependencies=[Depends(require_admin)])
 def use_code(code: str, db: Session = Depends(get_db)) -> DiscountCode:
     dc = db.scalar(select(DiscountCode).where(DiscountCode.code == code.upper()))
     if not dc:

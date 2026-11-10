@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.api.deps import require_admin
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
 
@@ -25,7 +26,10 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
 
 
 @router.get("/all", response_model=list[ProductRead])
-def list_all_products(db: Session = Depends(get_db)) -> list[Product]:
+def list_all_products(
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> list[Product]:
     """Admin: all products including unpublished."""
     return list(db.scalars(
         select(Product).order_by(Product.sort_order.asc(), Product.created_at.desc())
@@ -58,7 +62,11 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> Product:
 
 
 @router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
-def create_product(payload: ProductCreate, db: Session = Depends(get_db)) -> Product:
+def create_product(
+    payload: ProductCreate,
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> Product:
     product = Product(**payload.model_dump())
     db.add(product)
     db.commit()
@@ -71,6 +79,7 @@ def update_product(
     product_id: str,
     payload: ProductUpdate,
     db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
 ) -> Product:
     product = db.get(Product, product_id)
     if not product:
@@ -83,7 +92,11 @@ def update_product(
 
 
 @router.patch("/{product_id}/toggle", response_model=ProductRead)
-def toggle_published(product_id: str, db: Session = Depends(get_db)) -> Product:
+def toggle_published(
+    product_id: str,
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> Product:
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="المنتج غير موجود")
@@ -98,6 +111,7 @@ def upload_image(
     product_id: str,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
 ) -> Product:
     product = db.get(Product, product_id)
     if not product:
@@ -120,7 +134,11 @@ def upload_image(
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-def delete_product(product_id: str, db: Session = Depends(get_db)) -> Response:
+def delete_product(
+    product_id: str,
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> Response:
     product = db.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="المنتج غير موجود")

@@ -10,6 +10,18 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+/**
+ * Every admin request must carry the session token. The backend now rejects
+ * anonymous writes, so a missing token surfaces as 401 instead of a silent
+ * "success" against an unprotected endpoint.
+ */
+function authFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("gf_token") : null;
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  return globalThis.fetch(input, { ...init, headers });
+}
+
 /* ── Types ─────────────────────────────────────────────────────────────── */
 type ChatSession = { id: string; name: string; email: string; whatsapp: string; is_resolved: boolean; created_at: string; last_message: string | null };
 type ChatMessage = { id: string; content: string; is_admin: boolean; created_at: string; session_id?: string };
@@ -140,7 +152,7 @@ export function AdminDashboard() {
   const loadSlides = useCallback(async () => {
     setSlidesLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/banners/admin/all`);
+      const res = await authFetch(`${API_URL}/api/v1/banners/admin/all`);
       if (res.ok) setSlides(await res.json());
     } catch {} finally { setSlidesLoading(false); }
   }, []);
@@ -182,7 +194,7 @@ export function AdminDashboard() {
     try {
       const url = editingId ? `${API_URL}/api/v1/banners/${editingId}` : `${API_URL}/api/v1/banners`;
       const method = editingId ? "PUT" : "POST";
-      const res = await fetch(url, { method, body: fd });
+      const res = await authFetch(url, { method, body: fd });
       if (res.ok) {
         setShowForm(false);
         await loadSlides();
@@ -192,12 +204,12 @@ export function AdminDashboard() {
 
   async function deleteBanner(id: number) {
     if (!confirm("حذف هذه الشريحة؟")) return;
-    await fetch(`${API_URL}/api/v1/banners/${id}`, { method: "DELETE" });
+    await authFetch(`${API_URL}/api/v1/banners/${id}`, { method: "DELETE" });
     setSlides((p) => p.filter((s) => s.id !== id));
   }
 
   async function toggleBanner(id: number) {
-    const res = await fetch(`${API_URL}/api/v1/banners/${id}/toggle`, { method: "PATCH" });
+    const res = await authFetch(`${API_URL}/api/v1/banners/${id}/toggle`, { method: "PATCH" });
     if (res.ok) { const updated: BannerSlide = await res.json(); setSlides((p) => p.map((s) => s.id === id ? updated : s)); }
   }
 
@@ -207,8 +219,8 @@ export function AdminDashboard() {
     if (swap < 0 || swap >= slides.length) return;
     const a = slides[idx], b = slides[swap];
     await Promise.all([
-      fetch(`${API_URL}/api/v1/banners/${a.id}/order?sort_order=${b.sort_order}`, { method: "PATCH" }),
-      fetch(`${API_URL}/api/v1/banners/${b.id}/order?sort_order=${a.sort_order}`, { method: "PATCH" }),
+      authFetch(`${API_URL}/api/v1/banners/${a.id}/order?sort_order=${b.sort_order}`, { method: "PATCH" }),
+      authFetch(`${API_URL}/api/v1/banners/${b.id}/order?sort_order=${a.sort_order}`, { method: "PATCH" }),
     ]);
     await loadSlides();
   }
@@ -251,7 +263,7 @@ export function AdminDashboard() {
   const loadOrders = useCallback(async () => {
     setOrdersLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/store-orders`);
+      const res = await authFetch(`${API_URL}/api/v1/store-orders`);
       if (res.ok) setOrders(await res.json());
     } catch {} finally { setOrdersLoading(false); }
   }, []);
@@ -262,7 +274,7 @@ export function AdminDashboard() {
   const loadDiscounts = useCallback(async () => {
     setDiscountsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/discounts`);
+      const res = await authFetch(`${API_URL}/api/v1/discounts`);
       if (res.ok) setDiscounts(await res.json());
     } catch {} finally { setDiscountsLoading(false); }
   }, []);
@@ -281,7 +293,7 @@ export function AdminDashboard() {
         expires_at: dcForm.expires_at || undefined,
         max_uses: dcForm.max_uses,
       };
-      const res = await fetch(`${API_URL}/api/v1/discounts`, {
+      const res = await authFetch(`${API_URL}/api/v1/discounts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -293,12 +305,12 @@ export function AdminDashboard() {
 
   async function deleteDiscount(id: number) {
     if (!confirm("حذف الكود؟")) return;
-    await fetch(`${API_URL}/api/v1/discounts/${id}`, { method: "DELETE" });
+    await authFetch(`${API_URL}/api/v1/discounts/${id}`, { method: "DELETE" });
     setDiscounts((p) => p.filter((d) => d.id !== id));
   }
 
   async function toggleDiscount(id: number) {
-    const res = await fetch(`${API_URL}/api/v1/discounts/${id}/toggle`, { method: "PATCH" });
+    const res = await authFetch(`${API_URL}/api/v1/discounts/${id}/toggle`, { method: "PATCH" });
     if (res.ok) { const updated: DiscountCode = await res.json(); setDiscounts((p) => p.map((d) => d.id === id ? updated : d)); }
   }
 
@@ -312,7 +324,7 @@ export function AdminDashboard() {
   const updateTracking = async (orderId: string) => {
     setUpdatingTracking(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/store-orders/${orderId}/tracking`, {
+      const res = await authFetch(`${API_URL}/api/v1/store-orders/${orderId}/tracking`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tracking_stage: trackingStage, tracking_notes: trackingNote || null }),
@@ -329,7 +341,7 @@ export function AdminDashboard() {
   const updateStatus = async (orderId: string, status: string) => {
     setUpdating(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/store-orders/${orderId}/status`, {
+      const res = await authFetch(`${API_URL}/api/v1/store-orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, admin_notes: statusNote || null }),
@@ -346,7 +358,7 @@ export function AdminDashboard() {
   /* ── Chat sessions ─────────────────────────────────────────────────── */
   const loadSessions = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/sessions`);
+      const res = await authFetch(`${API_URL}/api/v1/chat/sessions`);
       if (res.ok) setSessions(await res.json());
     } catch {}
   }, []);
@@ -381,7 +393,7 @@ export function AdminDashboard() {
     activeSidRef.current = session.id;
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/sessions/${session.id}/messages`);
+      const res = await authFetch(`${API_URL}/api/v1/chat/sessions/${session.id}/messages`);
       if (res.ok) {
         const msgs: ChatMessage[] = await res.json();
         setMessages(msgs);
@@ -399,7 +411,7 @@ export function AdminDashboard() {
         const url = since
           ? `${API_URL}/api/v1/chat/sessions/${sid}/messages?since=${encodeURIComponent(since)}`
           : `${API_URL}/api/v1/chat/sessions/${sid}/messages`;
-        const r = await fetch(url);
+        const r = await authFetch(url);
         if (!r.ok) return;
         const msgs: ChatMessage[] = await r.json();
         if (msgs.length === 0) return;
@@ -423,7 +435,7 @@ export function AdminDashboard() {
     const content = reply.trim();
     setReply("");
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/sessions/${activeSession.id}/messages`, {
+      const res = await authFetch(`${API_URL}/api/v1/chat/sessions/${activeSession.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, is_admin: true }),
@@ -439,7 +451,7 @@ export function AdminDashboard() {
   }, [reply, activeSession]);
 
   const resolveSession = async (id: string) => {
-    await fetch(`${API_URL}/api/v1/chat/sessions/${id}/resolve`, { method: "PATCH" });
+    await authFetch(`${API_URL}/api/v1/chat/sessions/${id}/resolve`, { method: "PATCH" });
     setSessions((p) => p.map((s) => (s.id === id ? { ...s, is_resolved: true } : s)));
     if (activeSession?.id === id) setActiveSession((p) => p ? { ...p, is_resolved: true } : p);
   };
@@ -457,7 +469,7 @@ export function AdminDashboard() {
   const loadBlogPosts = useCallback(async () => {
     setBlogLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/blog/admin/all`);
+      const res = await authFetch(`${API_URL}/api/v1/blog/admin/all`);
       if (res.ok) setBlogPosts(await res.json());
     } catch {} finally { setBlogLoading(false); }
   }, []);
@@ -486,7 +498,7 @@ export function AdminDashboard() {
     try {
       const url = editingBlogId ? `${API_URL}/api/v1/blog/${editingBlogId}` : `${API_URL}/api/v1/blog`;
       const method = editingBlogId ? "PUT" : "POST";
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await authFetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.ok) { setShowBlogForm(false); await loadBlogPosts(); }
       else { const err = await res.json(); alert(err.detail ?? "خطأ في الحفظ"); }
     } catch {} finally { setBlogSaving(false); }
@@ -494,18 +506,18 @@ export function AdminDashboard() {
 
   async function deleteBlogPost(id: string) {
     if (!confirm("حذف هذا المقال نهائياً؟")) return;
-    await fetch(`${API_URL}/api/v1/blog/${id}`, { method: "DELETE" });
+    await authFetch(`${API_URL}/api/v1/blog/${id}`, { method: "DELETE" });
     setBlogPosts(p => p.filter(b => b.id !== id));
     if (editingBlogId === id) { setShowBlogForm(false); setEditingBlogId(null); }
   }
 
   async function toggleBlogPublish(id: string) {
-    const res = await fetch(`${API_URL}/api/v1/blog/${id}/toggle`, { method: "PATCH" });
+    const res = await authFetch(`${API_URL}/api/v1/blog/${id}/toggle`, { method: "PATCH" });
     if (res.ok) { const u: BlogPost = await res.json(); setBlogPosts(p => p.map(b => b.id === id ? u : b)); }
   }
 
   async function toggleBlogFeatured(id: string) {
-    const res = await fetch(`${API_URL}/api/v1/blog/${id}/featured`, { method: "PATCH" });
+    const res = await authFetch(`${API_URL}/api/v1/blog/${id}/featured`, { method: "PATCH" });
     if (res.ok) { const u: BlogPost = await res.json(); setBlogPosts(p => p.map(b => b.id === id ? u : b)); }
   }
 
@@ -1598,7 +1610,7 @@ function ProductsAdmin() {
 
   function load() {
     setLoading(true);
-    fetch(`${API_URL}/api/v1/products/all`)
+    authFetch(`${API_URL}/api/v1/products/all`)
       .then((r) => r.json())
       .then((d) => setProducts(Array.isArray(d) ? d : []))
       .catch(() => setProducts([]))
@@ -1630,13 +1642,13 @@ function ProductsAdmin() {
     try {
       const payload = buildPayload(form);
       if (creating) {
-        await fetch(`${API_URL}/api/v1/products`, {
+        await authFetch(`${API_URL}/api/v1/products`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       } else if (editing) {
-        await fetch(`${API_URL}/api/v1/products/${editing.id}`, {
+        await authFetch(`${API_URL}/api/v1/products/${editing.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -1652,13 +1664,13 @@ function ProductsAdmin() {
   }
 
   async function togglePublish(id: string) {
-    await fetch(`${API_URL}/api/v1/products/${id}/toggle`, { method: "PATCH" });
+    await authFetch(`${API_URL}/api/v1/products/${id}/toggle`, { method: "PATCH" });
     load();
   }
 
   async function deleteProduct(id: string) {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
-    await fetch(`${API_URL}/api/v1/products/${id}`, { method: "DELETE" });
+    await authFetch(`${API_URL}/api/v1/products/${id}`, { method: "DELETE" });
     load();
   }
 
@@ -1666,7 +1678,7 @@ function ProductsAdmin() {
     setUploadingId(productId);
     const fd = new FormData();
     fd.append("file", file);
-    await fetch(`${API_URL}/api/v1/products/${productId}/image`, { method: "POST", body: fd });
+    await authFetch(`${API_URL}/api/v1/products/${productId}/image`, { method: "POST", body: fd });
     setUploadingId(null);
     load();
   }

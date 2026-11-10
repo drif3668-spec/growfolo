@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.api.deps import require_admin
 from app.models.banner import BannerSlide
 
 router = APIRouter()
@@ -79,7 +80,7 @@ def list_active_banners(db: Session = Depends(get_db)) -> list[BannerSlide]:
 
 # ── Admin ──────────────────────────────────────────────────────────────────
 
-@router.get("/admin/all", response_model=list[SlideOut])
+@router.get("/admin/all", response_model=list[SlideOut], dependencies=[Depends(require_admin)])
 def list_all_banners(db: Session = Depends(get_db)) -> list[BannerSlide]:
     """Returns all slides (active + inactive) for admin panel."""
     return list(
@@ -87,7 +88,7 @@ def list_all_banners(db: Session = Depends(get_db)) -> list[BannerSlide]:
     )
 
 
-@router.post("", response_model=SlideOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SlideOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 async def create_banner(
     image: UploadFile = File(...),
     title: str = Form(""),
@@ -129,7 +130,7 @@ async def create_banner(
     return slide
 
 
-@router.put("/{slide_id}", response_model=SlideOut)
+@router.put("/{slide_id}", response_model=SlideOut, dependencies=[Depends(require_admin)])
 async def update_banner(
     slide_id: int,
     title: str = Form(""),
@@ -182,6 +183,7 @@ async def update_banner(
     "/{slide_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    dependencies=[Depends(require_admin)],
 )
 def delete_banner(slide_id: int, db: Session = Depends(get_db)) -> Response:
     slide = db.get(BannerSlide, slide_id)
@@ -195,7 +197,7 @@ def delete_banner(slide_id: int, db: Session = Depends(get_db)) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.patch("/{slide_id}/order", response_model=SlideOut)
+@router.patch("/{slide_id}/order", response_model=SlideOut, dependencies=[Depends(require_admin)])
 def update_order(slide_id: int, sort_order: int, db: Session = Depends(get_db)) -> BannerSlide:
     slide = db.get(BannerSlide, slide_id)
     if not slide:
@@ -206,7 +208,7 @@ def update_order(slide_id: int, sort_order: int, db: Session = Depends(get_db)) 
     return slide
 
 
-@router.patch("/{slide_id}/toggle", response_model=SlideOut)
+@router.patch("/{slide_id}/toggle", response_model=SlideOut, dependencies=[Depends(require_admin)])
 def toggle_banner(slide_id: int, db: Session = Depends(get_db)) -> BannerSlide:
     slide = db.get(BannerSlide, slide_id)
     if not slide:

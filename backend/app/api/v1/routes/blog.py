@@ -11,6 +11,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.api.deps import require_admin
 from app.models.blog_post import BlogPost
 
 router = APIRouter()
@@ -111,7 +112,7 @@ def list_posts(
     return [PostOut.from_orm(p) for p in db.scalars(q)]
 
 
-@router.get("/admin/all", response_model=list[PostOut])
+@router.get("/admin/all", response_model=list[PostOut], dependencies=[Depends(require_admin)])
 def list_all_posts(db: Session = Depends(get_db)) -> list[PostOut]:
     posts = db.scalars(select(BlogPost).order_by(BlogPost.created_at.desc()))
     return [PostOut.from_orm(p) for p in posts]
@@ -128,7 +129,7 @@ def get_post(slug: str, db: Session = Depends(get_db)) -> PostOut:
     return PostOut.from_orm(post)
 
 
-@router.post("", response_model=PostOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=PostOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_post(payload: PostCreate, db: Session = Depends(get_db)) -> PostOut:
     slug = payload.slug.strip() if payload.slug else _make_slug(payload.title, db)
     existing = db.scalar(select(BlogPost).where(BlogPost.slug == slug))
@@ -151,7 +152,7 @@ def create_post(payload: PostCreate, db: Session = Depends(get_db)) -> PostOut:
     return PostOut.from_orm(post)
 
 
-@router.put("/{post_id}", response_model=PostOut)
+@router.put("/{post_id}", response_model=PostOut, dependencies=[Depends(require_admin)])
 def update_post(post_id: str, payload: PostUpdate, db: Session = Depends(get_db)) -> PostOut:
     post = db.get(BlogPost, post_id)
     if not post:
@@ -177,7 +178,7 @@ def update_post(post_id: str, payload: PostUpdate, db: Session = Depends(get_db)
     return PostOut.from_orm(post)
 
 
-@router.patch("/{post_id}/toggle", response_model=PostOut)
+@router.patch("/{post_id}/toggle", response_model=PostOut, dependencies=[Depends(require_admin)])
 def toggle_published(post_id: str, db: Session = Depends(get_db)) -> PostOut:
     post = db.get(BlogPost, post_id)
     if not post:
@@ -189,7 +190,7 @@ def toggle_published(post_id: str, db: Session = Depends(get_db)) -> PostOut:
     return PostOut.from_orm(post)
 
 
-@router.patch("/{post_id}/featured", response_model=PostOut)
+@router.patch("/{post_id}/featured", response_model=PostOut, dependencies=[Depends(require_admin)])
 def toggle_featured(post_id: str, db: Session = Depends(get_db)) -> PostOut:
     post = db.get(BlogPost, post_id)
     if not post:
@@ -205,6 +206,7 @@ def toggle_featured(post_id: str, db: Session = Depends(get_db)) -> PostOut:
     "/{post_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
+    dependencies=[Depends(require_admin)],
 )
 def delete_post(post_id: str, db: Session = Depends(get_db)) -> Response:
     post = db.get(BlogPost, post_id)

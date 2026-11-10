@@ -32,7 +32,7 @@ const COUNTRIES = [
 type SavedState = {
   step: number;
   orderId: string | null;
-  product: { name: string; price: number };
+  product: { id?: string; name: string; price: number };
   customer: Customer;
   method: string | null;
   startedAt: number | null;
@@ -258,7 +258,7 @@ export function CheckoutWizard({
   product,
   defaultMethod,
 }: {
-  product?: { name: string; price: number };
+  product?: { id?: string; name: string; price: number };
   defaultMethod?: string | null;
 }) {
   const defaultProduct = product ?? { name: "Claude Pro", price: 19 };
@@ -327,7 +327,7 @@ export function CheckoutWizard({
           customer_name: customer.name, customer_email: customer.email,
           customer_whatsapp: customer.whatsapp, customer_country: customer.country,
           customer_telegram: customer.telegram, customer_notes: customer.notes,
-          product_name: defaultProduct.name, product_price: defaultProduct.price,
+          product_id: defaultProduct.id ?? defaultProduct.name,
           payment_method: method,
         }),
       });

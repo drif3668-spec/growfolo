@@ -14,8 +14,12 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.api.deps import require_admin
 from app.models.order import Order
+from app.models.product import Product
+from app.models.discount_code import DiscountCode
 from app.models.proof import OrderProof
+from decimal import Decimal
 from app.services.email import send_order_activated, send_order_received, send_order_rejected, send_proof_uploaded_admin
 
 router = APIRouter()
@@ -29,15 +33,16 @@ MAX_PROOF_BYTES = 15 * 1024 * 1024  # 15 MB per file
 # ── Schemas ────────────────────────────────────────────────────────────────
 
 class OrderCreate(BaseModel):
-    customer_name: str
-    customer_email: str
-    customer_whatsapp: str
-    customer_country: str
-    customer_telegram: str | None = None
-    customer_notes: str | None = None
-    product_name: str
-    product_price: float
-    payment_method: str
+    customer_name: str = Field(min_length=2, max_length=160)
+    customer_email: str = Field(min_length=5, max_length=255)
+    customer_whatsapp: str | None = Field(default=None, max_length=50)
+    customer_country: str | None = Field(default=None, max_length=80)
+    customer_telegram: str | None = Field(default=None, max_length=80)
+    customer_notes: str | None = Field(default=None, max_length=2000)
+    # Price is resolved from the catalogue, never from the client.
+    product_id: str = Field(min_length=1, max_length=64)
+    payment_method: str = Field(min_length=2, max_length=50)
+    discount_code: str | None = Field(default=None, max_length=50)
 
 
 class StatusUpdate(BaseModel):
@@ -92,6 +97,33 @@ class TrackingOut(BaseModel):
 
 @router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
 def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
+    # Resolve the product and its price server-side. The client only chooses
+    # what to buy, never how much it costs.
+    product = db.get(Product, payload.product_id)
+    if product is None:
+        product = db.scalar(select(Product).where(Product.slug == payload.product_id))
+    if product is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "المنتج غير موجود")
+    if not product.is_published:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "هذا المنتج غير متاح للشراء")
+
+    unit_price = Decimal(str(product.price or 0))
+    total = unit_price
+
+    # Apply a discount code if supplied and valid.
+    if payload.discount_code:
+        code = db.scalar(
+            select(DiscountCode).where(DiscountCode.code == payload.discount_code.strip())
+        )
+        if code and code.is_active:
+            not_expired = code.expires_at is None or code.expires_at > datetime.utcnow()
+            within_uses = code.used_count < code.max_uses
+            if not_expired and within_uses and 0 < code.percent <= 100:
+                total = (unit_price * (Decimal(100 - code.percent) / Decimal(100))).quantize(
+                    Decimal("0.01")
+                )
+                code.used_count += 1
+
     now = datetime.utcnow()
     is_whatsapp = payload.payment_method == "whatsapp"
     expire_mins = EXPIRE_MINUTES_WHATSAPP if is_whatsapp else EXPIRE_MINUTES
@@ -102,10 +134,10 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
         customer_country=payload.customer_country,
         customer_telegram=payload.customer_telegram,
         customer_notes=payload.customer_notes,
-        product_name=payload.product_name,
-        product_price=payload.product_price,
+        product_name=product.name,
+        product_price=unit_price,
         payment_method=payload.payment_method,
-        total=payload.product_price,
+        total=total,
         status="pending_proof",
         created_at=now,
         expires_at=now + timedelta(minutes=expire_mins),
@@ -127,7 +159,10 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)) -> Order:
 
 
 @router.get("", response_model=list[OrderOut])
-def list_orders(db: Session = Depends(get_db)) -> list[Order]:
+def list_orders(
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> list[Order]:
     return list(db.scalars(select(Order).order_by(Order.created_at.desc())))
 
 
@@ -140,7 +175,12 @@ def track_order(order_id: str, db: Session = Depends(get_db)) -> Order:
 
 
 @router.patch("/{order_id}/tracking", response_model=OrderOut)
-def update_tracking(order_id: str, payload: TrackingUpdate, db: Session = Depends(get_db)) -> Order:
+def update_tracking(
+    order_id: str,
+    payload: TrackingUpdate,
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> Order:
     order = db.get(Order, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
@@ -262,7 +302,12 @@ def upload_proof(
 
 
 @router.patch("/{order_id}/status", response_model=OrderOut)
-def update_status(order_id: str, payload: StatusUpdate, db: Session = Depends(get_db)) -> Order:
+def update_status(
+    order_id: str,
+    payload: StatusUpdate,
+    db: Session = Depends(get_db),
+    _admin: object = Depends(require_admin),
+) -> Order:
     order = db.get(Order, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="الطلب غير موجود")
