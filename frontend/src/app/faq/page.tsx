@@ -10,13 +10,13 @@ const FAQS = [
     q: "ما هي Growfolo؟",
     a: "Growfolo منصة رقمية تقدم خدمات الذكاء الاصطناعي، والخدمات السحابية، والحلول البرمجية، والمنتجات الرقمية للمطورين والأفراد والشركات.",
     icon: Zap,
-    color: "#a855f7",
+    color: "var(--gf-brand)",
   },
   {
     q: "كيف يمكنني شراء أي خدمة؟",
     a: "اختر الخدمة المناسبة، ثم اضغط «إضافة إلى السلة»، وبعدها أكمل عملية الدفع من خلال صفحة السلة.",
     icon: ShoppingCart,
-    color: "#c8e600",
+    color: "var(--gf-brand)",
   },
   {
     q: "ما هي طرق الدفع المتوفرة؟",
@@ -40,13 +40,13 @@ const FAQS = [
     q: "كم تستغرق عملية التفعيل؟",
     a: "تختلف حسب نوع الخدمة، لكن معظم الطلبات تتم معالجتها خلال وقت قصير بعد التحقق من الدفع.",
     icon: Zap,
-    color: "#c8e600",
+    color: "var(--gf-brand)",
   },
   {
     q: "هل أحتاج إلى إنشاء حساب؟",
     a: "نعم، يجب إنشاء حساب حتى تتمكن من إدارة طلباتك، ومتابعة مشترياتك، والعودة إليها في أي وقت.",
     icon: Shield,
-    color: "#a855f7",
+    color: "var(--gf-brand)",
   },
   {
     q: "هل بياناتي آمنة؟",
@@ -64,13 +64,13 @@ const FAQS = [
     q: "هل أحصل على دعم فني بعد الشراء؟",
     a: "نعم، جميع العملاء يحصلون على دعم فني عبر الدردشة المباشرة داخل الموقع.",
     icon: MessageCircle,
-    color: "#c8e600",
+    color: "var(--gf-brand)",
   },
   {
     q: "كيف أتواصل مع الدعم؟",
     a: "يمكنك استخدام زر الدردشة المباشرة الموجود داخل الموقع، وسيقوم فريق الدعم بالرد عليك في أقرب وقت.",
     icon: MessageCircle,
-    color: "#a855f7",
+    color: "var(--gf-brand)",
   },
   {
     q: "هل يمكنني استخدام الخدمات على Windows وmacOS وLinux؟",
@@ -82,7 +82,7 @@ const FAQS = [
     q: "هل الخدمات مناسبة للمطورين؟",
     a: "نعم، نوفر خدمات مخصصة للمطورين، بما في ذلك حلول تعتمد على واجهات API، وخدمات سحابية، وأدوات ذكاء اصطناعي متقدمة.",
     icon: Zap,
-    color: "#c8e600",
+    color: "var(--gf-brand)",
   },
   {
     q: "هل يمكنني تحديث أو تغيير طلبي بعد الدفع؟",
@@ -202,13 +202,13 @@ export default function FaqPage() {
   const rightCol = FAQS.filter((_, i) => i % 2 !== 0);
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
 
       {/* ── Ambient glows ─────────────────────────────────────────── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute right-1/4 top-0 size-[500px] rounded-full bg-purple-600/10 blur-[130px]" />
-        <div className="absolute left-1/4 top-40 size-[350px] rounded-full bg-lime-400/6 blur-[110px]" />
+        <div className="absolute right-1/4 top-0 size-[500px] rounded-full bg-[var(--gf-brand)]/10 blur-[130px]" />
+        <div className="absolute left-1/4 top-40 size-[350px] rounded-full bg-[var(--gf-brand)]/6 blur-[110px]" />
         <div className="absolute bottom-1/3 left-1/3 size-[400px] rounded-full bg-blue-500/7 blur-[120px]" />
       </div>
 
@@ -216,7 +216,7 @@ export default function FaqPage() {
         {/* ── Back link ───────────────────────────────────────────── */}
         <a
           href="/"
-          className="mb-10 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
+          className="mb-10 inline-flex items-center gap-2 text-sm text-[var(--gf-text-muted)] transition-colors hover:text-[var(--gf-text)]"
         >
           <ArrowRight size={15} /> العودة للرئيسية
         </a>
@@ -233,21 +233,21 @@ export default function FaqPage() {
               transform: "perspective(500px) rotateX(6deg)",
             }}
           >
-            <HelpCircle size={36} className="text-purple-400 drop-shadow-[0_0_16px_rgba(168,85,247,0.7)]" />
+            <HelpCircle size={36} className="text-[var(--gf-brand)] drop-shadow-[0_0_16px_rgba(168,85,247,0.7)]" />
           </div>
 
           <div className="pixel-logo mb-3 text-2xl font-black">
-            <span className="text-purple-500">GROW</span>
-            <span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span>
+            <span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
 
-          <h1 className="text-4xl font-black text-white md:text-5xl">
+          <h1 className="text-4xl font-black text-[var(--gf-text)] md:text-5xl">
             الأسئلة{" "}
             <span className="bg-gradient-to-l from-lime-400 to-purple-400 bg-clip-text text-transparent">
               الشائعة
             </span>
           </h1>
-          <p className="mt-3 text-sm text-white/45">
+          <p className="mt-3 text-sm text-[var(--gf-text)]/45">
             كل ما تحتاج معرفته عن Growfolo في مكان واحد
           </p>
 
@@ -259,8 +259,8 @@ export default function FaqPage() {
               { val: "100%", label: "مجاناً" },
             ].map(({ val, label }) => (
               <div key={label} className="text-center">
-                <p className="text-xl font-black text-white">{val}</p>
-                <p className="text-xs text-white/40">{label}</p>
+                <p className="text-xl font-black text-[var(--gf-text)]">{val}</p>
+                <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
               </div>
             ))}
           </div>
@@ -310,16 +310,16 @@ export default function FaqPage() {
             boxShadow: "0 0 60px rgba(168,85,247,0.1)",
           }}
         >
-          <MessageCircle size={32} className="mx-auto mb-3 text-purple-400" />
-          <h2 className="mb-2 text-xl font-black text-white">لم تجد إجابة سؤالك؟</h2>
-          <p className="mb-5 text-sm text-white/50">
+          <MessageCircle size={32} className="mx-auto mb-3 text-[var(--gf-brand)]" />
+          <h2 className="mb-2 text-xl font-black text-[var(--gf-text)]">لم تجد إجابة سؤالك؟</h2>
+          <p className="mb-5 text-sm text-[var(--gf-text-muted)]">
             فريق الدعم متاح لمساعدتك في أي وقت عبر الدردشة المباشرة داخل الموقع
           </p>
           <a
             href="/"
             className="inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-black text-black transition-all hover:opacity-90 active:scale-95"
             style={{
-              background: "linear-gradient(135deg, #c8e600, #a3bd00)",
+              background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)",
               boxShadow: "0 4px 20px rgba(200,230,0,0.35)",
             }}
           >

@@ -114,21 +114,21 @@ export function VerifyEmailForm() {
       {/* Brand */}
       <a href="/" className="mb-8 block text-center">
         <span className="pixel-logo text-3xl font-black">
-          <span className="text-purple-500">GROW</span>
-          <span className="text-lime-400">FOLO</span>
+          <span className="text-[var(--gf-brand)]">GROW</span>
+          <span className="text-[var(--gf-brand)]">FOLO</span>
         </span>
       </a>
 
       <div className="glass-panel rounded-3xl p-7">
         {/* Icon */}
-        <div className="mb-5 grid size-14 place-items-center rounded-2xl bg-purple-500/15 border border-purple-500/30">
-          <ShieldCheck size={26} className="text-purple-400" />
+        <div className="mb-5 grid size-14 place-items-center rounded-2xl bg-[var(--gf-brand)]/15 border border-purple-500/30">
+          <ShieldCheck size={26} className="text-[var(--gf-brand)]" />
         </div>
 
-        <h1 className="text-2xl font-black text-white">تحقق من بريدك</h1>
-        <p className="mt-2 text-sm text-white/50 leading-relaxed">
+        <h1 className="text-2xl font-black text-[var(--gf-text)]">تحقق من بريدك</h1>
+        <p className="mt-2 text-sm text-[var(--gf-text-muted)] leading-relaxed">
           أرسلنا رمز التحقق إلى<br />
-          <strong className="text-white/80">{email}</strong>
+          <strong className="text-[var(--gf-text-muted)]">{email}</strong>
         </p>
 
         {/* OTP inputs */}
@@ -148,7 +148,7 @@ export function VerifyEmailForm() {
               onChange={(e) => handleDigitChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               disabled={loading || !!success}
-              className="h-14 w-12 rounded-2xl border border-white/12 bg-white/5 text-center text-xl font-black text-white outline-none transition-all focus:border-purple-500/70 focus:bg-purple-500/8 disabled:opacity-50"
+              className="h-14 w-12 rounded-2xl border border-white/12 bg-[var(--gf-surface-2)] text-center text-xl font-black text-white outline-none transition-all focus:border-purple-500/70 focus:bg-[var(--gf-brand)]/8 disabled:opacity-50"
               style={{
                 borderColor: d ? "rgba(168,85,247,.55)" : undefined,
                 boxShadow: d ? "0 0 0 1px rgba(168,85,247,.2)" : undefined,
@@ -164,14 +164,14 @@ export function VerifyEmailForm() {
           </div>
         )}
         {success && (
-          <div className="mt-4 rounded-2xl bg-lime-500/10 border border-lime-500/25 px-4 py-3 text-sm text-lime-400 text-center font-bold">
+          <div className="mt-4 rounded-2xl bg-lime-500/10 border border-lime-500/25 px-4 py-3 text-sm text-[var(--gf-brand)] text-center font-bold">
             {success}
           </div>
         )}
 
         {/* Loading indicator */}
         {loading && (
-          <p className="mt-4 text-center text-sm text-purple-400 animate-pulse">
+          <p className="mt-4 text-center text-sm text-[var(--gf-brand)] animate-pulse">
             جارٍ التحقق…
           </p>
         )}
@@ -179,14 +179,14 @@ export function VerifyEmailForm() {
         {/* Resend */}
         <div className="mt-6 text-center">
           {countdown > 0 ? (
-            <p className="text-sm text-white/35">
-              يمكن إعادة الإرسال بعد <span className="text-white/60 font-bold tabular-nums">{countdown}s</span>
+            <p className="text-sm text-[var(--gf-text)]/35">
+              يمكن إعادة الإرسال بعد <span className="text-[var(--gf-text-muted)] font-bold tabular-nums">{countdown}s</span>
             </p>
           ) : (
             <button
               onClick={() => void handleResend()}
               disabled={resending}
-              className="flex items-center gap-2 mx-auto text-sm text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 mx-auto text-sm text-[var(--gf-brand)] hover:text-[var(--gf-brand)] transition-colors disabled:opacity-50"
             >
               <RotateCcw size={14} />
               {resending ? "جارٍ الإرسال…" : "إعادة إرسال الرمز"}
@@ -194,7 +194,7 @@ export function VerifyEmailForm() {
           )}
         </div>
 
-        <p className="mt-6 text-center text-xs text-white/30">
+        <p className="mt-6 text-center text-xs text-[var(--gf-text)]/30">
           الرمز صالح لمدة 15 دقيقة فقط
         </p>
       </div>

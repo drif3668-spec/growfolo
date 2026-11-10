@@ -66,7 +66,7 @@ function CopyBtn({ value, label }: { value: string; label?: string }) {
   return (
     <button
       onClick={() => { navigator.clipboard.writeText(value); setOk(true); setTimeout(() => setOk(false), 2000); }}
-      className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${ok ? "bg-lime-500/20 text-lime-400" : "bg-white/8 text-white/50 hover:bg-white/15 hover:text-white"}`}
+      className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${ok ? "bg-lime-500/20 text-[var(--gf-brand)]" : "bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15 hover:text-[var(--gf-text)]"}`}
     >
       {ok ? <Check size={12} /> : <Copy size={12} />}
       {label ?? (ok ? "تم النسخ!" : "نسخ")}
@@ -115,11 +115,11 @@ function Timer({
     : `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 
   return (
-    <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 ${urgent ? "border-red-500/30 bg-red-500/8" : "border-white/10 bg-white/5"}`}>
-      <Clock size={15} className={urgent ? "text-red-400" : "text-purple-400"} />
-      <span className={`text-sm font-black tabular-nums ${urgent ? "text-red-400" : "text-white"}`}>{timeStr}</span>
-      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
-        <div className={`h-full rounded-full transition-all ${urgent ? "bg-red-400" : "bg-purple-500"}`} style={{ width: `${pct}%` }} />
+    <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 ${urgent ? "border-red-500/30 bg-red-500/8" : "border-[var(--gf-line)] bg-[var(--gf-surface-2)]"}`}>
+      <Clock size={15} className={urgent ? "text-red-400" : "text-[var(--gf-brand)]"} />
+      <span className={`text-sm font-black tabular-nums ${urgent ? "text-red-400" : "text-[var(--gf-text)]"}`}>{timeStr}</span>
+      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--gf-surface-2)]">
+        <div className={`h-full rounded-full transition-all ${urgent ? "bg-red-400" : "bg-[var(--gf-brand)]"}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -176,18 +176,18 @@ function WhatsAppPaymentStep({
     <div className="glass-panel rounded-3xl p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">الدفع عبر واتساب</h2>
+        <h2 className="text-lg font-black text-[var(--gf-text)]">الدفع عبر واتساب</h2>
         <Timer expiresAt={expiresAt} startedAt={startedAt} onExpire={onExpire} />
       </div>
 
       {/* Order number */}
       <div className="rounded-2xl border-2 border-green-500/40 bg-green-500/8 p-5 text-center space-y-3">
-        <p className="text-xs text-white/45 font-semibold">رقم طلبك</p>
+        <p className="text-xs text-[var(--gf-text)]/45 font-semibold">رقم طلبك</p>
         <div className="flex items-center justify-center gap-3">
           <code className="text-3xl font-black text-green-400 tracking-widest">{shortId}</code>
         </div>
         <CopyBtn value={shortId} label="نسخ رقم الطلب" />
-        <p className="text-[11px] text-white/35">احتفظ بهذا الرقم — ستحتاجه في التواصل مع الوكيل</p>
+        <p className="text-[11px] text-[var(--gf-text)]/35">احتفظ بهذا الرقم — ستحتاجه في التواصل مع الوكيل</p>
       </div>
 
       {/* WhatsApp button */}
@@ -196,34 +196,34 @@ function WhatsAppPaymentStep({
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba58] active:scale-[0.98] px-6 py-4 text-white font-black text-base transition-all shadow-[0_0_20px_#25D36640]"
+          className="flex items-center justify-center gap-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba58] active:scale-[0.98] px-6 py-4 text-[var(--gf-text)] font-black text-base transition-all shadow-[0_0_20px_#25D36640]"
         >
           <MessageCircle size={22} />
           تواصل مع الوكيل عبر واتساب
         </a>
 
-        <div className="rounded-xl bg-white/4 px-4 py-3 text-sm text-white/65 leading-relaxed text-center">
+        <div className="rounded-xl bg-white/4 px-4 py-3 text-sm text-[var(--gf-text)]/65 leading-relaxed text-center">
           تواصل مع الوكيل، ثم انسخ رقم الطلب وأرسله إليه. بعد ذلك سنتواصل معك ونزودك بطريقة الدفع المتاحة في بلدك.
         </div>
       </div>
 
       {/* Proof upload */}
       <div className="space-y-2">
-        <p className="text-sm font-black text-white/80">رفع إثبات الدفع</p>
-        <p className="text-xs text-white/40">بعد إتمام الدفع مع الوكيل، ارفع صورة الإيصال هنا</p>
+        <p className="text-sm font-black text-[var(--gf-text-muted)]">رفع إثبات الدفع</p>
+        <p className="text-xs text-[var(--gf-text-muted)]">بعد إتمام الدفع مع الوكيل، ارفع صورة الإيصال هنا</p>
         <label className="block cursor-pointer">
           <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${proof ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
             {proof ? (
               <>
-                <Check size={22} className="text-lime-400" />
-                <p className="text-sm font-semibold text-lime-400">{proof.name}</p>
-                <p className="text-xs text-white/35">اضغط لتغيير الملف</p>
+                <Check size={22} className="text-[var(--gf-brand)]" />
+                <p className="text-sm font-semibold text-[var(--gf-brand)]">{proof.name}</p>
+                <p className="text-xs text-[var(--gf-text)]/35">اضغط لتغيير الملف</p>
               </>
             ) : (
               <>
-                <Upload size={22} className="text-white/30" />
-                <p className="text-sm text-white/55">اسحب الصورة أو الإيصال هنا</p>
-                <p className="text-xs text-white/30">JPG · PNG · PDF</p>
+                <Upload size={22} className="text-[var(--gf-text)]/30" />
+                <p className="text-sm text-[var(--gf-text)]/55">اسحب الصورة أو الإيصال هنا</p>
+                <p className="text-xs text-[var(--gf-text)]/30">JPG · PNG · PDF</p>
               </>
             )}
             <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
@@ -243,7 +243,7 @@ function WhatsAppPaymentStep({
 
       <button
         onClick={onReset}
-        className="w-full rounded-2xl py-2.5 text-sm text-white/30 hover:text-white/60"
+        className="w-full rounded-2xl py-2.5 text-sm text-[var(--gf-text)]/30 hover:text-[var(--gf-text-muted)]"
       >
         ← بدء من جديد
       </button>
@@ -385,17 +385,17 @@ export function CheckoutWizard({
   if (done) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
-        <div className="mb-5 grid size-20 place-items-center rounded-3xl bg-lime-400/15">
-          <CheckCircle size={44} className="text-lime-400" />
+        <div className="mb-5 grid size-20 place-items-center rounded-3xl bg-[var(--gf-brand)]/15">
+          <CheckCircle size={44} className="text-[var(--gf-brand)]" />
         </div>
-        <h2 className="text-2xl font-black text-white">تم استلام طلبك!</h2>
-        <p className="mt-3 max-w-sm text-white/55">
+        <h2 className="text-2xl font-black text-[var(--gf-text)]">تم استلام طلبك!</h2>
+        <p className="mt-3 max-w-sm text-[var(--gf-text)]/55">
           {isWhatsApp
             ? "سيتحقق الوكيل من إثبات الدفع ويتواصل معك قريباً."
             : "سيتم مراجعة إثبات الدفع وتفعيل طلبك خلال دقائق."}
         </p>
         {orderId && (
-          <p className="mt-4 rounded-xl bg-white/5 px-4 py-2 font-mono text-sm text-purple-400">
+          <p className="mt-4 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 font-mono text-sm text-[var(--gf-brand)]">
             #{orderId.slice(0, 8).toUpperCase()}
           </p>
         )}
@@ -405,7 +405,7 @@ export function CheckoutWizard({
           </a>
           <button
             onClick={() => { clear(); window.location.href = "/"; }}
-            className="rounded-2xl border border-white/15 bg-white/5 px-7 py-3.5 font-black text-white hover:bg-white/10 transition-colors"
+            className="rounded-2xl border border-white/15 bg-[var(--gf-surface-2)] px-7 py-3.5 font-black text-[var(--gf-text)] hover:bg-[var(--gf-surface-2)] transition-colors"
           >
             العودة للرئيسية
           </button>
@@ -422,8 +422,8 @@ export function CheckoutWizard({
     return (
       <div className="flex flex-col items-center py-16 text-center">
         <div className="mb-5 grid size-20 place-items-center rounded-3xl bg-red-500/15 text-5xl">⏰</div>
-        <h2 className="text-2xl font-black text-white">انتهت مدة الدفع</h2>
-        <p className="mt-3 text-white/55">
+        <h2 className="text-2xl font-black text-[var(--gf-text)]">انتهت مدة الدفع</h2>
+        <p className="mt-3 text-[var(--gf-text)]/55">
           {isWhatsApp ? "انتهت مدة 6 ساعات المخصصة لإتمام الدفع" : "انتهت مدة 35 دقيقة المخصصة لإتمام الدفع"}
         </p>
         <button
@@ -446,11 +446,11 @@ export function CheckoutWizard({
           { n: 3, label: "إتمام الدفع" },
         ].map(({ n, label }, i) => (
           <div key={n} className="flex items-center gap-3">
-            <div className={`flex items-center gap-2 rounded-2xl px-3 py-1.5 text-xs font-bold transition-all ${step >= n ? "bg-purple-600 text-white" : "bg-white/8 text-white/40"}`}>
+            <div className={`flex items-center gap-2 rounded-2xl px-3 py-1.5 text-xs font-bold transition-all ${step >= n ? "bg-[var(--gf-brand)] text-white" : "bg-[var(--gf-surface-2)] text-white/80"}`}>
               <span className="grid size-5 place-items-center rounded-full bg-white/15 text-xs">{n}</span>
               {label}
             </div>
-            {i < 2 && <div className={`h-px w-8 ${step > n ? "bg-purple-500" : "bg-white/10"}`} />}
+            {i < 2 && <div className={`h-px w-8 ${step > n ? "bg-[var(--gf-brand)]" : "bg-[var(--gf-surface-2)]"}`} />}
           </div>
         ))}
       </div>
@@ -458,67 +458,67 @@ export function CheckoutWizard({
       {/* Product summary */}
       <div className="mb-5 flex items-center justify-between rounded-2xl border border-white/8 bg-white/4 px-5 py-3">
         <div>
-          <p className="text-xs text-white/45">المنتج المختار</p>
-          <p className="font-black text-white">{defaultProduct.name}</p>
+          <p className="text-xs text-[var(--gf-text)]/45">المنتج المختار</p>
+          <p className="font-black text-[var(--gf-text)]">{defaultProduct.name}</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black text-white">{defaultProduct.price}$</p>
-          <p className="text-xs text-white/35">/سنوياً</p>
+          <p className="text-2xl font-black text-[var(--gf-text)]">{defaultProduct.price}$</p>
+          <p className="text-xs text-[var(--gf-text)]/35">/سنوياً</p>
         </div>
       </div>
 
       {/* ── Steps 1 + 2: Customer info + Method ──────────────────────── */}
       {step <= 2 && (
         <form onSubmit={submitCustomer} className="glass-panel rounded-3xl p-6">
-          <h2 className="mb-5 text-lg font-black text-white">بيانات العميل</h2>
+          <h2 className="mb-5 text-lg font-black text-[var(--gf-text)]">بيانات العميل</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Name */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
               الاسم الكامل *
               <input type="text" value={customer.name} onChange={e => setCustomer(p => ({ ...p, name: e.target.value }))}
-                placeholder="أحمد محمد" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50" />
+                placeholder="أحمد محمد" className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50" />
             </label>
             {/* Email */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
               البريد الإلكتروني *
               <input type="email" value={customer.email} onChange={e => setCustomer(p => ({ ...p, email: e.target.value }))}
-                placeholder="you@email.com" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50" />
+                placeholder="you@email.com" className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50" />
             </label>
             {/* WhatsApp */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
               رقم WhatsApp *
               <input type="tel" value={customer.whatsapp} onChange={e => setCustomer(p => ({ ...p, whatsapp: e.target.value }))}
-                placeholder="+213 5XX XXX XXX" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50" />
+                placeholder="+213 5XX XXX XXX" className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50" />
             </label>
             {/* Country — always a dropdown */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
               الدولة *
               <select
                 value={customer.country}
                 onChange={e => setCustomer(p => ({ ...p, country: e.target.value }))}
-                className="rounded-xl border border-white/10 bg-[#0d0b14] px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 appearance-none cursor-pointer"
+                className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 appearance-none cursor-pointer"
               >
                 <option value="" disabled>اختر دولتك...</option>
                 {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
             {/* Telegram */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
               Telegram (اختياري)
               <input type="text" value={customer.telegram} onChange={e => setCustomer(p => ({ ...p, telegram: e.target.value }))}
-                placeholder="@username" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50" />
+                placeholder="@username" className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50" />
             </label>
             {/* Notes */}
-            <label className="grid gap-1.5 text-xs font-semibold text-white/60 sm:col-span-2">
+            <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)] sm:col-span-2">
               ملاحظات إضافية
               <textarea rows={2} value={customer.notes} onChange={e => setCustomer(p => ({ ...p, notes: e.target.value }))}
                 placeholder="أي تفاصيل إضافية..."
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50 resize-none" />
+                className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50 resize-none" />
             </label>
           </div>
 
           {/* Payment methods */}
-          <h2 className="mb-4 mt-7 text-lg font-black text-white">طريقة الدفع</h2>
+          <h2 className="mb-4 mt-7 text-lg font-black text-[var(--gf-text)]">طريقة الدفع</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {/* WhatsApp payment card — special */}
             <button
@@ -538,9 +538,9 @@ export function CheckoutWizard({
                 <p className="text-sm font-black" style={{ color: method === "whatsapp" ? "#25D366" : "#fff" }}>
                   الدفع عبر واتساب
                 </p>
-                <p className="text-[11px] text-white/40 mt-0.5">تواصل مع الوكيل + ادفع بأي وسيلة</p>
+                <p className="text-[11px] text-[var(--gf-text-muted)] mt-0.5">تواصل مع الوكيل + ادفع بأي وسيلة</p>
               </div>
-              {method === "whatsapp" && <Check size={14} className="mr-auto shrink-0 text-lime-400" />}
+              {method === "whatsapp" && <Check size={14} className="mr-auto shrink-0 text-[var(--gf-brand)]" />}
             </button>
 
             {/* Standard payment methods */}
@@ -562,7 +562,7 @@ export function CheckoutWizard({
                 <div>
                   <p className="text-sm font-black" style={{ color: method === m.id ? m.color : "#fff" }}>{m.label}</p>
                 </div>
-                {method === m.id && <Check size={14} className="mr-auto shrink-0 text-lime-400" />}
+                {method === m.id && <Check size={14} className="mr-auto shrink-0 text-[var(--gf-brand)]" />}
               </button>
             ))}
           </div>
@@ -593,12 +593,12 @@ export function CheckoutWizard({
       {step === 3 && !isWhatsApp && selectedMethod && startedAt && (
         <div className="glass-panel rounded-3xl p-6">
           <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-lg font-black text-white">إتمام الدفع</h2>
+            <h2 className="text-lg font-black text-[var(--gf-text)]">إتمام الدفع</h2>
             <Timer expiresAt={expiresAt} startedAt={startedAt} onExpire={() => setExpired(true)} />
           </div>
 
           <div className="mb-5 rounded-2xl border px-4 py-3" style={{ borderColor: selectedMethod.border, background: selectedMethod.bg }}>
-            <p className="mb-1 text-xs text-white/45">طريقة الدفع</p>
+            <p className="mb-1 text-xs text-[var(--gf-text)]/45">طريقة الدفع</p>
             <p className="font-black" style={{ color: selectedMethod.color }}>{selectedMethod.label}</p>
           </div>
 
@@ -606,17 +606,17 @@ export function CheckoutWizard({
           <div className="mb-5 grid gap-3">
             {(isVodafone && orderId ? [{ label: "رمز الطلب", value: orderCode }] : selectedMethod.fields).map((f) => (
               <div key={f.label} className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
-                <p className="mb-1 text-xs text-white/45">{f.label}</p>
+                <p className="mb-1 text-xs text-[var(--gf-text)]/45">{f.label}</p>
                 <div className="flex items-center justify-between gap-2">
-                  <code className="break-all text-sm font-bold text-white">{f.value}</code>
+                  <code className="break-all text-sm font-bold text-[var(--gf-text)]">{f.value}</code>
                   <CopyBtn value={f.value} />
                 </div>
               </div>
             ))}
-            <div className="rounded-2xl border border-purple-500/20 bg-purple-500/8 px-4 py-3">
-              <p className="mb-1 text-xs text-white/45">المبلغ المطلوب</p>
+            <div className="rounded-2xl border border-purple-500/20 bg-[var(--gf-brand)]/8 px-4 py-3">
+              <p className="mb-1 text-xs text-[var(--gf-text)]/45">المبلغ المطلوب</p>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xl font-black text-white">{defaultProduct.price}$</span>
+                <span className="text-xl font-black text-[var(--gf-text)]">{defaultProduct.price}$</span>
                 <CopyBtn value={String(defaultProduct.price)} />
               </div>
             </div>
@@ -625,14 +625,14 @@ export function CheckoutWizard({
           {isVodafone && orderId && (
             <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-center">
               <p className="text-sm font-black text-red-300">إتمام الدفع عبر واتساب</p>
-              <p className="mt-2 text-sm leading-7 text-white/65">
+              <p className="mt-2 text-sm leading-7 text-[var(--gf-text)]/65">
                 انسخ رمز الطلب وتواصل معنا عبر واتساب لإتمام دفع Vodafone Cash، ثم ارفع إثبات الدفع هنا.
               </p>
               <a
                 href={vodafoneWaLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 py-3 text-sm font-black text-white shadow-[0_0_20px_#25D36640] transition-all hover:bg-[#20ba58] active:scale-[0.98]"
+                className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 py-3 text-sm font-black text-[var(--gf-text)] shadow-[0_0_20px_#25D36640] transition-all hover:bg-[#20ba58] active:scale-[0.98]"
               >
                 <MessageCircle size={18} />
                 تواصل عبر واتساب لإتمام الدفع
@@ -643,23 +643,23 @@ export function CheckoutWizard({
           {isMobilis && (
             <div className="mb-5 grid gap-3">
               <div className="rounded-2xl border border-lime-500/30 bg-lime-500/10 px-4 py-3">
-                <p className="text-sm font-black text-lime-300">تنبيه Flexy Mobilis</p>
-                <p className="mt-2 text-sm leading-7 text-white/70">
+                <p className="text-sm font-black text-[var(--gf-brand)]">تنبيه Flexy Mobilis</p>
+                <p className="mt-2 text-sm leading-7 text-[var(--gf-text-muted)]">
                   تنبيه: لا يمكنك إرسال أكثر من 15 دولارًا في العملية الواحدة عبر Flexy Mobilis. إذا كانت قيمة طلبك أكبر، يرجى تقسيم المبلغ إلى عدة عمليات، ثم رفع جميع إيصالات الدفع لإكمال الطلب.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
-                  <p className="text-xs text-white/45">سعر الصرف الحالي</p>
-                  <p className="mt-1 text-sm font-black text-white">250 DZD = 1 USD</p>
+                  <p className="text-xs text-[var(--gf-text)]/45">سعر الصرف الحالي</p>
+                  <p className="mt-1 text-sm font-black text-[var(--gf-text)]">250 DZD = 1 USD</p>
                 </div>
                 <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
-                  <p className="text-xs text-white/45">حد العملية الواحدة</p>
-                  <p className="mt-1 text-sm font-black text-lime-300">{FLEXY_MAX_PAYMENT_USD}$</p>
+                  <p className="text-xs text-[var(--gf-text)]/45">حد العملية الواحدة</p>
+                  <p className="mt-1 text-sm font-black text-[var(--gf-brand)]">{FLEXY_MAX_PAYMENT_USD}$</p>
                 </div>
                 <div className="rounded-2xl border border-white/8 bg-white/4 px-4 py-3">
-                  <p className="text-xs text-white/45">المبلغ بالدينار</p>
-                  <p className="mt-1 text-sm font-black text-purple-300">{(defaultProduct.price * FLEXY_EXCHANGE_RATE_DZD).toLocaleString("fr-DZ")} DZD</p>
+                  <p className="text-xs text-[var(--gf-text)]/45">المبلغ بالدينار</p>
+                  <p className="mt-1 text-sm font-black text-[var(--gf-brand)]">{(defaultProduct.price * FLEXY_EXCHANGE_RATE_DZD).toLocaleString("fr-DZ")} DZD</p>
                 </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
@@ -678,11 +678,11 @@ export function CheckoutWizard({
 
           {/* Steps */}
           <div className="mb-5">
-            <p className="mb-2 text-xs font-bold text-white/50">خطوات الدفع</p>
+            <p className="mb-2 text-xs font-bold text-[var(--gf-text-muted)]">خطوات الدفع</p>
             <ol className="grid gap-2">
               {selectedMethod.steps.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-white/70">
-                  <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-purple-600/30 text-xs font-bold text-purple-400">{i + 1}</span>
+                <li key={i} className="flex items-start gap-2 text-sm text-[var(--gf-text-muted)]">
+                  <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[var(--gf-brand)]/30 text-xs font-bold text-[var(--gf-brand)]">{i + 1}</span>
                   {s}
                 </li>
               ))}
@@ -692,12 +692,12 @@ export function CheckoutWizard({
           {/* Proof upload */}
           {isMobilis ? (
             <div className="grid gap-3">
-              <p className="mb-1 text-sm font-bold text-white/75">رفع إيصالات Flexy Mobilis *</p>
+              <p className="mb-1 text-sm font-bold text-[var(--gf-text)]/75">رفع إيصالات Flexy Mobilis *</p>
               <label className="block cursor-pointer">
                 <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${flexyProofs.length ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
-                  <Upload size={22} className="text-white/30" />
-                  <p className="text-sm text-white/55">ارفع الإيصالات واحدًا تلو الآخر أو دفعة واحدة</p>
-                  <p className="text-xs text-white/30">تم رفع {flexyProofs.length} من {FLEXY_MAX_RECEIPTS}</p>
+                  <Upload size={22} className="text-[var(--gf-text)]/30" />
+                  <p className="text-sm text-[var(--gf-text)]/55">ارفع الإيصالات واحدًا تلو الآخر أو دفعة واحدة</p>
+                  <p className="text-xs text-[var(--gf-text)]/30">تم رفع {flexyProofs.length} من {FLEXY_MAX_RECEIPTS}</p>
                   <input
                     type="file"
                     accept="image/*,.pdf"
@@ -712,8 +712,8 @@ export function CheckoutWizard({
                 </div>
               </label>
               {flexyProofs.map((file, index) => (
-                <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/5 px-3 py-2">
-                  <span className="truncate text-sm font-semibold text-lime-400">إيصال {index + 1}: {file.name}</span>
+                <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-[var(--gf-surface-2)] px-3 py-2">
+                  <span className="truncate text-sm font-semibold text-[var(--gf-brand)]">إيصال {index + 1}: {file.name}</span>
                   <button type="button" onClick={() => setFlexyProofs((prev) => prev.filter((_, i) => i !== index))} className="rounded-lg bg-red-500/10 px-2 py-1 text-xs font-bold text-red-300">
                     حذف
                   </button>
@@ -722,12 +722,12 @@ export function CheckoutWizard({
             </div>
           ) : (
             <label className="block cursor-pointer">
-              <p className="mb-2 text-sm font-bold text-white/75">رفع إثبات الدفع *</p>
+              <p className="mb-2 text-sm font-bold text-[var(--gf-text)]/75">رفع إثبات الدفع *</p>
               <div className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed transition-colors ${proof ? "border-lime-500/50 bg-lime-500/6" : "border-white/15 bg-white/3 hover:bg-white/6"}`}>
                 {proof ? (
-                  <><Check size={22} className="text-lime-400" /><p className="text-sm font-semibold text-lime-400">{proof.name}</p><p className="text-xs text-white/35">اضغط لتغيير الملف</p></>
+                  <><Check size={22} className="text-[var(--gf-brand)]" /><p className="text-sm font-semibold text-[var(--gf-brand)]">{proof.name}</p><p className="text-xs text-[var(--gf-text)]/35">اضغط لتغيير الملف</p></>
                 ) : (
-                  <><Upload size={22} className="text-white/30" /><p className="text-sm text-white/55">اسحب الصورة هنا أو اضغط للرفع</p><p className="text-xs text-white/30">JPG · PNG · PDF</p></>
+                  <><Upload size={22} className="text-[var(--gf-text)]/30" /><p className="text-sm text-[var(--gf-text)]/55">اسحب الصورة هنا أو اضغط للرفع</p><p className="text-xs text-[var(--gf-text)]/30">JPG · PNG · PDF</p></>
                 )}
                 <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
               </div>
@@ -742,7 +742,7 @@ export function CheckoutWizard({
 
           <PaymentMethodShowcase />
 
-          <button onClick={handleReset} className="mt-3 w-full rounded-2xl py-2.5 text-sm text-white/35 hover:text-white/60">
+          <button onClick={handleReset} className="mt-3 w-full rounded-2xl py-2.5 text-sm text-[var(--gf-text)]/35 hover:text-[var(--gf-text-muted)]">
             ← بدء من جديد
           </button>
         </div>

@@ -63,11 +63,11 @@ function statusLabel(s: string) {
     pending_proof:  { label: "انتظار الدفع",    color: "text-yellow-400 bg-yellow-500/15 border-yellow-500/30" },
     processing:     { label: "قيد المعالجة",   color: "text-orange-400 bg-orange-500/15 border-orange-500/30" },
     confirmed:      { label: "مؤكّد",           color: "text-cyan-400 bg-cyan-500/15 border-cyan-500/30" },
-    activated:      { label: "مفعّل ✓",        color: "text-lime-400 bg-lime-500/15 border-lime-500/30" },
+    activated:      { label: "مفعّل ✓",        color: "text-[var(--gf-brand)] bg-lime-500/15 border-lime-500/30" },
     rejected:       { label: "مرفوض",           color: "text-red-400 bg-red-500/15 border-red-500/30" },
-    expired:        { label: "منتهي",           color: "text-white/40 bg-white/5 border-white/10" },
+    expired:        { label: "منتهي",           color: "text-[var(--gf-text-muted)] bg-[var(--gf-surface-2)] border-[var(--gf-line)]" },
   };
-  return map[s] ?? { label: s, color: "text-white/50 bg-white/5 border-white/10" };
+  return map[s] ?? { label: s, color: "text-[var(--gf-text-muted)] bg-[var(--gf-surface-2)] border-[var(--gf-line)]" };
 }
 
 function formatDate(iso: string | null) {
@@ -84,14 +84,14 @@ function Avatar({ user, size = 48 }: { user: UserData; size?: number }) {
         src={user.profile_picture}
         alt="avatar"
         style={{ width: size, height: size }}
-        className="rounded-full object-cover border-2 border-purple-500/40"
+        className="rounded-full object-cover border-2 border-[var(--gf-brand)]"
       />
     );
   }
   return (
     <div
       style={{ width: size, height: size, fontSize: size * 0.36 }}
-      className="flex items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 font-black text-white border-2 border-purple-500/40"
+      className="flex items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 font-black text-[var(--gf-text)] border-2 border-[var(--gf-brand)]"
     >
       {getInitials(user)}
     </div>
@@ -162,9 +162,9 @@ export function CustomerDashboard() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-3">
           <div className="pixel-logo text-3xl font-black">
-            <span className="text-purple-500">GROW</span><span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span><span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
-          <p className="animate-pulse text-sm text-white/40">جارٍ التحميل…</p>
+          <p className="animate-pulse text-sm text-[var(--gf-text-muted)]">جارٍ التحميل…</p>
         </div>
       </div>
     );
@@ -194,19 +194,19 @@ export function CustomerDashboard() {
         <div className="border-b border-white/8 p-5">
           <div className="flex items-center justify-between mb-4">
             <a href="/" className="pixel-logo text-xl font-black">
-              <span className="text-purple-500">GROW</span><span className="text-lime-400">FOLO</span>
+              <span className="text-[var(--gf-brand)]">GROW</span><span className="text-[var(--gf-brand)]">FOLO</span>
             </a>
-            <button onClick={() => setSidebar(false)} className="text-white/40 hover:text-white lg:hidden">
+            <button onClick={() => setSidebar(false)} className="text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] lg:hidden">
               <X size={20} />
             </button>
           </div>
           <div className="flex items-center gap-3">
             <Avatar user={user} size={44} />
             <div className="min-w-0">
-              <p className="truncate font-bold text-white text-sm">{user.full_name ?? user.username ?? "مستخدم"}</p>
-              <p className="truncate text-xs text-white/40">{user.email}</p>
+              <p className="truncate font-bold text-[var(--gf-text)] text-sm">{user.full_name ?? user.username ?? "مستخدم"}</p>
+              <p className="truncate text-xs text-[var(--gf-text-muted)]">{user.email}</p>
               {user.is_verified ? (
-                <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-lime-500/15 border border-lime-500/30 px-2 py-0.5 text-[10px] font-bold text-lime-400">
+                <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-lime-500/15 border border-lime-500/30 px-2 py-0.5 text-[10px] font-bold text-[var(--gf-brand)]">
                   <CheckCircle size={9} /> موثّق
                 </span>
               ) : (
@@ -233,15 +233,15 @@ export function CustomerDashboard() {
                 className={`
                   flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all
                   ${section === s
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
+                    ? "bg-[var(--gf-brand)]/20 text-[var(--gf-brand)] border border-purple-500/30"
+                    : "text-white/80 hover:bg-[var(--gf-surface-2)] hover:text-white"
                   }
                 `}
               >
-                <span className={section === s ? "text-purple-400" : "text-white/40"}>{icon}</span>
+                <span className={section === s ? "text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)]"}>{icon}</span>
                 <span className="flex-1 text-right">{label}</span>
                 {badge !== null && (
-                  <span className="grid min-w-5 place-items-center rounded-full bg-purple-500 px-1.5 text-[10px] font-black text-white">
+                  <span className="grid min-w-5 place-items-center rounded-full bg-[var(--gf-brand)] px-1.5 text-[10px] font-black text-white">
                     {badge}
                   </span>
                 )}
@@ -266,23 +266,23 @@ export function CustomerDashboard() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-white/8 bg-black/40 backdrop-blur-xl px-5 py-4">
-          <button onClick={() => setSidebar(true)} className="text-white/60 hover:text-white lg:hidden">
+          <button onClick={() => setSidebar(true)} className="text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] lg:hidden">
             <Menu size={22} />
           </button>
-          <h1 className="flex-1 text-base font-black text-white">
+          <h1 className="flex-1 text-base font-black text-[var(--gf-text)]">
             {NAV_ITEMS.find(n => n.section === section)?.label ?? "لوحة التحكم"}
           </h1>
           <div className="flex items-center gap-3">
             <a
               href="/"
-              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-all"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] hover:bg-[var(--gf-surface-2)] px-3 py-1.5 text-xs font-semibold text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] transition-all"
             >
               ← المتجر
             </a>
-            <button onClick={() => navigate("notifications")} className="relative text-white/50 hover:text-white">
+            <button onClick={() => navigate("notifications")} className="relative text-[var(--gf-text-muted)] hover:text-[var(--gf-text)]">
               <Bell size={20} />
               {notifCtx.unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-purple-500 text-[9px] font-black text-white">
+                <span className="absolute -top-1 -right-1 grid min-w-4 place-items-center rounded-full bg-[var(--gf-brand)] text-[9px] font-black text-white">
                   {notifCtx.unreadCount}
                 </span>
               )}
@@ -341,9 +341,9 @@ function HomeSection({ user, onNavigate }: { user: UserData; onNavigate: (s: Sec
         <div className="flex items-center gap-4">
           <Avatar user={user} size={56} />
           <div>
-            <p className="text-white/50 text-sm">مرحباً بعودتك،</p>
-            <h2 className="text-xl font-black text-white">{user.full_name ?? user.username ?? "عميلنا"}</h2>
-            <p className="text-white/40 text-xs mt-0.5">عضو منذ {formatDate(user.created_at)}</p>
+            <p className="text-[var(--gf-text-muted)] text-sm">مرحباً بعودتك،</p>
+            <h2 className="text-xl font-black text-[var(--gf-text)]">{user.full_name ?? user.username ?? "عميلنا"}</h2>
+            <p className="text-[var(--gf-text-muted)] text-xs mt-0.5">عضو منذ {formatDate(user.created_at)}</p>
           </div>
         </div>
       </div>
@@ -354,13 +354,13 @@ function HomeSection({ user, onNavigate }: { user: UserData; onNavigate: (s: Sec
           <button
             key={label}
             onClick={() => action && onNavigate(action)}
-            className={`glass-panel rounded-2xl p-4 text-center space-y-1.5 hover:border-white/20 transition-all ${action ? "cursor-pointer" : "cursor-default"}`}
+            className={`glass-panel rounded-2xl p-4 text-center space-y-1.5 hover:border-[var(--gf-line-strong)] transition-all ${action ? "cursor-pointer" : "cursor-default"}`}
           >
-            <div className={`mx-auto grid size-10 place-items-center rounded-xl bg-gradient-to-br ${color} text-white`}>
+            <div className={`mx-auto grid size-10 place-items-center rounded-xl bg-gradient-to-br ${color} text-[var(--gf-text)]`}>
               {icon}
             </div>
-            <p className="text-lg font-black text-white">{value}</p>
-            <p className="text-xs text-white/45 leading-tight">{label}</p>
+            <p className="text-lg font-black text-[var(--gf-text)]">{value}</p>
+            <p className="text-xs text-[var(--gf-text)]/45 leading-tight">{label}</p>
           </button>
         ))}
       </div>
@@ -371,11 +371,11 @@ function HomeSection({ user, onNavigate }: { user: UserData; onNavigate: (s: Sec
           <button
             key={section}
             onClick={() => onNavigate(section)}
-            className="glass-panel rounded-2xl p-5 text-right hover:border-purple-500/40 hover:bg-purple-500/5 transition-all group space-y-2"
+            className="glass-panel rounded-2xl p-5 text-right hover:border-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/5 transition-all group space-y-2"
           >
-            <div className="text-purple-400 group-hover:text-purple-300 transition-colors">{icon}</div>
-            <p className="font-black text-white text-sm">{label}</p>
-            <p className="text-xs text-white/35">{desc}</p>
+            <div className="text-[var(--gf-brand)] group-hover:text-[var(--gf-brand)] transition-colors">{icon}</div>
+            <p className="font-black text-[var(--gf-text)] text-sm">{label}</p>
+            <p className="text-xs text-[var(--gf-text)]/35">{desc}</p>
           </button>
         ))}
       </div>
@@ -413,20 +413,20 @@ function AccountSection({ user, onRefresh }: { user: UserData; onRefresh: () => 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">معلومات الحساب</h2>
+        <h2 className="text-lg font-black text-[var(--gf-text)]">معلومات الحساب</h2>
         {!editing ? (
           <button onClick={() => setEditing(true)}
-            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 hover:text-white hover:border-white/20 transition-all">
+            className="flex items-center gap-2 rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-2 text-xs font-semibold text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] hover:border-[var(--gf-line-strong)] transition-all">
             <Edit3 size={13} /> تعديل
           </button>
         ) : (
           <div className="flex gap-2">
             <button onClick={() => { setEditing(false); setMsg(null); }}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/50 hover:text-white transition-colors">
+              className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-1.5 text-xs text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] transition-colors">
               إلغاء
             </button>
             <button onClick={() => void handleSave()} disabled={saving}
-              className="flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 px-4 py-1.5 text-xs font-black text-white disabled:opacity-60 transition-colors">
+              className="flex items-center gap-1.5 rounded-xl bg-[var(--gf-brand)] hover:bg-[var(--gf-brand)] px-4 py-1.5 text-xs font-black text-white disabled:opacity-60 transition-colors">
               <Save size={12} /> {saving ? "حفظ…" : "حفظ"}
             </button>
           </div>
@@ -435,7 +435,7 @@ function AccountSection({ user, onRefresh }: { user: UserData; onRefresh: () => 
 
       {msg && (
         <div className={`flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm ${
-          msg.ok ? "bg-lime-500/10 border-lime-500/30 text-lime-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+          msg.ok ? "bg-lime-500/10 border-lime-500/30 text-[var(--gf-brand)]" : "bg-red-500/10 border-red-500/20 text-red-400"
         }`}>
           {msg.ok ? <CheckCircle size={15} /> : <AlertCircle size={15} />}
           {msg.text}
@@ -446,23 +446,23 @@ function AccountSection({ user, onRefresh }: { user: UserData; onRefresh: () => 
         {[
           { label: "الاسم الكامل",         value: editing ? (
             <input value={fullName} onChange={e => setFullName(e.target.value)}
-              className="bg-white/5 border border-white/15 rounded-xl px-3 py-1.5 text-sm text-white outline-none focus:border-purple-500/50 w-full" />
+              className="bg-[var(--gf-surface-2)] border border-white/15 rounded-xl px-3 py-1.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 w-full" />
           ) : (user.full_name ?? "—") },
           { label: "اسم المستخدم",          value: editing ? (
             <input value={username} onChange={e => setUsername(e.target.value)} dir="ltr"
-              className="bg-white/5 border border-white/15 rounded-xl px-3 py-1.5 text-sm text-white outline-none focus:border-purple-500/50 w-full" />
+              className="bg-[var(--gf-surface-2)] border border-white/15 rounded-xl px-3 py-1.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 w-full" />
           ) : (user.username ?? "—") },
-          { label: "البريد الإلكتروني",     value: <span dir="ltr" className="text-white/70">{user.email}</span> },
+          { label: "البريد الإلكتروني",     value: <span dir="ltr" className="text-[var(--gf-text-muted)]">{user.email}</span> },
           { label: "نوع الحساب",            value: user.is_admin ? "مدير" : "عميل" },
           { label: "حالة التوثيق",          value: user.is_verified
-            ? <span className="inline-flex items-center gap-1 text-lime-400"><CheckCircle size={13} /> موثّق</span>
+            ? <span className="inline-flex items-center gap-1 text-[var(--gf-brand)]"><CheckCircle size={13} /> موثّق</span>
             : <span className="inline-flex items-center gap-1 text-yellow-400"><AlertCircle size={13} /> غير موثّق</span>
           },
           { label: "تاريخ التسجيل",         value: formatDate(user.created_at) },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center gap-4 px-5 py-4">
-            <span className="w-36 shrink-0 text-sm text-white/45">{label}</span>
-            <span className="flex-1 text-sm font-semibold text-white">{value}</span>
+            <span className="w-36 shrink-0 text-sm text-[var(--gf-text)]/45">{label}</span>
+            <span className="flex-1 text-sm font-semibold text-[var(--gf-text)]">{value}</span>
           </div>
         ))}
       </div>
@@ -493,15 +493,15 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-black text-white">{purchased ? "مشترياتي المفعّلة" : "جميع طلباتي"}</h2>
+      <h2 className="text-lg font-black text-[var(--gf-text)]">{purchased ? "مشترياتي المفعّلة" : "جميع طلباتي"}</h2>
 
-      {loading && <p className="animate-pulse text-sm text-white/40 py-8 text-center">جارٍ التحميل…</p>}
+      {loading && <p className="animate-pulse text-sm text-[var(--gf-text-muted)] py-8 text-center">جارٍ التحميل…</p>}
       {error   && <p className="text-sm text-red-400 py-4 text-center">{error}</p>}
 
       {!loading && !error && displayed.length === 0 && (
         <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
-          <Package size={40} className="mx-auto text-white/20" />
-          <p className="text-white/40 text-sm">
+          <Package size={40} className="mx-auto text-[var(--gf-text)]/20" />
+          <p className="text-[var(--gf-text-muted)] text-sm">
             {purchased ? "لا توجد مشتريات مفعّلة بعد" : "لم تقم بأي طلب حتى الآن"}
           </p>
           <a href="/#products" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
@@ -516,25 +516,25 @@ function OrdersSection({ user: _user, purchased }: { user: UserData; purchased: 
           <div key={order.id} className="glass-panel rounded-2xl p-5 space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-black text-white truncate">{order.product_name || "منتج Growfolo"}</p>
-                <p className="text-xs text-white/40 mt-0.5">{formatDate(order.created_at)}</p>
+                <p className="font-black text-[var(--gf-text)] truncate">{order.product_name || "منتج Growfolo"}</p>
+                <p className="text-xs text-[var(--gf-text-muted)] mt-0.5">{formatDate(order.created_at)}</p>
               </div>
               <span className={`shrink-0 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold ${st.color}`}>
                 {st.label}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-white/40 font-mono text-xs">#{order.id.slice(0, 8).toUpperCase()}</span>
-              <span className="font-black text-lime-400">${order.product_price.toFixed(2)}</span>
+              <span className="text-[var(--gf-text-muted)] font-mono text-xs">#{order.id.slice(0, 8).toUpperCase()}</span>
+              <span className="font-black text-[var(--gf-brand)]">${order.product_price.toFixed(2)}</span>
             </div>
             {order.tracking_notes && (
-              <p className="rounded-xl bg-white/5 border border-white/8 px-3 py-2 text-xs text-white/50">
+              <p className="rounded-xl bg-[var(--gf-surface-2)] border border-white/8 px-3 py-2 text-xs text-[var(--gf-text-muted)]">
                 {order.tracking_notes}
               </p>
             )}
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map(n => (
-                <div key={n} className={`flex-1 h-1.5 rounded-full transition-all ${n <= order.tracking_stage ? "bg-purple-500" : "bg-white/10"}`} />
+                <div key={n} className={`flex-1 h-1.5 rounded-full transition-all ${n <= order.tracking_stage ? "bg-[var(--gf-brand)]" : "bg-[var(--gf-surface-2)]"}`} />
               ))}
             </div>
           </div>
@@ -563,7 +563,7 @@ function WaCountdown({ expiresAt }: { expiresAt: string | null }) {
   }, [expiresAt]);
 
   if (!expiresAt || left === 0) {
-    return <span className="text-xs text-white/30">انتهت المدة</span>;
+    return <span className="text-xs text-[var(--gf-text)]/30">انتهت المدة</span>;
   }
 
   const h   = Math.floor(left / 3600000);
@@ -572,7 +572,7 @@ function WaCountdown({ expiresAt }: { expiresAt: string | null }) {
   const urgent = left < 30 * 60000;
 
   return (
-    <span className={`flex items-center gap-1 text-xs font-black tabular-nums ${urgent ? "text-red-400" : "text-purple-300"}`}>
+    <span className={`flex items-center gap-1 text-xs font-black tabular-nums ${urgent ? "text-red-400" : "text-[var(--gf-brand)]"}`}>
       <Clock size={11} />
       {h > 0 ? `${h}س ${String(min).padStart(2,"0")}د` : `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`}
     </span>
@@ -618,15 +618,15 @@ function TransactionsSection({ user }: { user: UserData }) {
   };
 
   if (loading) {
-    return <div className="py-12 text-center text-sm text-white/30 animate-pulse">جارٍ التحميل...</div>;
+    return <div className="py-12 text-center text-sm text-[var(--gf-text)]/30 animate-pulse">جارٍ التحميل...</div>;
   }
 
   if (orders.length === 0) {
     return (
       <div className="glass-panel rounded-3xl p-12 text-center space-y-4">
         <div className="text-4xl">💬</div>
-        <p className="font-black text-white">لا توجد معاملات عبر واتساب</p>
-        <p className="text-sm text-white/45">عند اختيار "الدفع عبر واتساب" في صفحة الدفع، ستظهر طلباتك هنا مع العداد التنازلي.</p>
+        <p className="font-black text-[var(--gf-text)]">لا توجد معاملات عبر واتساب</p>
+        <p className="text-sm text-[var(--gf-text)]/45">عند اختيار "الدفع عبر واتساب" في صفحة الدفع، ستظهر طلباتك هنا مع العداد التنازلي.</p>
         <a href="/" className="neon-button inline-block px-6 py-2.5 rounded-2xl text-sm font-black text-black mt-1">
           تسوق الآن
         </a>
@@ -637,7 +637,7 @@ function TransactionsSection({ user }: { user: UserData }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">معاملاتي عبر واتساب</h2>
+        <h2 className="text-lg font-black text-[var(--gf-text)]">معاملاتي عبر واتساب</h2>
         <span className="rounded-xl bg-green-500/15 px-3 py-1 text-xs font-black text-green-400">{orders.length} معاملة</span>
       </div>
 
@@ -657,13 +657,13 @@ function TransactionsSection({ user }: { user: UserData }) {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">💬</span>
-                  <code className="font-black text-white text-sm">{shortId}</code>
+                  <code className="font-black text-[var(--gf-text)] text-sm">{shortId}</code>
                   <span className={`rounded-xl border px-2 py-0.5 text-[10px] font-black ${st.color}`}>{st.label}</span>
                 </div>
-                <p className="text-xs text-white/45">{order.product_name} · {order.product_price}$</p>
+                <p className="text-xs text-[var(--gf-text)]/45">{order.product_name} · {order.product_price}$</p>
               </div>
               {!isActive && <WaCountdown expiresAt={exAt} />}
-              {isActive && <CheckCircle size={18} className="text-lime-400 shrink-0" />}
+              {isActive && <CheckCircle size={18} className="text-[var(--gf-brand)] shrink-0" />}
             </div>
 
             {/* Actions */}
@@ -672,7 +672,7 @@ function TransactionsSection({ user }: { user: UserData }) {
                 {/* Copy order id */}
                 <button
                   onClick={() => copyId(order.id)}
-                  className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-black transition-all ${copyOk === order.id ? "border-lime-500/40 bg-lime-500/10 text-lime-400" : "border-white/10 bg-white/4 text-white/60 hover:text-white hover:bg-white/8"}`}
+                  className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-black transition-all ${copyOk === order.id ? "border-lime-500/40 bg-lime-500/10 text-[var(--gf-brand)]" : "border-[var(--gf-line)] bg-white/4 text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] hover:bg-[var(--gf-surface-2)]"}`}
                 >
                   {copyOk === order.id ? <><CheckCircle size={13} /> تم النسخ!</> : <><Copy size={13} /> نسخ رقم الطلب</>}
                 </button>
@@ -692,9 +692,9 @@ function TransactionsSection({ user }: { user: UserData }) {
             {/* Proof upload — if still pending */}
             {!hasProof && !isActive && uploadedId !== order.id && (
               <div className="space-y-2">
-                <p className="text-xs font-bold text-white/55">رفع إثبات الدفع</p>
+                <p className="text-xs font-bold text-[var(--gf-text)]/55">رفع إثبات الدفع</p>
                 <label className="block cursor-pointer">
-                  <div className={`flex items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-xs transition-colors ${proof ? "border-lime-500/40 bg-lime-500/6 text-lime-400" : "border-white/15 bg-white/3 hover:bg-white/6 text-white/40"}`}>
+                  <div className={`flex items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-xs transition-colors ${proof ? "border-lime-500/40 bg-lime-500/6 text-[var(--gf-brand)]" : "border-white/15 bg-white/3 hover:bg-white/6 text-[var(--gf-text-muted)]"}`}>
                     {proof ? <><CheckCircle size={14} /> {proof.name} — اضغط لتغييره</> : <><Upload size={14} /> ارفع إثبات الدفع (JPG · PNG · PDF)</>}
                     <input type="file" accept="image/*,.pdf" className="sr-only" onChange={e => setProof(e.target.files?.[0] ?? null)} />
                   </div>
@@ -713,20 +713,20 @@ function TransactionsSection({ user }: { user: UserData }) {
 
             {/* Proof uploaded confirmation */}
             {(hasProof || uploadedId === order.id) && !isActive && (
-              <div className="flex items-center gap-2 rounded-xl bg-lime-500/8 border border-lime-500/20 px-3 py-2 text-xs text-lime-400">
+              <div className="flex items-center gap-2 rounded-xl bg-lime-500/8 border border-lime-500/20 px-3 py-2 text-xs text-[var(--gf-brand)]">
                 <CheckCircle size={13} /> إثبات الدفع مرفوع — قيد المراجعة
               </div>
             )}
 
             {/* Activated */}
             {isActive && (
-              <div className="rounded-xl bg-lime-500/10 border border-lime-500/20 px-3 py-2 text-xs text-lime-400 text-center font-black">
+              <div className="rounded-xl bg-lime-500/10 border border-lime-500/20 px-3 py-2 text-xs text-[var(--gf-brand)] text-center font-black">
                 ✓ تم التفعيل — يمكنك استخدام الخدمة الآن
               </div>
             )}
 
             {/* Timestamp */}
-            <p className="text-[10px] text-white/25">{formatDate(order.created_at)}</p>
+            <p className="text-[10px] text-[var(--gf-text)]/25">{formatDate(order.created_at)}</p>
           </div>
         );
       })}
@@ -744,8 +744,8 @@ function ProductsSection() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">المنتجات المتاحة</h2>
-        <a href="/" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+        <h2 className="text-lg font-black text-[var(--gf-text)]">المنتجات المتاحة</h2>
+        <a href="/" className="text-xs text-[var(--gf-brand)] hover:text-[var(--gf-brand)] transition-colors">
           المتجر الكامل ←
         </a>
       </div>
@@ -765,13 +765,13 @@ function ProductsSection() {
                 {p.logo}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-black text-white text-sm truncate">{p.name}</p>
-                <p className="text-xs text-white/35 truncate">{p.subtitle}</p>
+                <p className="font-black text-[var(--gf-text)] text-sm truncate">{p.name}</p>
+                <p className="text-xs text-[var(--gf-text)]/35 truncate">{p.subtitle}</p>
               </div>
               <div className="text-right shrink-0">
                 <p className="font-black text-sm" style={{ color: p.accentColor }}>${p.price}</p>
                 {p.oldPrice && (
-                  <p className="text-[10px] text-white/30 line-through">${p.oldPrice}</p>
+                  <p className="text-[10px] text-[var(--gf-text)]/30 line-through">${p.oldPrice}</p>
                 )}
               </div>
             </div>
@@ -868,18 +868,18 @@ function DiscountsSection({ user }: { user: UserData }) {
       <div className="glass-panel rounded-3xl p-6">
         <div className="flex items-center gap-3 mb-1">
           <div className="grid size-10 place-items-center rounded-2xl bg-lime-500/15">
-            <Percent size={20} className="text-lime-400" />
+            <Percent size={20} className="text-[var(--gf-brand)]" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white">خصوماتي</h2>
-            <p className="text-xs text-white/40">أدخل كود الحصول على الخصم الذي حصلت عليه</p>
+            <h2 className="text-lg font-black text-[var(--gf-text)]">خصوماتي</h2>
+            <p className="text-xs text-[var(--gf-text-muted)]">أدخل كود الحصول على الخصم الذي حصلت عليه</p>
           </div>
         </div>
       </div>
 
       {/* Redeem form */}
       <div className="glass-panel rounded-3xl p-6 space-y-4">
-        <p className="text-sm font-bold text-white/70">استرداد كود الخصم</p>
+        <p className="text-sm font-bold text-[var(--gf-text-muted)]">استرداد كود الخصم</p>
         <form onSubmit={handleRedeem} className="flex gap-3">
           <input
             value={redemptionCode}
@@ -888,7 +888,7 @@ function DiscountsSection({ user }: { user: UserData }) {
               if (status !== "idle") setStatus("idle");
             }}
             placeholder="WELCOME2026"
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-mono text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/50"
+            className="flex-1 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 font-mono text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/20 focus:border-lime-500/50"
           />
           <button
             type="submit"
@@ -901,10 +901,10 @@ function DiscountsSection({ user }: { user: UserData }) {
 
         {status === "success" && (
           <div className="flex items-start gap-3 rounded-2xl border border-lime-500/30 bg-lime-500/10 p-4">
-            <CheckCircle size={20} className="shrink-0 text-lime-400 mt-0.5" />
+            <CheckCircle size={20} className="shrink-0 text-[var(--gf-brand)] mt-0.5" />
             <div>
-              <p className="font-black text-lime-400">🎉 مبروك! لقد حصلت على رمز خصم بنجاح</p>
-              <p className="mt-1 text-xs text-white/60">
+              <p className="font-black text-[var(--gf-brand)]">🎉 مبروك! لقد حصلت على رمز خصم بنجاح</p>
+              <p className="mt-1 text-xs text-[var(--gf-text-muted)]">
                 تم حفظ رمز الخصم في حسابك تلقائياً. سيُطبَّق الخصم عند إتمام الشراء دون الحاجة لإدخاله مجدداً.
               </p>
             </div>
@@ -921,14 +921,14 @@ function DiscountsSection({ user }: { user: UserData }) {
 
       {/* Saved discounts */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-white/40 px-1">خصوماتي المحفوظة</p>
+        <p className="text-xs font-bold text-[var(--gf-text-muted)] px-1">خصوماتي المحفوظة</p>
         {loadingMy ? (
-          <div className="glass-panel rounded-3xl p-8 text-center text-white/30 text-sm">جارٍ التحميل...</div>
+          <div className="glass-panel rounded-3xl p-8 text-center text-[var(--gf-text)]/30 text-sm">جارٍ التحميل...</div>
         ) : savedDiscounts.length === 0 ? (
           <div className="glass-panel rounded-3xl p-10 text-center space-y-2">
-            <Percent size={36} className="mx-auto text-white/15" />
-            <p className="text-white/30 text-sm">لا توجد خصومات محفوظة بعد</p>
-            <p className="text-white/20 text-xs">أدخل كود الحصول على الخصم أعلاه للبدء</p>
+            <Percent size={36} className="mx-auto text-[var(--gf-text)]/15" />
+            <p className="text-[var(--gf-text)]/30 text-sm">لا توجد خصومات محفوظة بعد</p>
+            <p className="text-[var(--gf-text)]/20 text-xs">أدخل كود الحصول على الخصم أعلاه للبدء</p>
           </div>
         ) : (
           savedDiscounts.map((dc) => (
@@ -937,27 +937,27 @@ function DiscountsSection({ user }: { user: UserData }) {
               className={`glass-panel rounded-2xl p-4 flex items-center gap-4 ${!dc.is_active ? "opacity-50" : ""}`}
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime-500/15">
-                <Percent size={16} className="text-lime-400" />
+                <Percent size={16} className="text-[var(--gf-brand)]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-sm font-black text-lime-400">{dc.code}</span>
-                  <span className="rounded-full bg-lime-500/15 px-2 py-0.5 text-[10px] font-black text-lime-400">
+                  <span className="font-mono text-sm font-black text-[var(--gf-brand)]">{dc.code}</span>
+                  <span className="rounded-full bg-lime-500/15 px-2 py-0.5 text-[10px] font-black text-[var(--gf-brand)]">
                     -{dc.percent}%
                   </span>
                   {!dc.is_active && (
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/40">معطّل</span>
+                    <span className="rounded-full bg-[var(--gf-surface-2)] px-2 py-0.5 text-[10px] text-[var(--gf-text-muted)]">معطّل</span>
                   )}
                 </div>
-                {dc.description && <p className="mt-0.5 text-xs text-white/40">{dc.description}</p>}
+                {dc.description && <p className="mt-0.5 text-xs text-[var(--gf-text-muted)]">{dc.description}</p>}
                 {dc.expires_at && (
-                  <p className="mt-0.5 text-[10px] text-white/30">
+                  <p className="mt-0.5 text-[10px] text-[var(--gf-text)]/30">
                     ينتهي: {new Date(dc.expires_at).toLocaleDateString("ar-DZ")}
                   </p>
                 )}
               </div>
               <div className="shrink-0 text-right">
-                <span className="text-2xl font-black text-lime-400">-{dc.percent}%</span>
+                <span className="text-2xl font-black text-[var(--gf-brand)]">-{dc.percent}%</span>
               </div>
             </div>
           ))
@@ -976,8 +976,8 @@ function CartSection() {
   if (count === 0) {
     return (
       <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
-        <ShoppingCart size={40} className="mx-auto text-white/20" />
-        <p className="text-white/40 text-sm">سلة التسوق فارغة</p>
+        <ShoppingCart size={40} className="mx-auto text-[var(--gf-text)]/20" />
+        <p className="text-[var(--gf-text-muted)] text-sm">سلة التسوق فارغة</p>
         <a href="/" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
           تصفح المنتجات
         </a>
@@ -988,36 +988,36 @@ function CartSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">سلة التسوق ({count})</h2>
+        <h2 className="text-lg font-black text-[var(--gf-text)]">سلة التسوق ({count})</h2>
         <button onClick={clear} className="text-xs text-red-400 hover:text-red-300">مسح الكل</button>
       </div>
       <div className="space-y-3">
         {items.map(item => (
           <div key={item.id} className="glass-panel rounded-2xl p-4 flex items-center gap-4">
-            <div className="grid size-10 shrink-0 place-items-center rounded-xl text-white font-black text-sm"
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl text-[var(--gf-text)] font-black text-sm"
               style={{ background: item.color }}>
               {typeof item.logo === "string" && item.logo.length <= 2 ? item.logo : "G"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-white text-sm truncate">{item.name}</p>
-              <p className="text-xs text-lime-400 font-black">${item.price}</p>
+              <p className="font-bold text-[var(--gf-text)] text-sm truncate">{item.name}</p>
+              <p className="text-xs text-[var(--gf-brand)] font-black">${item.price}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => updateQty(item.id, -1)}
-                className="grid size-7 place-items-center rounded-lg bg-white/5 hover:bg-white/10 text-white/70 font-black">−</button>
-              <span className="w-5 text-center text-sm font-black text-white">{item.qty}</span>
+                className="grid size-7 place-items-center rounded-lg bg-[var(--gf-surface-2)] hover:bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] font-black">−</button>
+              <span className="w-5 text-center text-sm font-black text-[var(--gf-text)]">{item.qty}</span>
               <button onClick={() => updateQty(item.id, 1)}
-                className="grid size-7 place-items-center rounded-lg bg-white/5 hover:bg-white/10 text-white/70 font-black">+</button>
+                className="grid size-7 place-items-center rounded-lg bg-[var(--gf-surface-2)] hover:bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] font-black">+</button>
             </div>
-            <button onClick={() => removeItem(item.id)} className="text-white/30 hover:text-red-400">
+            <button onClick={() => removeItem(item.id)} className="text-[var(--gf-text)]/30 hover:text-red-400">
               <X size={16} />
             </button>
           </div>
         ))}
       </div>
       <div className="glass-panel rounded-2xl p-4 flex items-center justify-between">
-        <span className="text-white/60 text-sm">الإجمالي</span>
-        <span className="text-xl font-black text-lime-400">${totalUSD.toFixed(2)}</span>
+        <span className="text-[var(--gf-text-muted)] text-sm">الإجمالي</span>
+        <span className="text-xl font-black text-[var(--gf-brand)]">${totalUSD.toFixed(2)}</span>
       </div>
       {/* Opens the full cart sidebar with payment method selection and checkout */}
       <button
@@ -1041,8 +1041,8 @@ function FavoritesSection() {
   if (favorites.length === 0) {
     return (
       <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
-        <Heart size={40} className="mx-auto text-white/20" />
-        <p className="text-white/40 text-sm">لا توجد منتجات مفضلة بعد</p>
+        <Heart size={40} className="mx-auto text-[var(--gf-text)]/20" />
+        <p className="text-[var(--gf-text-muted)] text-sm">لا توجد منتجات مفضلة بعد</p>
         <a href="/" className="neon-button inline-block px-5 py-2.5 rounded-2xl text-sm font-black text-black mt-2">
           تصفح المنتجات
         </a>
@@ -1052,19 +1052,19 @@ function FavoritesSection() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-black text-white">المفضلة ({favorites.length})</h2>
+      <h2 className="text-lg font-black text-[var(--gf-text)]">المفضلة ({favorites.length})</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {favorites.map(item => (
           <div key={item.id} className="glass-panel rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="grid size-10 place-items-center rounded-xl text-white font-black text-sm"
+                <div className="grid size-10 place-items-center rounded-xl text-[var(--gf-text)] font-black text-sm"
                   style={{ background: item.color }}>
                   {typeof item.logo === "string" && item.logo.length <= 2 ? item.logo : "G"}
                 </div>
                 <div>
-                  <p className="font-bold text-white text-sm">{item.name}</p>
-                  <p className="text-xs text-lime-400 font-black">${item.price}</p>
+                  <p className="font-bold text-[var(--gf-text)] text-sm">{item.name}</p>
+                  <p className="text-xs text-[var(--gf-brand)] font-black">${item.price}</p>
                 </div>
               </div>
               <button onClick={() => toggleFavorite(item)} className="text-red-400 hover:text-red-300">
@@ -1076,7 +1076,7 @@ function FavoritesSection() {
                 addItem({ id: item.id, name: item.name, price: item.price, logo: item.logo, color: item.color });
                 openSidebar();
               }}
-              className="w-full rounded-xl bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/30 py-2 text-xs font-black text-purple-300 transition-colors"
+              className="w-full rounded-xl bg-[var(--gf-brand)]/20 hover:bg-[var(--gf-brand)]/40 border border-purple-500/30 py-2 text-xs font-black text-[var(--gf-brand)] transition-colors"
             >
               أضف للسلة
             </button>
@@ -1097,31 +1097,31 @@ function NotificationsSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black text-white">الإشعارات</h2>
+        <h2 className="text-lg font-black text-[var(--gf-text)]">الإشعارات</h2>
         {notifications.some(n => !n.read) && (
-          <button onClick={markAllRead} className="text-xs text-purple-400 hover:text-purple-300">
+          <button onClick={markAllRead} className="text-xs text-[var(--gf-brand)] hover:text-[var(--gf-brand)]">
             تعيين الكل كمقروء
           </button>
         )}
       </div>
       {notifications.length === 0 && (
         <div className="glass-panel rounded-3xl p-12 text-center">
-          <Bell size={40} className="mx-auto text-white/20 mb-3" />
-          <p className="text-white/40 text-sm">لا توجد إشعارات</p>
+          <Bell size={40} className="mx-auto text-[var(--gf-text)]/20 mb-3" />
+          <p className="text-[var(--gf-text-muted)] text-sm">لا توجد إشعارات</p>
         </div>
       )}
       <div className="space-y-2">
         {notifications.map(n => (
           <button key={n.id} onClick={() => markRead(n.id)}
-            className={`w-full glass-panel rounded-2xl p-4 text-right hover:border-white/20 transition-all ${!n.read ? "border-purple-500/30 bg-purple-500/5" : ""}`}>
+            className={`w-full glass-panel rounded-2xl p-4 text-right hover:border-[var(--gf-line-strong)] transition-all ${!n.read ? "border-purple-500/30 bg-[var(--gf-brand)]/5" : ""}`}>
             <div className="flex items-start gap-3">
-              <Bell size={16} className={n.read ? "text-white/30 mt-0.5" : "text-purple-400 mt-0.5"} />
+              <Bell size={16} className={n.read ? "text-[var(--gf-text)]/30 mt-0.5" : "text-[var(--gf-brand)] mt-0.5"} />
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-bold ${n.read ? "text-white/60" : "text-white"}`}>{n.title}</p>
-                <p className="text-xs text-white/40 mt-0.5">{n.description}</p>
-                <p className="text-xs text-white/25 mt-1">{formatDate(n.createdAt)}</p>
+                <p className={`text-sm font-bold ${n.read ? "text-[var(--gf-text-muted)]" : "text-[var(--gf-text)]"}`}>{n.title}</p>
+                <p className="text-xs text-[var(--gf-text-muted)] mt-0.5">{n.description}</p>
+                <p className="text-xs text-[var(--gf-text)]/25 mt-1">{formatDate(n.createdAt)}</p>
               </div>
-              {!n.read && <div className="size-2 shrink-0 rounded-full bg-purple-500 mt-1.5" />}
+              {!n.read && <div className="size-2 shrink-0 rounded-full bg-[var(--gf-brand)] mt-1.5" />}
             </div>
           </button>
         ))}
@@ -1137,24 +1137,24 @@ function NotificationsSection() {
 function SupportSection({ user }: { user: UserData }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-black text-white">الدعم والمساعدة</h2>
+      <h2 className="text-lg font-black text-[var(--gf-text)]">الدعم والمساعدة</h2>
       <div className="glass-panel rounded-3xl p-6 space-y-4 bg-gradient-to-l from-purple-900/10 to-transparent">
         <div className="flex items-center gap-4">
-          <div className="grid size-14 place-items-center rounded-2xl bg-purple-500/20 border border-purple-500/30">
-            <MessageCircle size={26} className="text-purple-400" />
+          <div className="grid size-14 place-items-center rounded-2xl bg-[var(--gf-brand)]/20 border border-purple-500/30">
+            <MessageCircle size={26} className="text-[var(--gf-brand)]" />
           </div>
           <div>
-            <h3 className="font-black text-white">تواصل مع فريق الدعم</h3>
-            <p className="text-sm text-white/50 mt-0.5">متوفرون للمساعدة في أي مشكلة</p>
+            <h3 className="font-black text-[var(--gf-text)]">تواصل مع فريق الدعم</h3>
+            <p className="text-sm text-[var(--gf-text-muted)] mt-0.5">متوفرون للمساعدة في أي مشكلة</p>
           </div>
         </div>
-        <p className="text-sm text-white/60 leading-relaxed">
+        <p className="text-sm text-[var(--gf-text-muted)] leading-relaxed">
           يمكنك التواصل معنا عبر الدردشة المباشرة في أسفل الشاشة. سيتم ربط محادثتك بحسابك تلقائياً.
         </p>
         <div className="glass-panel rounded-2xl p-4 space-y-1">
-          <p className="text-xs text-white/40 font-semibold">بيانات حسابك في الدردشة</p>
-          <p className="text-sm text-white">{user.full_name ?? user.username ?? "—"}</p>
-          <p className="text-xs text-white/50" dir="ltr">{user.email}</p>
+          <p className="text-xs text-[var(--gf-text-muted)] font-semibold">بيانات حسابك في الدردشة</p>
+          <p className="text-sm text-[var(--gf-text)]">{user.full_name ?? user.username ?? "—"}</p>
+          <p className="text-xs text-[var(--gf-text-muted)]" dir="ltr">{user.email}</p>
         </div>
         <button
           onClick={() => {
@@ -1168,8 +1168,8 @@ function SupportSection({ user }: { user: UserData }) {
           فتح الدردشة المباشرة
         </button>
       </div>
-      <div className="glass-panel rounded-2xl p-4 flex items-center gap-3 text-sm text-white/60">
-        <Clock size={16} className="text-purple-400 shrink-0" />
+      <div className="glass-panel rounded-2xl p-4 flex items-center gap-3 text-sm text-[var(--gf-text-muted)]">
+        <Clock size={16} className="text-[var(--gf-brand)] shrink-0" />
         وقت الاستجابة المتوقع: أقل من ساعة في أوقات العمل
       </div>
     </div>
@@ -1183,7 +1183,7 @@ function SupportSection({ user }: { user: UserData }) {
 function SettingsSection({ user, onRefresh }: { user: UserData; onRefresh: () => Promise<void> }) {
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-black text-white">إعدادات الحساب</h2>
+      <h2 className="text-lg font-black text-[var(--gf-text)]">إعدادات الحساب</h2>
       <AvatarUpload user={user} onRefresh={onRefresh} />
       <PasswordChangeForm />
     </div>
@@ -1221,17 +1221,17 @@ function AvatarUpload({ user, onRefresh }: { user: UserData; onRefresh: () => Pr
 
   return (
     <div className="glass-panel rounded-3xl p-5 space-y-4">
-      <h3 className="font-black text-white">صورة الملف الشخصي</h3>
+      <h3 className="font-black text-[var(--gf-text)]">صورة الملف الشخصي</h3>
       <div className="flex items-center gap-5">
         <Avatar user={user} size={68} />
         <div className="space-y-1.5">
-          <p className="text-sm text-white/60">صورة واضحة لوجهك أو شعارك الشخصي</p>
-          <p className="text-xs text-white/35">PNG / JPG — تُضغط تلقائياً إلى 200×200px</p>
+          <p className="text-sm text-[var(--gf-text-muted)]">صورة واضحة لوجهك أو شعارك الشخصي</p>
+          <p className="text-xs text-[var(--gf-text)]/35">PNG / JPG — تُضغط تلقائياً إلى 200×200px</p>
         </div>
       </div>
       {msg && (
         <div className={`flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm ${
-          msg.ok ? "bg-lime-500/10 border-lime-500/30 text-lime-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+          msg.ok ? "bg-lime-500/10 border-lime-500/30 text-[var(--gf-brand)]" : "bg-red-500/10 border-red-500/20 text-red-400"
         }`}>
           {msg.ok ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
           {msg.text}
@@ -1239,7 +1239,7 @@ function AvatarUpload({ user, onRefresh }: { user: UserData; onRefresh: () => Pr
       )}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => void handleFile(e)} />
       <button onClick={() => fileRef.current?.click()} disabled={saving}
-        className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 px-5 py-2.5 text-sm font-semibold text-white/70 hover:text-white disabled:opacity-60 transition-all">
+        className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] hover:bg-[var(--gf-surface-2)] px-5 py-2.5 text-sm font-semibold text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] disabled:opacity-60 transition-all">
         <Camera size={16} />
         {saving ? "جارٍ الرفع…" : "تغيير الصورة"}
       </button>
@@ -1296,45 +1296,45 @@ function PasswordChangeForm() {
 
   return (
     <div className="glass-panel rounded-3xl p-5 space-y-4">
-      <h3 className="font-black text-white">تغيير كلمة المرور</h3>
+      <h3 className="font-black text-[var(--gf-text)]">تغيير كلمة المرور</h3>
       <form onSubmit={e => void handleSubmit(e)} className="space-y-4">
         {/* Old password */}
-        <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+        <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
           كلمة المرور الحالية
-          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 focus-within:border-purple-500/50 transition-colors">
+          <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 focus-within:border-purple-500/50 transition-colors">
             <input type={showOld ? "text" : "password"} value={oldPass} onChange={e => setOldPass(e.target.value)} required
               placeholder="••••••••••"
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30" />
-            <button type="button" onClick={() => setShowOld(p => !p)} className="text-white/30 hover:text-white/70">
+              className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30" />
+            <button type="button" onClick={() => setShowOld(p => !p)} className="text-[var(--gf-text)]/30 hover:text-[var(--gf-text-muted)]">
               {showOld ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
         </label>
 
         {/* New password */}
-        <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+        <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
           كلمة المرور الجديدة
-          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 focus-within:border-purple-500/50 transition-colors">
+          <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 focus-within:border-purple-500/50 transition-colors">
             <input type={showNew ? "text" : "password"} value={newPass} onChange={e => setNewPass(e.target.value)} required
               placeholder="9 أحرف على الأقل"
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30" />
-            <button type="button" onClick={() => setShowNew(p => !p)} className="text-white/30 hover:text-white/70">
+              className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30" />
+            <button type="button" onClick={() => setShowNew(p => !p)} className="text-[var(--gf-text)]/30 hover:text-[var(--gf-text-muted)]">
               {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
         </label>
 
         {/* Confirm */}
-        <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+        <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
           تأكيد كلمة المرور الجديدة
           <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required
             placeholder="أعد كتابة كلمة المرور الجديدة"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-purple-500/50 transition-colors" />
+            className="rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 transition-colors" />
         </label>
 
         {msg && (
           <div className={`flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm ${
-            msg.ok ? "bg-lime-500/10 border-lime-500/30 text-lime-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+            msg.ok ? "bg-lime-500/10 border-lime-500/30 text-[var(--gf-brand)]" : "bg-red-500/10 border-red-500/20 text-red-400"
           }`}>
             {msg.ok ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
             {msg.text}
@@ -1346,10 +1346,10 @@ function PasswordChangeForm() {
           {saving ? "جارٍ الحفظ…" : "تغيير كلمة المرور"}
         </button>
       </form>
-      <div className="flex items-center gap-2 text-xs text-white/35 border-t border-white/8 pt-3">
+      <div className="flex items-center gap-2 text-xs text-[var(--gf-text)]/35 border-t border-white/8 pt-3">
         <ChevronRight size={12} />
         <span>نسيت كلمة المرور الحالية؟</span>
-        <a href="/forgot-password" className="text-purple-400 hover:text-purple-300">استعادة عبر البريد</a>
+        <a href="/forgot-password" className="text-[var(--gf-brand)] hover:text-[var(--gf-brand)]">استعادة عبر البريد</a>
       </div>
     </div>
   );

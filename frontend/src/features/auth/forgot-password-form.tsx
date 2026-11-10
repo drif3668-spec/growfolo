@@ -62,8 +62,8 @@ export function ForgotPasswordForm() {
     <div className="w-full max-w-md">
       <a href="/" className="mb-8 block text-center">
         <span className="pixel-logo text-3xl font-black">
-          <span className="text-purple-500">GROW</span>
-          <span className="text-lime-400">FOLO</span>
+          <span className="text-[var(--gf-brand)]">GROW</span>
+          <span className="text-[var(--gf-brand)]">FOLO</span>
         </span>
       </a>
 
@@ -72,29 +72,29 @@ export function ForgotPasswordForm() {
         {step === "done" ? (
           <div className="py-6 text-center space-y-4">
             <div className="grid size-16 place-items-center rounded-2xl bg-lime-500/15 border border-lime-500/30 mx-auto">
-              <ShieldCheck size={28} className="text-lime-400" />
+              <ShieldCheck size={28} className="text-[var(--gf-brand)]" />
             </div>
-            <h1 className="text-xl font-black text-white">تم تغيير كلمة المرور!</h1>
-            <p className="text-sm text-white/50">جارٍ توجيهك لتسجيل الدخول…</p>
+            <h1 className="text-xl font-black text-[var(--gf-text)]">تم تغيير كلمة المرور!</h1>
+            <p className="text-sm text-[var(--gf-text-muted)]">جارٍ توجيهك لتسجيل الدخول…</p>
           </div>
         ) : step === "email" ? (
           <>
-            <div className="mb-5 grid size-12 place-items-center rounded-2xl bg-purple-500/15 border border-purple-500/30">
-              <KeyRound size={22} className="text-purple-400" />
+            <div className="mb-5 grid size-12 place-items-center rounded-2xl bg-[var(--gf-brand)]/15 border border-purple-500/30">
+              <KeyRound size={22} className="text-[var(--gf-brand)]" />
             </div>
-            <h1 className="text-xl font-black text-white">نسيت كلمة المرور؟</h1>
-            <p className="mt-1.5 text-sm text-white/50">أدخل بريدك وسنرسل لك رمزاً للإعادة</p>
+            <h1 className="text-xl font-black text-[var(--gf-text)]">نسيت كلمة المرور؟</h1>
+            <p className="mt-1.5 text-sm text-[var(--gf-text-muted)]">أدخل بريدك وسنرسل لك رمزاً للإعادة</p>
 
             <form onSubmit={e => void handleSendOtp(e)} className="mt-6 space-y-4">
-              <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+              <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
                 البريد الإلكتروني
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 focus-within:border-purple-500/50">
-                  <Mail size={15} className="shrink-0 text-purple-400" />
+                <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 focus-within:border-purple-500/50">
+                  <Mail size={15} className="shrink-0 text-[var(--gf-brand)]" />
                   <input
                     type="email" required value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+                    className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30"
                   />
                 </div>
               </label>
@@ -107,38 +107,38 @@ export function ForgotPasswordForm() {
           </>
         ) : (
           <>
-            <h1 className="text-xl font-black text-white">إعادة تعيين كلمة المرور</h1>
-            <p className="mt-1.5 text-sm text-white/50">
-              أرسلنا الرمز إلى <strong className="text-white/70">{email}</strong>
+            <h1 className="text-xl font-black text-[var(--gf-text)]">إعادة تعيين كلمة المرور</h1>
+            <p className="mt-1.5 text-sm text-[var(--gf-text-muted)]">
+              أرسلنا الرمز إلى <strong className="text-[var(--gf-text-muted)]">{email}</strong>
             </p>
 
             <form onSubmit={e => void handleReset(e)} className="mt-6 space-y-4">
-              <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+              <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
                 رمز التحقق (6 أرقام)
                 <input type="text" inputMode="numeric" maxLength={6} required value={otp}
                   onChange={e => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="• • • • • •"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-xl font-black text-purple-400 tracking-widest outline-none focus:border-purple-500/50 transition-colors"
+                  className="rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 text-center text-xl font-black text-[var(--gf-brand)] tracking-widest outline-none focus:border-purple-500/50 transition-colors"
                   style={{ direction: "ltr" }}
                 />
               </label>
-              <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+              <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
                 كلمة المرور الجديدة
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 focus-within:border-purple-500/50">
+                <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 focus-within:border-purple-500/50">
                   <input type={showPass ? "text" : "password"} required value={newPass}
                     onChange={e => setNewPass(e.target.value)} placeholder="9 أحرف على الأقل"
-                    className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+                    className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30"
                   />
-                  <button type="button" onClick={() => setShowPass(p => !p)} className="text-white/35">
+                  <button type="button" onClick={() => setShowPass(p => !p)} className="text-[var(--gf-text)]/35">
                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
               </label>
-              <label className="grid gap-1.5 text-xs font-semibold text-white/60">
+              <label className="grid gap-1.5 text-xs font-semibold text-[var(--gf-text-muted)]">
                 تأكيد كلمة المرور
                 <input type="password" required value={confirm}
                   onChange={e => setConfirm(e.target.value)} placeholder="أعد كتابة كلمة المرور"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-purple-500/50 transition-colors"
+                  className="rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 transition-colors"
                 />
               </label>
               {error && <p className="text-xs text-red-400 rounded-2xl bg-red-500/10 border border-red-500/20 px-3 py-2">{error}</p>}
@@ -150,8 +150,8 @@ export function ForgotPasswordForm() {
           </>
         )}
 
-        <p className="mt-5 text-center text-sm text-white/40">
-          <a href="/login" className="text-purple-400 hover:text-purple-300">← العودة لتسجيل الدخول</a>
+        <p className="mt-5 text-center text-sm text-[var(--gf-text-muted)]">
+          <a href="/login" className="text-[var(--gf-brand)] hover:text-[var(--gf-brand)]">← العودة لتسجيل الدخول</a>
         </p>
       </div>
     </div>

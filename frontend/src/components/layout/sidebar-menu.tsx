@@ -62,19 +62,19 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
 
       {/* Drawer */}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 flex w-[300px] flex-col bg-[#09080f] shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-[300px] flex-col bg-[var(--gf-surface)] shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-transform duration-300 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Top bar */}
         <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
           <div className="pixel-logo text-2xl font-black">
-            <span className="text-purple-500">GROW</span>
-            <span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span>
+            <span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
           <button
             onClick={onClose}
-            className="grid size-9 place-items-center rounded-2xl bg-white/6 text-white/60 hover:bg-white/12 hover:text-white"
+            className="grid size-9 place-items-center rounded-2xl bg-white/6 text-[var(--gf-text-muted)] hover:bg-white/12 hover:text-[var(--gf-text)]"
             aria-label="إغلاق القائمة"
           >
             <X size={18} />
@@ -90,11 +90,11 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
               onClick={onClose}
               className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-colors ${
                 item.highlight
-                  ? "bg-purple-600/20 text-purple-300 hover:bg-purple-600/35"
+                  ? "bg-[var(--gf-brand)]/20 text-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/35"
                   : "text-white/75 hover:bg-white/6 hover:text-white"
               }`}
             >
-              <item.icon size={18} className={item.highlight ? "text-purple-400" : "text-white/50"} />
+              <item.icon size={18} className={item.highlight ? "text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)]"} />
               <span className="flex-1">{item.label}</span>
               {item.badge > 0 && (
                 <span
@@ -115,7 +115,7 @@ export function SidebarMenu({ open, onClose }: SidebarMenuProps) {
 
         {/* Footer */}
         <div className="border-t border-white/8 px-5 py-4">
-          <p className="text-center text-xs text-white/30">جميع الحقوق محفوظة © Growfolo 2026</p>
+          <p className="text-center text-xs text-[var(--gf-text)]/30">جميع الحقوق محفوظة © Growfolo 2026</p>
         </div>
       </aside>
     </>

@@ -72,12 +72,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }`}
         style={{ minWidth: 240 }}
       >
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-lime-500/20 text-xl text-lime-400">
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-lime-500/20 text-xl text-[var(--gf-brand)]">
           ✓
         </span>
         <div>
-          <p className="text-xs font-bold text-lime-400">تمت الإضافة للسلة</p>
-          <p className="mt-0.5 text-xs text-white/70">{toast}</p>
+          <p className="text-xs font-bold text-[var(--gf-brand)]">تمت الإضافة للسلة</p>
+          <p className="mt-0.5 text-xs text-[var(--gf-text-muted)]">{toast}</p>
         </div>
       </div>
     </Ctx.Provider>

@@ -70,7 +70,7 @@ export function SiteHeader() {
     <>
       <SidebarMenu open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <header className="sticky top-0 z-40 border-b border-[var(--gf-line)] bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-[var(--gf-line)] bg-[var(--gf-surface-2)]0 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-1.5">
             <button

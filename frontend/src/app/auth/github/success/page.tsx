@@ -53,8 +53,8 @@ function GitHubSuccessHandler() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
       <div className="text-center">
-        <div className="mb-4 animate-spin text-4xl text-purple-400">⟳</div>
-        <p className="text-sm text-white/50">جاري تسجيل الدخول...</p>
+        <div className="mb-4 animate-spin text-4xl text-[var(--gf-brand)]">⟳</div>
+        <p className="text-sm text-[var(--gf-text-muted)]">جاري تسجيل الدخول...</p>
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ export default function GitHubSuccessPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="animate-spin text-4xl text-purple-400">⟳</div>
+          <div className="animate-spin text-4xl text-[var(--gf-brand)]">⟳</div>
         </div>
       }
     >

@@ -8,7 +8,7 @@ export default function VerifyEmailPage() {
     <main className="grid min-h-screen place-items-center px-4 py-12">
       <Suspense
         fallback={
-          <div className="text-white/40 text-sm animate-pulse">جارٍ التحميل…</div>
+          <div className="text-[var(--gf-text-muted)] text-sm animate-pulse">جارٍ التحميل…</div>
         }
       >
         <VerifyEmailForm />

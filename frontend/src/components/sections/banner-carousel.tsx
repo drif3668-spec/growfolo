@@ -102,14 +102,14 @@ export function BannerCarousel() {
           <div className="absolute inset-0 flex flex-col items-start justify-end p-6 md:p-10 lg:p-16">
             {s.title && (
               <h2
-                className="mb-2 max-w-2xl text-2xl font-black leading-tight text-white drop-shadow-lg md:text-4xl lg:text-5xl"
+                className="mb-2 max-w-2xl text-2xl font-black leading-tight text-[var(--gf-text)] drop-shadow-lg md:text-4xl lg:text-5xl"
                 style={{ textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}
               >
                 {s.title}
               </h2>
             )}
             {s.description && (
-              <p className="mb-5 max-w-xl text-sm leading-7 text-white/80 drop-shadow md:text-base">
+              <p className="mb-5 max-w-xl text-sm leading-7 text-[var(--gf-text-muted)] drop-shadow md:text-base">
                 {s.description}
               </p>
             )}
@@ -127,7 +127,7 @@ export function BannerCarousel() {
       {slides.length > 1 && (
         <button
           onClick={prev}
-          className="absolute right-4 top-1/2 z-10 -translate-y-1/2 grid size-10 place-items-center rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/65 transition-colors md:size-12"
+          className="absolute right-4 top-1/2 z-10 -translate-y-1/2 grid size-10 place-items-center rounded-full bg-black/40 text-[var(--gf-text)] backdrop-blur hover:bg-black/65 transition-colors md:size-12"
           aria-label="السابق"
         >
           <ChevronRight size={22} />
@@ -138,7 +138,7 @@ export function BannerCarousel() {
       {slides.length > 1 && (
         <button
           onClick={next}
-          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 grid size-10 place-items-center rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/65 transition-colors md:size-12"
+          className="absolute left-4 top-1/2 z-10 -translate-y-1/2 grid size-10 place-items-center rounded-full bg-black/40 text-[var(--gf-text)] backdrop-blur hover:bg-black/65 transition-colors md:size-12"
           aria-label="التالي"
         >
           <ChevronLeft size={22} />
@@ -151,7 +151,7 @@ export function BannerCarousel() {
           {/* Play/Pause */}
           <button
             onClick={() => setPlaying((p) => !p)}
-            className="grid size-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
+            className="grid size-8 place-items-center rounded-full bg-black/50 text-[var(--gf-text)] backdrop-blur hover:bg-black/70"
             aria-label={playing ? "إيقاف" : "تشغيل"}
           >
             {playing ? <Pause size={13} /> : <Play size={13} />}
@@ -166,7 +166,7 @@ export function BannerCarousel() {
                 aria-label={`انتقل إلى الشريحة ${i + 1}`}
                 className={`rounded-full transition-all duration-300 ${
                   i === current
-                    ? "w-6 h-2.5 bg-lime-400"
+                    ? "w-6 h-2.5 bg-[var(--gf-brand)]"
                     : "size-2.5 bg-white/40 hover:bg-white/70"
                 }`}
               />
@@ -180,7 +180,7 @@ export function BannerCarousel() {
         <div className="absolute bottom-0 left-0 right-0 z-10 h-0.5 bg-white/15">
           <div
             key={`${current}-${playing}`}
-            className="h-full bg-lime-400"
+            className="h-full bg-[var(--gf-brand)]"
             style={{
               animation: `banner-progress ${AUTO_INTERVAL}ms linear forwards`,
             }}

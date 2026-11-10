@@ -16,7 +16,7 @@ const SECTIONS = [
   {
     id: 1,
     icon: Database,
-    color: "#a855f7",
+    color: "var(--gf-brand)",
     title: "المعلومات التي نقوم بجمعها",
     groups: [
       {
@@ -158,7 +158,7 @@ const SECTIONS = [
   {
     id: 11,
     icon: Scale,
-    color: "#c8e600",
+    color: "var(--gf-brand)",
     title: "حقوق المستخدم",
     list: [
       "معرفة البيانات التي نحتفظ بها",
@@ -171,7 +171,7 @@ const SECTIONS = [
   {
     id: 12,
     icon: RefreshCw,
-    color: "#a855f7",
+    color: "var(--gf-brand)",
     title: "تعديل سياسة الخصوصية",
     text: "قد نقوم بتحديث سياسة الخصوصية من وقت لآخر. وسيتم نشر أي تحديث على هذه الصفحة مع توضيح تاريخ آخر تعديل.",
   },
@@ -190,14 +190,14 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
 
       {/* ── Ambient glows ───────────────────────────────────────────────── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute right-1/4 top-0 size-[600px] rounded-full bg-purple-600/10 blur-[140px]" />
+        <div className="absolute right-1/4 top-0 size-[600px] rounded-full bg-[var(--gf-brand)]/10 blur-[140px]" />
         <div className="absolute left-1/4 top-32 size-[400px] rounded-full bg-blue-500/8 blur-[120px]" />
-        <div className="absolute bottom-1/4 left-1/3 size-[350px] rounded-full bg-lime-400/5 blur-[110px]" />
+        <div className="absolute bottom-1/4 left-1/3 size-[350px] rounded-full bg-[var(--gf-brand)]/5 blur-[110px]" />
       </div>
 
       <div className="relative mx-auto max-w-4xl px-4 pb-24 pt-12">
@@ -205,7 +205,7 @@ export default function PrivacyPage() {
         {/* ── Back link ──────────────────────────────────────────────────── */}
         <a
           href="/"
-          className="mb-10 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
+          className="mb-10 inline-flex items-center gap-2 text-sm text-[var(--gf-text-muted)] transition-colors hover:text-[var(--gf-text)]"
         >
           <ArrowRight size={15} /> العودة للرئيسية
         </a>
@@ -221,25 +221,25 @@ export default function PrivacyPage() {
               transform: "perspective(500px) rotateX(6deg)",
             }}
           >
-            <Shield size={38} className="text-purple-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.8)]" />
+            <Shield size={38} className="text-[var(--gf-brand)] drop-shadow-[0_0_18px_rgba(168,85,247,0.8)]" />
           </div>
 
           <div className="pixel-logo mb-3 text-2xl font-black">
-            <span className="text-purple-500">GROW</span>
-            <span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span>
+            <span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
 
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-400/25 bg-purple-500/10 px-4 py-1.5 text-xs font-bold text-purple-400">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-400/25 bg-[var(--gf-brand)]/10 px-4 py-1.5 text-xs font-bold text-[var(--gf-brand)]">
             <Shield size={12} /> وثيقة رسمية
           </div>
 
-          <h1 className="text-4xl font-black text-white md:text-5xl">
+          <h1 className="text-4xl font-black text-[var(--gf-text)] md:text-5xl">
             سياسة{" "}
             <span className="bg-gradient-to-l from-blue-400 via-purple-400 to-lime-400 bg-clip-text text-transparent">
               الخصوصية
             </span>
           </h1>
-          <p className="mt-3 text-sm text-white/45">
+          <p className="mt-3 text-sm text-[var(--gf-text)]/45">
             آخر تحديث: {LAST_UPDATED}
           </p>
 
@@ -251,8 +251,8 @@ export default function PrivacyPage() {
               { val: "🔒", label: "حماية" },
             ].map(({ val, label }) => (
               <div key={label} className="text-center">
-                <p className="text-xl font-black text-white">{val}</p>
-                <p className="text-xs text-white/40">{label}</p>
+                <p className="text-xl font-black text-[var(--gf-text)]">{val}</p>
+                <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
               </div>
             ))}
           </div>
@@ -267,8 +267,8 @@ export default function PrivacyPage() {
             boxShadow: "0 0 40px rgba(168,85,247,0.08)",
           }}
         >
-          <p className="text-sm leading-8 text-white/70">
-            مرحبًا بك في <span className="font-black text-white">Growfolo</span>. نحن نلتزم بحماية خصوصية مستخدمينا وضمان التعامل مع بياناتهم بأعلى معايير الأمان والشفافية. باستخدامك لموقعنا أو خدماتنا، فإنك توافق على سياسة الخصوصية التالية.
+          <p className="text-sm leading-8 text-[var(--gf-text-muted)]">
+            مرحبًا بك في <span className="font-black text-[var(--gf-text)]">Growfolo</span>. نحن نلتزم بحماية خصوصية مستخدمينا وضمان التعامل مع بياناتهم بأعلى معايير الأمان والشفافية. باستخدامك لموقعنا أو خدماتنا، فإنك توافق على سياسة الخصوصية التالية.
           </p>
         </div>
 
@@ -312,7 +312,7 @@ export default function PrivacyPage() {
                     >
                       {String(sec.id).padStart(2, "0")}
                     </span>
-                    <h2 className="text-base font-black text-white">{sec.title}</h2>
+                    <h2 className="text-base font-black text-[var(--gf-text)]">{sec.title}</h2>
                   </div>
                 </div>
 
@@ -323,25 +323,25 @@ export default function PrivacyPage() {
                 <div className="p-5 pt-4">
                   {/* Simple text */}
                   {"text" in sec && sec.text && (
-                    <p className="text-sm leading-8 text-white/65">{sec.text}</p>
+                    <p className="text-sm leading-8 text-[var(--gf-text)]/65">{sec.text}</p>
                   )}
 
                   {/* Intro text */}
                   {"intro" in sec && sec.intro && (
-                    <p className="mb-3 text-sm leading-7 text-white/65">{sec.intro}</p>
+                    <p className="mb-3 text-sm leading-7 text-[var(--gf-text)]/65">{sec.intro}</p>
                   )}
 
                   {/* Intro (strong statement) */}
                   {"intro" in sec && sec.intro && "list" in sec && !("listLabel" in sec) && null}
                   {"listLabel" in sec && sec.listLabel && (
-                    <p className="mb-3 text-sm font-semibold text-white/60">{sec.listLabel}</p>
+                    <p className="mb-3 text-sm font-semibold text-[var(--gf-text-muted)]">{sec.listLabel}</p>
                   )}
 
                   {/* Simple list */}
                   {"list" in sec && sec.list && (
                     <ul className="grid gap-2">
                       {(sec.list as string[]).map((item) => (
-                        <li key={item} className="flex items-start gap-2.5 text-sm text-white/65">
+                        <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--gf-text)]/65">
                           <CheckCircle
                             size={14}
                             className="mt-0.5 shrink-0"
@@ -373,7 +373,7 @@ export default function PrivacyPage() {
                           </p>
                           <ul className="grid gap-2">
                             {g.items.map((item) => (
-                              <li key={item} className="flex items-start gap-2 text-xs text-white/60">
+                              <li key={item} className="flex items-start gap-2 text-xs text-[var(--gf-text-muted)]">
                                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full" style={{ background: sec.color }} />
                                 {item}
                               </li>
@@ -407,7 +407,7 @@ export default function PrivacyPage() {
                           <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: `${sec.color}99` }}>
                             {c.label}
                           </span>
-                          <span className="text-sm font-bold text-white/80 group-hover/link:text-white transition-colors">
+                          <span className="text-sm font-bold text-[var(--gf-text-muted)] group-hover/link:text-[var(--gf-text)] transition-colors">
                             {c.value}
                           </span>
                         </a>
@@ -433,17 +433,17 @@ export default function PrivacyPage() {
             className="mx-auto mb-4 grid size-14 place-items-center rounded-2xl"
             style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)" }}
           >
-            <CheckCircle size={28} className="text-purple-400" />
+            <CheckCircle size={28} className="text-[var(--gf-brand)]" />
           </div>
-          <h2 className="mb-2 text-xl font-black text-white">موافقة المستخدم</h2>
-          <p className="mx-auto max-w-xl text-sm leading-8 text-white/55">
+          <h2 className="mb-2 text-xl font-black text-[var(--gf-text)]">موافقة المستخدم</h2>
+          <p className="mx-auto max-w-xl text-sm leading-8 text-[var(--gf-text)]/55">
             باستخدامك لموقع Growfolo أو أي من خدماته، فإنك تقر بأنك قرأت سياسة الخصوصية هذه وفهمتها، وتوافق على جمع واستخدام ومعالجة بياناتك وفقًا لما هو موضح أعلاه.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <a
               href="/"
               className="inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-black text-black transition-all hover:opacity-90 active:scale-95"
-              style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)", boxShadow: "0 4px 20px rgba(200,230,0,0.3)" }}
+              style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)", boxShadow: "0 4px 20px rgba(200,230,0,0.3)" }}
             >
               العودة للمتجر
             </a>
@@ -451,7 +451,7 @@ export default function PrivacyPage() {
               href="https://wa.me/213779012833"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/6 px-7 py-3 text-sm font-black text-white transition-all hover:bg-white/12"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/6 px-7 py-3 text-sm font-black text-[var(--gf-text)] transition-all hover:bg-white/12"
             >
               <MessageCircle size={15} /> تواصل معنا
             </a>
@@ -459,7 +459,7 @@ export default function PrivacyPage() {
         </div>
 
         {/* ── Footer note ────────────────────────────────────────────────── */}
-        <p className="mt-10 text-center text-xs text-white/25">
+        <p className="mt-10 text-center text-xs text-[var(--gf-text)]/25">
           © 2026 Growfolo — جميع الحقوق محفوظة · آخر تحديث: {LAST_UPDATED}
         </p>
       </div>

@@ -28,7 +28,7 @@ export function CheckoutForm() {
           <input className="sr-only" type="file" name="paymentProof" accept="image/*,.pdf" />
         </span>
       </label>
-      <button className="w-fit rounded-md bg-leaf px-5 py-2.5 font-medium text-white" type="submit">
+      <button className="w-fit rounded-md bg-leaf px-5 py-2.5 font-medium text-[var(--gf-text)]" type="submit">
         Place order
       </button>
     </motion.form>

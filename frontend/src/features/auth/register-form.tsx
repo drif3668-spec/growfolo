@@ -9,7 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 function PasswordRule({ met, text }: { met: boolean; text: string }) {
   return (
-    <li className={`flex items-center gap-1.5 text-xs ${met ? "text-lime-400" : "text-white/40"}`}>
+    <li className={`flex items-center gap-1.5 text-xs ${met ? "text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)]"}`}>
       {met ? <Check size={11} /> : <X size={11} />}
       {text}
     </li>
@@ -91,14 +91,14 @@ export function RegisterForm() {
     placeholder: string,
     type = "text"
   ) => (
-    <label className="grid gap-1.5 text-sm font-semibold text-white/75">
+    <label className="grid gap-1.5 text-sm font-semibold text-[var(--gf-text)]/75">
       {label}
       <input
         type={type}
         required
         value={form[name]}
         onChange={(e) => setForm((p) => ({ ...p, [name]: e.target.value }))}
-        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-purple-500/60 focus:bg-white/8 transition-colors"
+        className="rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30 focus:border-purple-500/60 focus:bg-[var(--gf-surface-2)] transition-colors"
         placeholder={placeholder}
       />
     </label>
@@ -109,14 +109,14 @@ export function RegisterForm() {
       {/* Brand */}
       <Link href="/" className="mb-8 block text-center">
         <span className="pixel-logo text-3xl font-black">
-          <span className="text-purple-500">GROW</span>
-          <span className="text-lime-400">FOLO</span>
+          <span className="text-[var(--gf-brand)]">GROW</span>
+          <span className="text-[var(--gf-brand)]">FOLO</span>
         </span>
       </Link>
 
       <div className="glass-panel rounded-3xl p-7">
-        <h1 className="text-2xl font-black text-white">إنشاء حساب جديد</h1>
-        <p className="mt-1.5 text-sm text-white/50">انضم إلى مجتمع Growfolo وابدأ التسوق</p>
+        <h1 className="text-2xl font-black text-[var(--gf-text)]">إنشاء حساب جديد</h1>
+        <p className="mt-1.5 text-sm text-[var(--gf-text-muted)]">انضم إلى مجتمع Growfolo وابدأ التسوق</p>
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
           {field("full_name", "الاسم الكامل", "مثال: أحمد محمد علي")}
@@ -124,7 +124,7 @@ export function RegisterForm() {
           {field("email", "البريد الإلكتروني", "example@email.com", "email")}
 
           {/* Password */}
-          <label className="grid gap-1.5 text-sm font-semibold text-white/75">
+          <label className="grid gap-1.5 text-sm font-semibold text-[var(--gf-text)]/75">
             كلمة المرور
             <div className="relative">
               <input
@@ -132,13 +132,13 @@ export function RegisterForm() {
                 required
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pl-12 text-sm text-white outline-none placeholder:text-white/30 focus:border-purple-500/60 focus:bg-white/8 transition-colors"
+                className="w-full rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 pl-12 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30 focus:border-purple-500/60 focus:bg-[var(--gf-surface-2)] transition-colors"
                 placeholder="9 أحرف على الأقل"
               />
               <button
                 type="button"
                 onClick={() => setShowPass((p) => !p)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--gf-text-muted)] hover:text-[var(--gf-text-muted)]"
               >
                 {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
@@ -153,7 +153,7 @@ export function RegisterForm() {
           </label>
 
           {/* Confirm Password */}
-          <label className="grid gap-1.5 text-sm font-semibold text-white/75">
+          <label className="grid gap-1.5 text-sm font-semibold text-[var(--gf-text)]/75">
             تأكيد كلمة المرور
             <div className="relative">
               <input
@@ -161,24 +161,24 @@ export function RegisterForm() {
                 required
                 value={form.confirm}
                 onChange={(e) => setForm((p) => ({ ...p, confirm: e.target.value }))}
-                className={`w-full rounded-2xl border px-4 py-3 pl-12 text-sm text-white outline-none focus:bg-white/8 transition-colors bg-white/5 ${
+                className={`w-full rounded-2xl border px-4 py-3 pl-12 text-sm text-[var(--gf-text)] outline-none focus:bg-[var(--gf-surface-2)] transition-colors bg-[var(--gf-surface-2)] ${
                   form.confirm
                     ? passwordsMatch
                       ? "border-lime-500/60"
                       : "border-red-500/60"
-                    : "border-white/10"
+                    : "border-[var(--gf-line)]"
                 }`}
                 placeholder="أعد كتابة كلمة المرور"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm((p) => !p)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--gf-text-muted)] hover:text-[var(--gf-text-muted)]"
               >
                 {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
               {form.confirm && (
-                <span className={`absolute left-10 top-1/2 -translate-y-1/2 ${passwordsMatch ? "text-lime-400" : "text-red-400"}`}>
+                <span className={`absolute left-10 top-1/2 -translate-y-1/2 ${passwordsMatch ? "text-[var(--gf-brand)]" : "text-red-400"}`}>
                   {passwordsMatch ? <Check size={15} /> : <X size={15} />}
                 </span>
               )}
@@ -200,9 +200,9 @@ export function RegisterForm() {
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-white/45">
+        <p className="mt-5 text-center text-sm text-[var(--gf-text)]/45">
           لديك حساب بالفعل؟{" "}
-          <Link href="/login" className="font-bold text-purple-400 hover:text-purple-300">
+          <Link href="/login" className="font-bold text-[var(--gf-brand)] hover:text-[var(--gf-brand)]">
             تسجيل الدخول
           </Link>
         </p>

@@ -65,7 +65,7 @@ export default async function HomePage() {
           />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
             <div>
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--gf-line-strong)] bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--gf-text-muted)]">
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--gf-line-strong)] bg-[var(--gf-surface-2)] px-3 py-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--gf-brand)]" />
                 تفعيل بعد التحقق · دعم عربي
               </p>

@@ -87,17 +87,17 @@ export function AdsShowcase() {
   }
 
   return (
-    <section className="relative select-none overflow-hidden bg-[#050508] py-10">
+    <section className="relative select-none overflow-hidden bg-[var(--gf-bg)] py-10">
       {/* Background glow */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] rounded-full bg-purple-600/8 blur-[120px]" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] rounded-full bg-[var(--gf-brand)]/8 blur-[120px]" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4">
         {/* Title */}
         <div className="mb-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-[4px] text-purple-400">أبرز خدماتنا</p>
-          <h2 className="mt-2 text-3xl font-black text-white md:text-4xl">عروض حصرية لك</h2>
+          <p className="text-xs font-bold uppercase tracking-[4px] text-[var(--gf-brand)]">أبرز خدماتنا</p>
+          <h2 className="mt-2 text-3xl font-black text-[var(--gf-text)] md:text-4xl">عروض حصرية لك</h2>
         </div>
 
         {/* 3D Scene */}
@@ -134,7 +134,7 @@ export function AdsShowcase() {
         <div className="mt-4 flex items-center justify-center gap-4">
           <button
             onClick={() => { goPrev(); pauseAndResume(); }}
-            className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-white transition-all hover:border-purple-500/40 hover:bg-purple-500/10"
+            className="grid size-11 place-items-center rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-white transition-all hover:border-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/10"
             aria-label="السابق"
           >
             <ChevronRight size={20} />
@@ -145,7 +145,7 @@ export function AdsShowcase() {
                 key={i}
                 onClick={() => { goTo(i); pauseAndResume(); }}
                 className={`rounded-full transition-all duration-300 ${
-                  i === current ? "w-7 h-2.5 bg-purple-500" : "size-2.5 bg-white/20 hover:bg-white/40"
+                  i === current ? "w-7 h-2.5 bg-[var(--gf-brand)]" : "size-2.5 bg-white/20 hover:bg-white/40"
                 }`}
                 aria-label={`انتقل إلى ${i + 1}`}
               />
@@ -153,7 +153,7 @@ export function AdsShowcase() {
           </div>
           <button
             onClick={() => { goNext(); pauseAndResume(); }}
-            className="grid size-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-white transition-all hover:border-purple-500/40 hover:bg-purple-500/10"
+            className="grid size-11 place-items-center rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-white transition-all hover:border-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/10"
             aria-label="التالي"
           >
             <ChevronLeft size={20} />
@@ -221,35 +221,35 @@ function ShowcaseCard({ product, isCenter, onAddToCart }: { product: Product; is
       <div className="relative flex flex-1 flex-col p-6">
         {/* Logo */}
         <div
-          className="mx-auto mb-4 grid size-20 place-items-center rounded-2xl text-4xl font-black text-white"
+          className="mx-auto mb-4 grid size-20 place-items-center rounded-2xl text-4xl font-black text-[var(--gf-text)]"
           style={{ background: `${product.accentColor}22`, border: `1px solid ${product.accentColor}44`, boxShadow: `0 0 30px ${product.accentColor}33` }}
         >
           {product.logo}
         </div>
 
         {/* Name */}
-        <h3 className="text-center text-lg font-black text-white">{product.name}</h3>
-        <p className="mt-0.5 text-center text-xs text-white/60">{product.subtitle}</p>
+        <h3 className="text-center text-lg font-black text-[var(--gf-text)]">{product.name}</h3>
+        <p className="mt-0.5 text-center text-xs text-[var(--gf-text-muted)]">{product.subtitle}</p>
 
         {/* Rating */}
         <div className="mt-3 flex items-center justify-center gap-1.5">
           {[...Array(5)].map((_, i) => (
             <Star key={i} size={11} className="fill-yellow-400 text-yellow-400" />
           ))}
-          <span className="text-xs text-white/60">{product.rating} ({product.reviews})</span>
+          <span className="text-xs text-[var(--gf-text-muted)]">{product.rating} ({product.reviews})</span>
         </div>
         {product.duration && (
-          <p className="mt-1 text-center text-xs font-semibold text-white/50">المدة: {product.duration}</p>
+          <p className="mt-1 text-center text-xs font-semibold text-[var(--gf-text-muted)]">المدة: {product.duration}</p>
         )}
 
         {/* Price */}
         <div className="mt-4 text-center">
-          <span className="text-4xl font-black text-white">${product.price}</span>
-          <span className="ml-2 text-sm text-white/40 line-through">${product.oldPrice}</span>
+          <span className="text-4xl font-black text-[var(--gf-text)]">${product.price}</span>
+          <span className="ml-2 text-sm text-[var(--gf-text-muted)] line-through">${product.oldPrice}</span>
         </div>
 
         {/* Short description */}
-        <p className="mt-3 text-center text-xs leading-6 text-white/65 line-clamp-2">
+        <p className="mt-3 text-center text-xs leading-6 text-[var(--gf-text)]/65 line-clamp-2">
           {product.description}
         </p>
 
@@ -257,7 +257,7 @@ function ShowcaseCard({ product, isCenter, onAddToCart }: { product: Product; is
         <div className="mt-5 flex flex-col gap-2.5">
           <a
             href={`/products?id=${product.id}`}
-            className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white transition-all hover:opacity-80"
+            className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-[var(--gf-text)] transition-all hover:opacity-80"
             style={{ background: `${product.accentColor}22`, border: `1px solid ${product.accentColor}44` }}
           >
             <Eye size={15} /> عرض التفاصيل

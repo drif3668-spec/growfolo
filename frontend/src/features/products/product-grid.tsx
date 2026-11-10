@@ -11,7 +11,7 @@ export function ProductGrid() {
             <h2 className="text-3xl font-semibold text-ink">Products</h2>
             <p className="mt-2 text-ink/65">Curated products ready for catalog and checkout integration.</p>
           </div>
-          <Link href="/checkout" className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-white">
+          <Link href="/checkout" className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-[var(--gf-text)]">
             Checkout <ArrowRight size={16} />
           </Link>
         </div>

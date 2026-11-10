@@ -17,7 +17,7 @@ function HeartBurst({ active }: { active: boolean }) {
           key={i}
           className="absolute left-1/2 top-1/2 size-2 rounded-full"
           style={{
-            background: i % 2 === 0 ? "#a855f7" : "#c8e600",
+            background: i % 2 === 0 ? "var(--gf-brand)" : "var(--gf-brand)",
             animation: `burst-${i} .5s ease-out forwards`,
           }}
         />
@@ -60,18 +60,18 @@ export default function WishlistPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
 
       {/* Glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute right-1/4 top-10 size-[450px] rounded-full bg-yellow-400/6 blur-[130px]" />
-        <div className="absolute left-1/4 top-32 size-[350px] rounded-full bg-purple-600/10 blur-[110px]" />
+        <div className="absolute left-1/4 top-32 size-[350px] rounded-full bg-[var(--gf-brand)]/10 blur-[110px]" />
       </div>
 
       <div className="relative mx-auto max-w-5xl px-4 pb-24 pt-12">
         {/* Back */}
-        <a href="/" className="mb-10 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white">
+        <a href="/" className="mb-10 inline-flex items-center gap-2 text-sm text-[var(--gf-text-muted)] transition-colors hover:text-[var(--gf-text)]">
           <ArrowRight size={15} /> العودة للرئيسية
         </a>
 
@@ -94,7 +94,7 @@ export default function WishlistPage() {
               المفضلة
             </span>
           </h1>
-          <p className="mt-2 text-sm text-white/45">
+          <p className="mt-2 text-sm text-[var(--gf-text)]/45">
             {favorites.length > 0 ? `${favorites.length} منتج محفوظ` : "لا توجد منتجات في المفضلة بعد"}
           </p>
         </div>
@@ -103,14 +103,14 @@ export default function WishlistPage() {
         {favorites.length === 0 && (
           <div className="flex flex-col items-center gap-5 py-20 text-center">
             <div className="grid size-24 place-items-center rounded-3xl border border-white/8 bg-white/3">
-              <Sparkles size={36} className="text-white/20" />
+              <Sparkles size={36} className="text-[var(--gf-text)]/20" />
             </div>
-            <p className="text-lg font-bold text-white/50">قائمتك فارغة</p>
-            <p className="text-sm text-white/30">اضغط على ⭐ في أي منتج لإضافته هنا</p>
+            <p className="text-lg font-bold text-[var(--gf-text-muted)]">قائمتك فارغة</p>
+            <p className="text-sm text-[var(--gf-text)]/30">اضغط على ⭐ في أي منتج لإضافته هنا</p>
             <a
               href="/#products"
               className="mt-2 inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-black transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)", boxShadow: "0 4px 18px rgba(200,230,0,0.35)" }}
+              style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)", boxShadow: "0 4px 18px rgba(200,230,0,0.35)" }}
             >
               تصفح المنتجات
             </a>
@@ -140,7 +140,7 @@ export default function WishlistPage() {
                   <HeartBurst active={bursting === item.id} />
 
                   {/* Discount badge */}
-                  <span className="absolute right-3 top-3 rounded-full bg-purple-600 px-2.5 py-1 text-xs font-bold text-white">
+                  <span className="absolute right-3 top-3 rounded-full bg-[var(--gf-brand)] px-2.5 py-1 text-xs font-bold text-white">
                     {item.discount}
                   </span>
 
@@ -158,7 +158,7 @@ export default function WishlistPage() {
                   </div>
 
                   {/* Name */}
-                  <h3 className="mt-4 text-center text-sm font-bold text-white">{item.name}</h3>
+                  <h3 className="mt-4 text-center text-sm font-bold text-[var(--gf-text)]">{item.name}</h3>
 
                   {/* Rating */}
                   <div className="mt-2 flex items-center justify-center gap-1 text-xs text-yellow-400">
@@ -166,20 +166,20 @@ export default function WishlistPage() {
                   </div>
 
                   {/* Price */}
-                  <p className="mt-3 text-center text-2xl font-black text-white">${item.price}</p>
+                  <p className="mt-3 text-center text-2xl font-black text-[var(--gf-text)]">${item.price}</p>
 
                   {/* Actions */}
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleAddToCart(item)}
                       className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-black text-black transition-all hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)" }}
+                      style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)" }}
                     >
                       <ShoppingCart size={15} /> أضف للسلة
                     </button>
                     <a
                       href={`/products/${item.id}`}
-                      className="grid size-10 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/5 text-white hover:bg-white/12"
+                      className="grid size-10 shrink-0 place-items-center rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-[var(--gf-text)] hover:bg-white/12"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>

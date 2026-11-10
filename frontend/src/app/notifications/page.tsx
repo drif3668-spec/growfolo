@@ -17,10 +17,10 @@ type NotificationIcon = React.ComponentType<{
 }>;
 
 const TYPE_CONFIG: Record<NotifType, { icon: NotificationIcon, color: string, bg: string }> = {
-  order:    { icon: Package,      color: "#a855f7", bg: "rgba(168,85,247,0.12)" },
+  order:    { icon: Package,      color: "var(--gf-brand)", bg: "rgba(168,85,247,0.12)" },
   payment:  { icon: CreditCard,   color: "#10b981", bg: "rgba(16,185,129,0.12)" },
   status:   { icon: Truck,        color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
-  discount: { icon: Tag,          color: "#c8e600", bg: "rgba(200,230,0,0.10)"  },
+  discount: { icon: Tag,          color: "var(--gf-brand)", bg: "rgba(200,230,0,0.10)"  },
   cart:     { icon: ShoppingCart, color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
   info:     { icon: Star,         color: "#ec4899", bg: "rgba(236,72,153,0.12)" },
 };
@@ -75,11 +75,11 @@ function NotifCard({ notif, onRead }: { notif: GfNotification; onRead: () => voi
           >
             {notif.title}
           </p>
-          <span className="shrink-0 text-[10px] text-white/35">{relativeTime(notif.createdAt)}</span>
+          <span className="shrink-0 text-[10px] text-[var(--gf-text)]/35">{relativeTime(notif.createdAt)}</span>
         </div>
-        <p className="mt-1 text-xs leading-5 text-white/50">{notif.description}</p>
+        <p className="mt-1 text-xs leading-5 text-[var(--gf-text-muted)]">{notif.description}</p>
         {notif.orderId && (
-          <span className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-white/5 px-2 py-0.5 font-mono text-[10px] text-white/40">
+          <span className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-[var(--gf-surface-2)] px-2 py-0.5 font-mono text-[10px] text-[var(--gf-text-muted)]">
             # {notif.orderId}
           </span>
         )}
@@ -93,7 +93,7 @@ function NotifCard({ notif, onRead }: { notif: GfNotification; onRead: () => voi
           >
             {notif.read ? "مقروء" : "جديد ●"}
           </span>
-          <span className="text-[10px] text-white/25">
+          <span className="text-[10px] text-[var(--gf-text)]/25">
             {new Date(notif.createdAt).toLocaleString("ar-DZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>
@@ -115,18 +115,18 @@ export default function NotificationsPage() {
     : notifications;
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
 
       {/* Glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute right-1/4 top-10 size-[450px] rounded-full bg-purple-600/10 blur-[130px]" />
+        <div className="absolute right-1/4 top-10 size-[450px] rounded-full bg-[var(--gf-brand)]/10 blur-[130px]" />
         <div className="absolute left-1/3 top-44 size-[300px] rounded-full bg-blue-500/7 blur-[100px]" />
       </div>
 
       <div className="relative mx-auto max-w-2xl px-4 pb-24 pt-12">
         {/* Back */}
-        <a href="/" className="mb-10 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white">
+        <a href="/" className="mb-10 inline-flex items-center gap-2 text-sm text-[var(--gf-text-muted)] transition-colors hover:text-[var(--gf-text)]">
           <ArrowRight size={15} /> العودة للرئيسية
         </a>
 
@@ -142,8 +142,8 @@ export default function NotificationsPage() {
             }}
           >
             {unreadCount > 0
-              ? <BellRing size={28} className="text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]" style={{ animation: "ring 1.5s ease-in-out infinite" }} />
-              : <Bell size={28} className="text-purple-400" />
+              ? <BellRing size={28} className="text-[var(--gf-brand)] drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]" style={{ animation: "ring 1.5s ease-in-out infinite" }} />
+              : <Bell size={28} className="text-[var(--gf-brand)]" />
             }
           </div>
           <div>
@@ -152,7 +152,7 @@ export default function NotificationsPage() {
                 الإشعارات
               </span>
             </h1>
-            <p className="mt-1 text-sm text-white/45">
+            <p className="mt-1 text-sm text-[var(--gf-text)]/45">
               {unreadCount > 0 ? `${unreadCount} إشعار غير مقروء` : "جميع الإشعارات مقروءة"} · {notifications.length} إجمالاً
             </p>
           </div>
@@ -162,19 +162,19 @@ export default function NotificationsPage() {
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Search */}
           <div className="relative flex-1">
-            <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/35" />
+            <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--gf-text)]/35" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="بحث برقم المعاملة أو الكلمات..."
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pr-9 pl-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50"
+              className="w-full rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] py-2.5 pr-9 pl-4 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50"
             />
           </div>
           {/* Mark all read */}
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="flex shrink-0 items-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-4 py-2.5 text-sm font-bold text-purple-300 transition-colors hover:bg-purple-500/20"
+              className="flex shrink-0 items-center gap-2 rounded-xl border border-purple-500/25 bg-[var(--gf-brand)]/10 px-4 py-2.5 text-sm font-bold text-[var(--gf-brand)] transition-colors hover:bg-[var(--gf-brand)]/20"
             >
               <CheckCheck size={15} /> قراءة الكل
             </button>
@@ -185,13 +185,13 @@ export default function NotificationsPage() {
         {notifications.length > 0 && !search && (
           <div className="mb-5 grid grid-cols-3 gap-2">
             {[
-              { label: "إجمالي",    val: notifications.length, color: "text-white" },
-              { label: "غير مقروء", val: unreadCount,          color: "text-purple-400" },
-              { label: "مقروء",     val: notifications.length - unreadCount, color: "text-white/50" },
+              { label: "إجمالي",    val: notifications.length, color: "text-[var(--gf-text)]" },
+              { label: "غير مقروء", val: unreadCount,          color: "text-[var(--gf-brand)]" },
+              { label: "مقروء",     val: notifications.length - unreadCount, color: "text-[var(--gf-text-muted)]" },
             ].map(({ label, val, color }) => (
               <div key={label} className="rounded-2xl border border-white/8 bg-white/3 p-3 text-center">
                 <p className={`text-xl font-black ${color}`}>{val}</p>
-                <p className="text-[10px] text-white/40">{label}</p>
+                <p className="text-[10px] text-[var(--gf-text-muted)]">{label}</p>
               </div>
             ))}
           </div>
@@ -201,16 +201,16 @@ export default function NotificationsPage() {
         {notifications.length === 0 && (
           <div className="flex flex-col items-center gap-4 py-20 text-center">
             <div className="grid size-20 place-items-center rounded-3xl border border-white/8 bg-white/3">
-              <Bell size={32} className="text-white/20" />
+              <Bell size={32} className="text-[var(--gf-text)]/20" />
             </div>
-            <p className="font-bold text-white/40">لا توجد إشعارات بعد</p>
-            <p className="text-sm text-white/25">ستظهر هنا إشعارات طلباتك ونشاط حسابك</p>
+            <p className="font-bold text-[var(--gf-text-muted)]">لا توجد إشعارات بعد</p>
+            <p className="text-sm text-[var(--gf-text)]/25">ستظهر هنا إشعارات طلباتك ونشاط حسابك</p>
           </div>
         )}
 
         {/* No results */}
         {notifications.length > 0 && filtered.length === 0 && (
-          <div className="py-12 text-center text-sm text-white/35">
+          <div className="py-12 text-center text-sm text-[var(--gf-text)]/35">
             لا توجد نتائج لـ &quot;{search}&quot;
           </div>
         )}

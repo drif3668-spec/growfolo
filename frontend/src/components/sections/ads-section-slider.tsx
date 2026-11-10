@@ -26,7 +26,7 @@ export function AdsSectionSlider() {
   return (
     <section className="mt-10 text-right">
       <div className="mb-5">
-        <h3 className="text-2xl font-black text-white">قسم الإعلانات</h3>
+        <h3 className="text-2xl font-black text-[var(--gf-text)]">قسم الإعلانات</h3>
       </div>
 
       <div
@@ -58,7 +58,7 @@ export function AdsSectionSlider() {
         {ADS.map((ad, index) => (
           <span
             key={ad.src}
-            className={`rounded-full transition-all duration-300 ${current === index ? "h-2.5 w-8 bg-lime-400" : "size-2.5 bg-white/25"}`}
+            className={`rounded-full transition-all duration-300 ${current === index ? "h-2.5 w-8 bg-[var(--gf-brand)]" : "size-2.5 bg-white/25"}`}
           />
         ))}
       </div>

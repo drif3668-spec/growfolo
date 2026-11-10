@@ -69,7 +69,7 @@ const REVIEWS = [
     country: "تونس",
     flag: "🇹🇳",
     avatar: "FZ",
-    color: "#a855f7",
+    color: "var(--gf-brand)",
     product: "Claude Pro",
     activationTime: "3 دقائق",
     since: "4 أيام",
@@ -112,11 +112,11 @@ export function ReviewsCarousel() {
       <div className="mb-10 text-center">
         <div className="mb-3 flex items-center justify-center gap-2 text-yellow-400">
           <Stars n={5} />
-          <span className="text-xl font-black text-white">4.98</span>
-          <span className="text-white/40 text-sm">/ 5</span>
+          <span className="text-xl font-black text-[var(--gf-text)]">4.98</span>
+          <span className="text-[var(--gf-text-muted)] text-sm">/ 5</span>
         </div>
-        <h2 className="text-3xl font-black text-white md:text-4xl">ماذا يقول عملاؤنا؟</h2>
-        <p className="mt-2 text-white/50">+250,000 عميل راضٍ حول العالم</p>
+        <h2 className="text-3xl font-black text-[var(--gf-text)] md:text-4xl">ماذا يقول عملاؤنا؟</h2>
+        <p className="mt-2 text-[var(--gf-text-muted)]">+250,000 عميل راضٍ حول العالم</p>
       </div>
 
       {/* Cards */}
@@ -135,7 +135,7 @@ export function ReviewsCarousel() {
       <div className="mt-8 flex items-center justify-center gap-4">
         <button
           onClick={prev}
-          className="grid size-10 place-items-center rounded-2xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/12"
+          className="grid size-10 place-items-center rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-[var(--gf-text)] transition-colors hover:bg-white/12"
         >
           <ChevronRight size={18} />
         </button>
@@ -144,13 +144,13 @@ export function ReviewsCarousel() {
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all ${i === current ? "h-2 w-6 bg-purple-500" : "size-2 bg-white/20"}`}
+              className={`rounded-full transition-all ${i === current ? "h-2 w-6 bg-[var(--gf-brand)]" : "size-2 bg-white/20"}`}
             />
           ))}
         </div>
         <button
           onClick={next}
-          className="grid size-10 place-items-center rounded-2xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/12"
+          className="grid size-10 place-items-center rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-[var(--gf-text)] transition-colors hover:bg-white/12"
         >
           <ChevronLeft size={18} />
         </button>
@@ -191,7 +191,7 @@ function ReviewCard({ review, offset }: { review: typeof REVIEWS[0]; offset: num
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="grid size-12 shrink-0 place-items-center rounded-2xl text-sm font-black text-white"
+              className="grid size-12 shrink-0 place-items-center rounded-2xl text-sm font-black text-[var(--gf-text)]"
               style={{
                 background: `linear-gradient(135deg, ${review.color}, ${review.color}99)`,
                 boxShadow: `0 0 0 2px rgba(9,8,15,1), 0 0 0 3px ${review.color}55`,
@@ -200,11 +200,11 @@ function ReviewCard({ review, offset }: { review: typeof REVIEWS[0]; offset: num
               {review.avatar}
             </div>
             <div>
-              <p className="font-black text-white leading-tight">{review.name}</p>
-              <p className="text-xs text-white/45">{review.flag} {review.country}</p>
+              <p className="font-black text-[var(--gf-text)] leading-tight">{review.name}</p>
+              <p className="text-xs text-[var(--gf-text)]/45">{review.flag} {review.country}</p>
             </div>
           </div>
-          <span className="flex items-center gap-1 rounded-xl border border-lime-500/25 bg-lime-500/10 px-2.5 py-1 text-[11px] font-bold text-lime-400">
+          <span className="flex items-center gap-1 rounded-xl border border-lime-500/25 bg-lime-500/10 px-2.5 py-1 text-[11px] font-bold text-[var(--gf-brand)]">
             <BadgeCheck size={11} /> Verified
           </span>
         </div>
@@ -215,7 +215,7 @@ function ReviewCard({ review, offset }: { review: typeof REVIEWS[0]; offset: num
         </div>
 
         {/* Text */}
-        <p className="mt-3 text-sm leading-7 text-white/75">{review.text}</p>
+        <p className="mt-3 text-sm leading-7 text-[var(--gf-text)]/75">{review.text}</p>
 
         {/* Stats */}
         <div className="mt-5 grid grid-cols-3 divide-x divide-white/8 rounded-2xl border border-white/8 bg-white/4 text-center">
@@ -225,8 +225,8 @@ function ReviewCard({ review, offset }: { review: typeof REVIEWS[0]; offset: num
             { label: "منذ", value: review.since },
           ].map(({ label, value }) => (
             <div key={label} className="px-2 py-2.5">
-              <p className="text-[10px] text-white/40">{label}</p>
-              <p className="mt-0.5 text-[11px] font-bold text-white leading-tight">{value}</p>
+              <p className="text-[10px] text-[var(--gf-text-muted)]">{label}</p>
+              <p className="mt-0.5 text-[11px] font-bold text-[var(--gf-text)] leading-tight">{value}</p>
             </div>
           ))}
         </div>

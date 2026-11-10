@@ -6,7 +6,7 @@ import { Send, X, ChevronLeft } from "lucide-react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /* ── Brand ────────────────────────────────────────────────────────────── */
-const LIME      = "#c8e600";
+const LIME      = "var(--gf-brand)";
 const LIME_DARK = "#a3bd00";
 
 /* ── Agent definitions ────────────────────────────────────────────────── */
@@ -436,7 +436,7 @@ export function LiveChat() {
       <div className="flex items-center gap-3">
         {back && (
           <button onClick={onBack}
-            className="grid size-7 place-items-center rounded-xl text-white/40 hover:text-white transition-colors">
+            className="grid size-7 place-items-center rounded-xl text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] transition-colors">
             <ChevronLeft size={16}/>
           </button>
         )}
@@ -449,15 +449,15 @@ export function LiveChat() {
           </svg>
         </div>
         <div>
-          <h2 className="text-sm font-black text-white">Growfolo Support</h2>
-          <p className="flex items-center gap-1.5 text-[11px] text-white/50">
+          <h2 className="text-sm font-black text-[var(--gf-text)]">Growfolo Support</h2>
+          <p className="flex items-center gap-1.5 text-[11px] text-[var(--gf-text-muted)]">
             <span className="inline-block size-1.5 rounded-full" style={{ background: LIME, boxShadow: `0 0 6px ${LIME}` }}/>
             متصل الآن
           </p>
         </div>
       </div>
       <button onClick={closeChat}
-        className="grid size-8 place-items-center rounded-xl text-white/40 hover:bg-white/8 hover:text-white transition-all">
+        className="grid size-8 place-items-center rounded-xl text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)] transition-all">
         <X size={15}/>
       </button>
     </div>
@@ -483,8 +483,8 @@ export function LiveChat() {
           <TopBar />
 
           <div className="px-5 pt-4 pb-2 shrink-0">
-            <p className="text-sm font-black text-white">اختر وكيل الدعم</p>
-            <p className="mt-0.5 text-[11px] text-white/40">تحدث مع الوكيل المناسب لطلبك مباشرة</p>
+            <p className="text-sm font-black text-[var(--gf-text)]">اختر وكيل الدعم</p>
+            <p className="mt-0.5 text-[11px] text-[var(--gf-text-muted)]">تحدث مع الوكيل المناسب لطلبك مباشرة</p>
           </div>
 
           <div className="flex flex-col gap-2.5 overflow-y-auto px-4 pb-4">
@@ -500,7 +500,7 @@ export function LiveChat() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <p className="font-black text-sm text-white">{agent.name}</p>
+                    <p className="font-black text-sm text-[var(--gf-text)]">{agent.name}</p>
                     <span
                       className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold"
                       style={{ background: `${STATUS_CFG[agent.status].color}20`, color: STATUS_CFG[agent.status].color }}
@@ -509,13 +509,13 @@ export function LiveChat() {
                     </span>
                   </div>
                   <p className="mt-0.5 text-[11px] font-bold" style={{ color: LIME }}>{agent.dept}</p>
-                  <p className="mt-1.5 text-[11px] leading-[1.65] text-white/40">{agent.desc}</p>
+                  <p className="mt-1.5 text-[11px] leading-[1.65] text-[var(--gf-text-muted)]">{agent.desc}</p>
                 </div>
               </button>
             ))}
           </div>
 
-          <div className="shrink-0 border-t border-white/4 py-2 text-center text-[10px] text-white/18">
+          <div className="shrink-0 border-t border-white/4 py-2 text-center text-[10px] text-[var(--gf-text)]/18">
             Growfolo Support · Powered by AI
           </div>
         </aside>
@@ -537,7 +537,7 @@ export function LiveChat() {
             style={{ background: "rgba(200,230,0,.07)", border: "1px solid rgba(200,230,0,.18)" }}>
             <AgentAvatar agent={pending} size={42} active showStatus />
             <div>
-              <p className="text-xs font-black text-white">{pending.name}</p>
+              <p className="text-xs font-black text-[var(--gf-text)]">{pending.name}</p>
               <p className="text-[11px]" style={{ color: LIME }}>{pending.dept}</p>
               <p className="flex items-center gap-1 text-[10px]" style={{ color: STATUS_CFG[pending.status].color }}>
                 <span className="inline-block size-1.5 rounded-full" style={{ background: STATUS_CFG[pending.status].color }}/>
@@ -548,19 +548,19 @@ export function LiveChat() {
         )}
 
         <form onSubmit={e => void submitForm(e)} className="flex flex-col gap-3 px-4 py-4">
-          <p className="text-xs text-white/40">أدخل بياناتك لبدء المحادثة</p>
+          <p className="text-xs text-[var(--gf-text-muted)]">أدخل بياناتك لبدء المحادثة</p>
           {([
             { key: "name"     as const, label: "الاسم الكامل",       placeholder: "أحمد محمد",       type: "text"  },
             { key: "email"    as const, label: "البريد الإلكتروني",  placeholder: "you@example.com", type: "email" },
             { key: "whatsapp" as const, label: "رقم WhatsApp",        placeholder: "+213 5XX XXX XXX", type: "tel"  },
           ] as const).map(({ key, label, placeholder, type }) => (
-            <label key={key} className="grid gap-1.5 text-[11px] font-semibold text-white/50">
+            <label key={key} className="grid gap-1.5 text-[11px] font-semibold text-[var(--gf-text-muted)]">
               {label}
               <input
                 required type={type} value={form[key]}
                 onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
                 placeholder={placeholder}
-                className="rounded-2xl border border-white/8 bg-white/4 px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-white/20 transition-all"
+                className="rounded-2xl border border-white/8 bg-white/4 px-3.5 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/20 transition-all"
                 onFocus={e  => { e.currentTarget.style.borderColor = `${LIME}55`; e.currentTarget.style.background = "rgba(200,230,0,.04)"; }}
                 onBlur={e   => { e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; e.currentTarget.style.background = "rgba(255,255,255,.04)"; }}
               />
@@ -609,20 +609,20 @@ export function LiveChat() {
                 )
               }
               <div>
-                <h2 className="text-sm font-black text-white">{activeAgent?.name ?? "Growfolo Support"}</h2>
+                <h2 className="text-sm font-black text-[var(--gf-text)]">{activeAgent?.name ?? "Growfolo Support"}</h2>
                 {activeAgent
                   ? <p className="text-[11px]" style={{ color: LIME }}>{activeAgent.dept}</p>
-                  : <p className="flex items-center gap-1 text-[11px] text-white/50"><span className="inline-block size-1.5 rounded-full" style={{ background: LIME }}/> متصل الآن</p>
+                  : <p className="flex items-center gap-1 text-[11px] text-[var(--gf-text-muted)]"><span className="inline-block size-1.5 rounded-full" style={{ background: LIME }}/> متصل الآن</p>
                 }
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button onClick={() => setPhase("select")}
-                className="rounded-xl border border-white/8 bg-white/4 px-2.5 py-1.5 text-[10px] font-bold text-white/50 hover:text-white transition-colors">
+                className="rounded-xl border border-white/8 bg-white/4 px-2.5 py-1.5 text-[10px] font-bold text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] transition-colors">
                 تغيير الوكيل
               </button>
               <button onClick={closeChat}
-                className="mr-1 grid size-8 place-items-center rounded-xl text-white/40 hover:bg-white/8 hover:text-white transition-all">
+                className="mr-1 grid size-8 place-items-center rounded-xl text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)] transition-all">
                 <X size={15}/>
               </button>
             </div>
@@ -651,12 +651,12 @@ export function LiveChat() {
           style={{ minHeight: 160, maxHeight: 280, opacity: fading ? 0 : 1 }}
         >
           {messages.filter(m => !m.content.startsWith("🎯")).length === 0 && (
-            <div className="self-start rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-6 text-white/85"
+            <div className="self-start rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-6 text-[var(--gf-text)]/85"
               style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,.06)", animation: "lc-msg-in .3s ease" }}>
               {activeAgent
                 ? `مرحباً! أنا ${activeAgent.name} من ${activeAgent.dept}. كيف يمكنني مساعدتك؟`
                 : "مرحباً! كيف يمكنني مساعدتك اليوم؟"}
-              <span className="mt-1 block text-[10px] text-white/30">{fmt(new Date().toISOString())}</span>
+              <span className="mt-1 block text-[10px] text-[var(--gf-text)]/30">{fmt(new Date().toISOString())}</span>
             </div>
           )}
           {messages.filter(m => !m.content.startsWith("🎯")).map((msg, i) => (
@@ -667,7 +667,7 @@ export function LiveChat() {
                   <AgentAvatar agent={activeAgent} size={24} />
                 </div>
               )}
-              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${msg.is_admin ? "rounded-tl-sm text-white/90" : "rounded-tr-sm text-black"}`}
+              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${msg.is_admin ? "rounded-tl-sm text-[var(--gf-text)]" : "rounded-tr-sm text-black"}`}
                 style={msg.is_admin
                   ? { background: "#1c1c1c", border: "1px solid rgba(255,255,255,.06)" }
                   : { background: `linear-gradient(135deg,${LIME},${LIME_DARK})`, boxShadow: `0 2px 12px rgba(200,230,0,.25)` }
@@ -690,7 +690,7 @@ export function LiveChat() {
             ref={inputRef} value={draft}
             onChange={e => setDraft(e.target.value)} onKeyDown={onKey}
             placeholder="اكتب رسالتك..."
-            className="min-w-0 flex-1 rounded-2xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 transition-all"
+            className="min-w-0 flex-1 rounded-2xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 transition-all"
             onFocus={e => { e.currentTarget.style.borderColor = `${LIME}44`; }}
             onBlur={e  => { e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; }}
           />
@@ -701,7 +701,7 @@ export function LiveChat() {
           </button>
         </div>
 
-        <div className="shrink-0 border-t border-white/4 py-1.5 text-center text-[10px] text-white/18">
+        <div className="shrink-0 border-t border-white/4 py-1.5 text-center text-[10px] text-[var(--gf-text)]/18">
           Growfolo Support · Powered by AI
         </div>
       </aside>

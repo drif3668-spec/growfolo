@@ -22,7 +22,7 @@ const VISUAL_ITEMS = [
 
 export default function ImportantInfoPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050508] text-white" dir="rtl">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <style>{`
         @keyframes importantGlow {
           0%, 100% { opacity: .45; transform: translate3d(0, 0, 0) scale(1); }
@@ -57,8 +57,8 @@ export default function ImportantInfoPage() {
 
       <SiteHeader />
 
-      <div className="info-orb right-[-120px] top-24 h-72 w-72 bg-purple-600/35" />
-      <div className="info-orb bottom-10 left-[-120px] h-80 w-80 bg-lime-400/20" style={{ animationDelay: "1.6s" }} />
+      <div className="info-orb right-[-120px] top-24 h-72 w-72 bg-[var(--gf-brand)]/35" />
+      <div className="info-orb bottom-10 left-[-120px] h-80 w-80 bg-[var(--gf-brand)]/20" style={{ animationDelay: "1.6s" }} />
 
       <section className="relative z-10 mx-auto max-w-5xl px-4 py-10 sm:py-14">
         <motion.div
@@ -68,18 +68,18 @@ export default function ImportantInfoPage() {
           className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-purple-500/10 px-4 py-2 text-xs font-black text-purple-200">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-[var(--gf-brand)]/10 px-4 py-2 text-xs font-black text-purple-200">
               <Sparkles size={14} />
               معلومات مهمة
             </div>
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">مكتبة الصور والمعلومات</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58 sm:text-base">
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--gf-text)]/58 sm:text-base">
               محتوى بصري تفاعلي لعرض التفاصيل المهمة بطريقة واضحة ومتناسقة مع هوية Growfolo.
             </p>
           </div>
           <a
             href="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-bold text-white/70 transition-all hover:border-purple-400/40 hover:bg-purple-500/12 hover:text-white"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-bold text-white/80 transition-all hover:border-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/12 hover:text-white"
           >
             <ArrowRight size={16} />
             العودة للرئيسية
@@ -101,7 +101,7 @@ export default function ImportantInfoPage() {
               className="info-glass relative overflow-hidden rounded-[28px] p-3 sm:p-4"
               style={{ transformStyle: "preserve-3d" }}
             >
-              <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-white/8">
+              <div className="relative overflow-hidden rounded-[22px] border border-[var(--gf-line)] bg-[var(--gf-surface-2)]">
                 <Image
                   src={item.src}
                   alt={item.alt}
@@ -114,10 +114,10 @@ export default function ImportantInfoPage() {
               </div>
               <div className="relative mt-4 flex flex-col gap-2 px-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-black text-white">{item.title}</h2>
-                  <p className="mt-1 text-sm leading-6 text-white/55">{item.description}</p>
+                  <h2 className="text-lg font-black text-[var(--gf-text)]">{item.title}</h2>
+                  <p className="mt-1 text-sm leading-6 text-[var(--gf-text)]/55">{item.description}</p>
                 </div>
-                <span className="w-fit rounded-full border border-lime-400/25 bg-lime-400/10 px-3 py-1.5 text-xs font-black text-lime-200">
+                <span className="w-fit rounded-full border border-lime-400/25 bg-[var(--gf-brand)]/10 px-3 py-1.5 text-xs font-black text-lime-200">
                   قابل للسحب والتفاعل
                 </span>
               </div>

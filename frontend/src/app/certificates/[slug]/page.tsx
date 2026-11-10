@@ -14,7 +14,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
   if (!certificate) notFound();
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050508] text-white" dir="rtl">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <style>{`
         @keyframes certificateFloat {
           0%, 100% { transform: translateY(0); }
@@ -33,8 +33,8 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
       `}</style>
       <SiteHeader />
 
-      <div className="pointer-events-none fixed -right-24 top-24 h-80 w-80 rounded-full bg-purple-600/25 blur-[80px]" />
-      <div className="pointer-events-none fixed -left-24 bottom-10 h-80 w-80 rounded-full bg-lime-400/18 blur-[80px]" />
+      <div className="pointer-events-none fixed -right-24 top-24 h-80 w-80 rounded-full bg-[var(--gf-brand)]/25 blur-[80px]" />
+      <div className="pointer-events-none fixed -left-24 bottom-10 h-80 w-80 rounded-full bg-[var(--gf-brand)]/18 blur-[80px]" />
 
       <section className="relative z-10 mx-auto max-w-5xl px-4 py-10 sm:py-14">
         <div className="mb-7 grid gap-5 text-right md:grid-cols-[1fr_auto] md:items-end">
@@ -51,13 +51,13 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
               الشهادات
             </div>
             <h1 className="text-3xl font-black leading-tight sm:text-5xl">{certificate.title}</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/62 sm:text-base">
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--gf-text)]/62 sm:text-base">
               {certificate.description}
             </p>
           </div>
           <a
             href="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-bold text-white/72 transition-all hover:border-purple-400/40 hover:bg-purple-500/12 hover:text-white"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-bold text-white/72 transition-all hover:border-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/12 hover:text-white"
           >
             <ArrowRight size={16} />
             العودة إلى الصفحة الرئيسية
@@ -65,19 +65,19 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
         </div>
 
         <div className="mb-6 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-5 backdrop-blur-xl">
-            <div className="mb-3 flex items-center gap-2 text-sm font-black text-white/45">
+          <div className="rounded-3xl border border-[var(--gf-line)] bg-white/[0.045] p-5 backdrop-blur-xl">
+            <div className="mb-3 flex items-center gap-2 text-sm font-black text-[var(--gf-text)]/45">
               <Globe2 size={16} />
               الدولة
             </div>
-            <p className="text-2xl font-black text-white">{certificate.country}</p>
+            <p className="text-2xl font-black text-[var(--gf-text)]">{certificate.country}</p>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-5 backdrop-blur-xl">
-            <div className="mb-3 flex items-center gap-2 text-sm font-black text-white/45">
+          <div className="rounded-3xl border border-[var(--gf-line)] bg-white/[0.045] p-5 backdrop-blur-xl">
+            <div className="mb-3 flex items-center gap-2 text-sm font-black text-[var(--gf-text)]/45">
               <CalendarDays size={16} />
               تاريخ الإصدار
             </div>
-            <p className="text-2xl font-black text-white">{certificate.issueDate}</p>
+            <p className="text-2xl font-black text-[var(--gf-text)]">{certificate.issueDate}</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
               className="h-auto w-full object-contain"
             />
           </div>
-          <p className="mt-4 text-center text-xs font-bold text-white/45">للعرض فقط</p>
+          <p className="mt-4 text-center text-xs font-bold text-[var(--gf-text)]/45">للعرض فقط</p>
         </article>
       </section>
     </main>

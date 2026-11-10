@@ -145,10 +145,10 @@ export function LoginForm() {
       {/* Logo */}
       <div className="mb-8 text-center">
         <div className="pixel-logo text-4xl font-black">
-          <span className="text-purple-500">GROW</span>
-          <span className="text-lime-400">FOLO</span>
+          <span className="text-[var(--gf-brand)]">GROW</span>
+          <span className="text-[var(--gf-brand)]">FOLO</span>
         </div>
-        <p className="mt-2 text-sm text-white/50">سجّل دخولك للمتابعة</p>
+        <p className="mt-2 text-sm text-[var(--gf-text-muted)]">سجّل دخولك للمتابعة</p>
       </div>
 
       {/* Card */}
@@ -156,41 +156,41 @@ export function LoginForm() {
         onSubmit={handleSubmit}
         className="glass-panel rounded-3xl px-8 py-8"
       >
-        <h1 className="mb-6 text-xl font-black text-white">تسجيل الدخول</h1>
+        <h1 className="mb-6 text-xl font-black text-[var(--gf-text)]">تسجيل الدخول</h1>
 
         {/* Email */}
-        <label className="mb-4 grid gap-1.5 text-xs font-semibold text-white/65">
+        <label className="mb-4 grid gap-1.5 text-xs font-semibold text-[var(--gf-text)]/65">
           البريد الإلكتروني
-          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition-colors focus-within:border-purple-500/50">
-            <Mail size={15} className="shrink-0 text-purple-400" />
+          <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 transition-colors focus-within:border-purple-500/50">
+            <Mail size={15} className="shrink-0 text-[var(--gf-brand)]" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+              className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30"
             />
           </div>
         </label>
 
         {/* Password */}
-        <label className="mb-6 grid gap-1.5 text-xs font-semibold text-white/65">
+        <label className="mb-6 grid gap-1.5 text-xs font-semibold text-[var(--gf-text)]/65">
           كلمة المرور
-          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition-colors focus-within:border-purple-500/50">
-            <Lock size={15} className="shrink-0 text-purple-400" />
+          <div className="flex items-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-3 transition-colors focus-within:border-purple-500/50">
+            <Lock size={15} className="shrink-0 text-[var(--gf-brand)]" />
             <input
               type={showPass ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••"
               autoComplete="current-password"
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+              className="flex-1 bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30"
             />
             <button
               type="button"
               onClick={() => setShowPass((p) => !p)}
-              className="text-white/35 hover:text-white/70"
+              className="text-[var(--gf-text)]/35 hover:text-[var(--gf-text-muted)]"
               tabIndex={-1}
             >
               {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -223,9 +223,9 @@ export function LoginForm() {
 
         {/* Divider */}
         <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-xs text-white/30">أو</span>
-          <div className="h-px flex-1 bg-white/10" />
+          <div className="h-px flex-1 bg-[var(--gf-surface-2)]" />
+          <span className="text-xs text-[var(--gf-text)]/30">أو</span>
+          <div className="h-px flex-1 bg-[var(--gf-surface-2)]" />
         </div>
 
         {/* OAuth Buttons — GitHub & Google side by side */}
@@ -234,7 +234,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={handleGitHubLogin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 py-3.5 text-sm font-bold text-white transition-colors hover:border-white/25 hover:bg-white/10"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] py-3.5 text-sm font-bold text-[var(--gf-text)] transition-colors hover:border-white/25 hover:bg-[var(--gf-surface-2)]"
           >
             <GitHubIcon size={18} />
             GitHub
@@ -244,7 +244,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 py-3.5 text-sm font-bold text-white transition-colors hover:border-white/25 hover:bg-white/10"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] py-3.5 text-sm font-bold text-[var(--gf-text)] transition-colors hover:border-white/25 hover:bg-[var(--gf-surface-2)]"
           >
             <GoogleIcon size={18} />
             Google
@@ -252,13 +252,13 @@ export function LoginForm() {
         </div>
 
         {/* Forgot password + register link */}
-        <div className="mt-5 flex flex-col items-center gap-2 text-center text-sm text-white/45">
-          <a href="/forgot-password" className="font-semibold text-white/50 hover:text-purple-400 transition-colors">
+        <div className="mt-5 flex flex-col items-center gap-2 text-center text-sm text-[var(--gf-text)]/45">
+          <a href="/forgot-password" className="font-semibold text-[var(--gf-text-muted)] hover:text-[var(--gf-brand)] transition-colors">
             نسيت كلمة المرور؟
           </a>
           <span>
             ليس لديك حساب؟{" "}
-            <a href="/register" className="font-bold text-purple-400 hover:text-purple-300">
+            <a href="/register" className="font-bold text-[var(--gf-brand)] hover:text-[var(--gf-brand)]">
               إنشاء حساب
             </a>
           </span>

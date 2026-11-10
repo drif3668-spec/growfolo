@@ -213,20 +213,20 @@ export function CartSidebar() {
 
       {/* Sidebar — slides from left */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[340px] max-w-full flex-col bg-[#09080f] shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-[340px] max-w-full flex-col bg-[var(--gf-surface)] shadow-[0_0_60px_rgba(168,85,247,0.3)] transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/8 px-5 py-4 shrink-0">
           <button
             onClick={closeSidebar}
-            className="grid size-9 place-items-center rounded-2xl bg-white/6 text-white/60 hover:bg-white/12 hover:text-white"
+            className="grid size-9 place-items-center rounded-2xl bg-white/6 text-[var(--gf-text-muted)] hover:bg-white/12 hover:text-[var(--gf-text)]"
             aria-label="إغلاق"
           >
             <X size={18} />
           </button>
           <div className="pixel-logo text-xl font-black">
-            <span className="text-purple-500">GROW</span>
-            <span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span>
+            <span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
         </div>
 
@@ -234,14 +234,14 @@ export function CartSidebar() {
         <div className="flex border-b border-white/8 shrink-0">
           <button
             onClick={() => setTab("cart")}
-            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${tab === "cart" ? "border-b-2 border-purple-500 text-purple-400" : "text-white/50 hover:text-white"}`}
+            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${tab === "cart" ? "border-b-2 border-purple-500 text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)] hover:text-[var(--gf-text)]"}`}
           >
             <ShoppingCart size={16} />
             سلتي
           </button>
           <button
             onClick={() => setTab("orders")}
-            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${tab === "orders" ? "border-b-2 border-purple-500 text-purple-400" : "text-white/50 hover:text-white"}`}
+            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${tab === "orders" ? "border-b-2 border-purple-500 text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)] hover:text-[var(--gf-text)]"}`}
           >
             <Clock size={16} />
             معاملاتي
@@ -255,32 +255,32 @@ export function CartSidebar() {
               {/* Cart items */}
               {items.length === 0 ? (
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center py-10">
-                  <ShoppingCart size={48} className="text-white/20" />
-                  <p className="text-white/40 text-sm">السلة فارغة</p>
-                  <p className="text-white/25 text-xs">أضف منتجات لتبدأ التسوق</p>
+                  <ShoppingCart size={48} className="text-[var(--gf-text)]/20" />
+                  <p className="text-[var(--gf-text-muted)] text-sm">السلة فارغة</p>
+                  <p className="text-[var(--gf-text)]/25 text-xs">أضف منتجات لتبدأ التسوق</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {items.map(item => (
-                    <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
+                    <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-[var(--gf-surface-2)] p-3">
                       <div className={`grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${item.color} text-xl font-black`}>
                         {item.logo}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="truncate text-sm font-bold text-white">{item.name}</p>
-                        <p className="text-xs text-purple-400">{convert(item.price)} {selected.code}</p>
+                        <p className="truncate text-sm font-bold text-[var(--gf-text)]">{item.name}</p>
+                        <p className="text-xs text-[var(--gf-brand)]">{convert(item.price)} {selected.code}</p>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => updateQty(item.id, -1)}
-                          className="grid size-7 place-items-center rounded-lg bg-white/10 text-white hover:bg-white/20"
+                          className="grid size-7 place-items-center rounded-lg bg-[var(--gf-surface-2)] text-[var(--gf-text)] hover:bg-white/20"
                         >
                           <Minus size={12} />
                         </button>
-                        <span className="w-5 text-center text-sm font-bold text-white">{item.qty}</span>
+                        <span className="w-5 text-center text-sm font-bold text-[var(--gf-text)]">{item.qty}</span>
                         <button
                           onClick={() => updateQty(item.id, 1)}
-                          className="grid size-7 place-items-center rounded-lg bg-white/10 text-white hover:bg-white/20"
+                          className="grid size-7 place-items-center rounded-lg bg-[var(--gf-surface-2)] text-[var(--gf-text)] hover:bg-white/20"
                         >
                           <Plus size={12} />
                         </button>
@@ -294,7 +294,7 @@ export function CartSidebar() {
                     </div>
                   ))}
                   {items.length > 1 && (
-                    <button onClick={clear} className="text-xs text-white/30 hover:text-red-400 text-left transition-colors">
+                    <button onClick={clear} className="text-xs text-[var(--gf-text)]/30 hover:text-red-400 text-left transition-colors">
                       مسح السلة
                     </button>
                   )}
@@ -306,24 +306,24 @@ export function CartSidebar() {
 
               {/* Currency selector */}
               <div>
-                <p className="mb-2 text-xs font-bold text-white/50 uppercase tracking-wider">العملة</p>
+                <p className="mb-2 text-xs font-bold text-[var(--gf-text-muted)] uppercase tracking-wider">العملة</p>
                 <div className="relative" ref={currencyDropRef}>
                   <button
                     onClick={() => setCurrencyDropOpen(v => !v)}
-                    className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white hover:bg-white/10"
+                    className="flex w-full items-center justify-between rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] hover:bg-[var(--gf-surface-2)]"
                   >
                     <span>{selected.flag} {selected.code} — {selected.name}</span>
                     <ChevronDown size={14} className={`transition-transform ${currencyDropOpen ? "rotate-180" : ""}`} />
                   </button>
                   {currencyDropOpen && (
-                    <div className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl border border-white/10 bg-[#12101a] shadow-xl">
+                    <div className="absolute left-0 right-0 top-full mt-1 z-10 rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface)] shadow-xl">
                       <div className="flex items-center gap-2 border-b border-white/8 px-3 py-2">
-                        <Search size={14} className="text-white/40" />
+                        <Search size={14} className="text-[var(--gf-text-muted)]" />
                         <input
                           value={currencySearch}
                           onChange={e => setCurrencySearch(e.target.value)}
                           placeholder="بحث..."
-                          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+                          className="w-full bg-transparent text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30"
                           autoFocus
                         />
                       </div>
@@ -332,11 +332,11 @@ export function CartSidebar() {
                           <button
                             key={c.code}
                             onClick={() => { setSelected(c); setCurrencyDropOpen(false); setCurrencySearch(""); }}
-                            className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-white/8 ${selected.code === c.code ? "text-purple-400" : "text-white/80"}`}
+                            className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-[var(--gf-surface-2)] ${selected.code === c.code ? "text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)]"}`}
                           >
                             <span>{c.flag}</span>
                             <span className="font-mono font-bold">{c.code}</span>
-                            <span className="text-white/50">{c.name}</span>
+                            <span className="text-[var(--gf-text-muted)]">{c.name}</span>
                           </button>
                         ))}
                       </div>
@@ -347,17 +347,17 @@ export function CartSidebar() {
 
               {/* Payment method */}
               <div>
-                <p className="mb-2 text-xs font-bold text-white/50 uppercase tracking-wider">طريقة الدفع</p>
+                <p className="mb-2 text-xs font-bold text-[var(--gf-text-muted)] uppercase tracking-wider">طريقة الدفع</p>
                 <div className="grid grid-cols-2 gap-2">
                   {/* WhatsApp payment */}
                   <button
                     onClick={() => setPayMethod("whatsapp")}
-                    className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all col-span-2 ${payMethod === "whatsapp" ? "border-[#25D366] bg-[#25D366]/15 text-[#25D366]" : "border-[#25D366]/30 bg-[#25D366]/5 text-white/70 hover:bg-[#25D366]/10"}`}
+                    className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all col-span-2 ${payMethod === "whatsapp" ? "border-[#25D366] bg-[#25D366]/15 text-[#25D366]" : "border-[#25D366]/30 bg-[#25D366]/5 text-[var(--gf-text-muted)] hover:bg-[#25D366]/10"}`}
                   >
                     <span className="grid h-10 w-14 shrink-0 place-items-center text-2xl">💬</span>
                     <div className="text-right">
                       <p className="font-black">الدفع عبر واتساب</p>
-                      <p className="text-[10px] text-white/40 font-normal mt-0.5">تواصل مع الوكيل + ادفع بأي وسيلة</p>
+                      <p className="text-[10px] text-[var(--gf-text-muted)] font-normal mt-0.5">تواصل مع الوكيل + ادفع بأي وسيلة</p>
                     </div>
                   </button>
                   {/* Standard methods */}
@@ -365,7 +365,7 @@ export function CartSidebar() {
                     <button
                       key={m.id}
                       onClick={() => setPayMethod(m.id)}
-                      className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all ${payMethod === m.id ? "border-purple-500 bg-purple-500/15 text-white" : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"}`}
+                      className={`flex min-h-20 items-center gap-2 rounded-xl border px-2.5 py-2 text-xs font-bold transition-all ${payMethod === m.id ? "border-purple-500 bg-[var(--gf-brand)]/15 text-white" : "border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-white/80 hover:bg-[var(--gf-surface-2)]"}`}
                     >
                       <span className="grid h-10 w-16 shrink-0 place-items-center">
                         <PaymentMethodImage method={m} />
@@ -378,7 +378,7 @@ export function CartSidebar() {
 
               {/* Discount code */}
               <div className="rounded-2xl border border-white/8 bg-white/3 p-3">
-                <p className="mb-2.5 flex items-center gap-1.5 text-xs font-black text-white/50">
+                <p className="mb-2.5 flex items-center gap-1.5 text-xs font-black text-[var(--gf-text-muted)]">
                   <Tag size={12} /> كود الخصم
                 </p>
 
@@ -393,24 +393,24 @@ export function CartSidebar() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-lime-400 shrink-0" />
-                        <span className="font-mono text-sm font-black text-lime-400">{appliedDiscount.code}</span>
+                        <CheckCircle2 size={14} className="text-[var(--gf-brand)] shrink-0" />
+                        <span className="font-mono text-sm font-black text-[var(--gf-brand)]">{appliedDiscount.code}</span>
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-black"
-                          style={{ background: "rgba(200,230,0,0.15)", color: "#c8e600" }}
+                          style={{ background: "rgba(200,230,0,0.15)", color: "var(--gf-brand)" }}
                         >
                           خصم {appliedDiscount.percent}%
                         </span>
                       </div>
                       <button
                         onClick={removeDiscount}
-                        className="grid size-6 place-items-center rounded-lg bg-white/8 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                        className="grid size-6 place-items-center rounded-lg bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-red-500/20 hover:text-red-400 transition-colors"
                         title="إلغاء الكود"
                       >
                         <X size={12} />
                       </button>
                     </div>
-                    <p className="mt-1 text-[11px] text-lime-400/70">✅ تم تطبيق كود الخصم بنجاح</p>
+                    <p className="mt-1 text-[11px] text-[var(--gf-brand)]/70">✅ تم تطبيق كود الخصم بنجاح</p>
                   </div>
                 ) : (
                   /* Input state */
@@ -420,13 +420,13 @@ export function CartSidebar() {
                       onChange={(e) => { setDcInput(e.target.value.toUpperCase()); setDcError(""); }}
                       onKeyDown={(e) => e.key === "Enter" && applyDiscount()}
                       placeholder="أدخل الكود هنا..."
-                      className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50 font-mono tracking-wider"
+                      className="min-w-0 flex-1 rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50 font-mono tracking-wider"
                     />
                     <button
                       onClick={applyDiscount}
                       disabled={dcLoading || !dcInput.trim()}
                       className="shrink-0 rounded-xl px-3 py-2 text-xs font-black text-black transition-all hover:opacity-90 active:scale-95 disabled:opacity-40"
-                      style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)" }}
+                      style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)" }}
                     >
                       {dcLoading ? <Loader2 size={14} className="animate-spin" /> : "تطبيق"}
                     </button>
@@ -453,29 +453,29 @@ export function CartSidebar() {
                   {appliedDiscount && (
                     <>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs text-white/40">المجموع الأصلي</span>
-                        <span className="text-sm text-white/35 line-through">
+                        <span className="text-xs text-[var(--gf-text-muted)]">المجموع الأصلي</span>
+                        <span className="text-sm text-[var(--gf-text)]/35 line-through">
                           {convert(totalUSD)} {selected.code}
                         </span>
                       </div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold" style={{ color: "#c8e600" }}>
+                        <span className="text-xs font-bold" style={{ color: "var(--gf-brand)" }}>
                           خصم {appliedDiscount.percent}%
                         </span>
-                        <span className="text-sm font-bold" style={{ color: "#c8e600" }}>
+                        <span className="text-sm font-bold" style={{ color: "var(--gf-brand)" }}>
                           − {convert(discountAmount)} {selected.code}
                         </span>
                       </div>
-                      <div className="mb-2 h-px bg-white/10" />
+                      <div className="mb-2 h-px bg-[var(--gf-surface-2)]" />
                     </>
                   )}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-white/60">
+                    <span className="text-sm text-[var(--gf-text-muted)]">
                       {appliedDiscount ? "الإجمالي بعد الخصم" : "المجموع"}
                     </span>
                     <span
                       className={`text-xl font-black transition-all ${priceAnimating ? "scale-105" : "scale-100"}`}
-                      style={{ color: appliedDiscount ? "#c8e600" : "white" }}
+                      style={{ color: appliedDiscount ? "var(--gf-brand)" : "white" }}
                     >
                       {convert(displayTotal || discountedTotal)} {selected.code}
                     </span>
@@ -495,8 +495,8 @@ export function CartSidebar() {
             <div className="flex flex-1 flex-col p-4 gap-4">
               {!savedEmail ? (
                 <div className="flex flex-1 flex-col items-center justify-center gap-4">
-                  <Clock size={40} className="text-purple-400/60" />
-                  <p className="text-center text-sm text-white/60">أدخل بريدك الإلكتروني لتتبع طلباتك</p>
+                  <Clock size={40} className="text-[var(--gf-brand)]/60" />
+                  <p className="text-center text-sm text-[var(--gf-text-muted)]">أدخل بريدك الإلكتروني لتتبع طلباتك</p>
                   <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-3">
                     <input
                       type="email"
@@ -504,7 +504,7 @@ export function CartSidebar() {
                       onChange={e => setEmailInput(e.target.value)}
                       placeholder="بريدك الإلكتروني"
                       required
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-purple-500"
+                      className="w-full rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-3 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30 focus:border-purple-500"
                     />
                     <button type="submit" className="neon-button w-full rounded-xl py-3 font-bold text-black">
                       تتبع طلباتي
@@ -514,7 +514,7 @@ export function CartSidebar() {
               ) : (
                 <div className="flex flex-1 flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-white/40">{savedEmail}</p>
+                    <p className="text-xs text-[var(--gf-text-muted)]">{savedEmail}</p>
                     <button
                       onClick={() => { setSavedEmail(null); setOrders([]); try { localStorage.removeItem("gf_my_email"); } catch {} }}
                       className="text-xs text-red-400/70 hover:text-red-400"
@@ -528,22 +528,22 @@ export function CartSidebar() {
                     </div>
                   ) : orders.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-3 py-10">
-                      <Clock size={40} className="text-white/20" />
-                      <p className="text-sm text-white/40">لا توجد طلبات بعد</p>
+                      <Clock size={40} className="text-[var(--gf-text)]/20" />
+                      <p className="text-sm text-[var(--gf-text-muted)]">لا توجد طلبات بعد</p>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
                       {orders.map(order => {
-                        const s = STATUS_MAP[order.status] ?? { label: order.status, color: "text-white/60 bg-white/10" };
+                        const s = STATUS_MAP[order.status] ?? { label: order.status, color: "text-[var(--gf-text-muted)] bg-[var(--gf-surface-2)]" };
                         return (
-                          <div key={order.id} className="rounded-2xl bg-white/5 p-4 border border-white/8">
+                          <div key={order.id} className="rounded-2xl bg-[var(--gf-surface-2)] p-4 border border-white/8">
                             <div className="flex items-start justify-between gap-2 mb-2">
-                              <p className="text-sm font-bold text-white">{order.product_name}</p>
+                              <p className="text-sm font-bold text-[var(--gf-text)]">{order.product_name}</p>
                               <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${s.color}`}>
                                 {s.label}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between text-xs text-white/50">
+                            <div className="flex items-center justify-between text-xs text-[var(--gf-text-muted)]">
                               <span>{order.product_price.toFixed(2)} USD</span>
                               <span>{new Date(order.created_at).toLocaleDateString("ar")}</span>
                             </div>

@@ -55,7 +55,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           />
         ) : (
           <span
-            className="grid h-16 w-16 place-items-center rounded-2xl text-2xl font-black text-white shadow-lg"
+            className="grid h-16 w-16 place-items-center rounded-2xl text-2xl font-black text-[var(--gf-text)] shadow-lg"
             style={{ background: `linear-gradient(135deg, ${accent}, ${accent}77)` }}
             aria-hidden="true"
           >
@@ -64,13 +64,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
 
         {percent > 0 && (
-          <span className="absolute start-3 top-3 rounded-full bg-[var(--gf-danger)] px-2.5 py-1 text-[11px] font-bold text-white shadow">
+          <span className="absolute start-3 top-3 rounded-full bg-[var(--gf-danger)] px-2.5 py-1 text-[11px] font-bold text-[var(--gf-text)] shadow">
             −{percent}%
           </span>
         )}
 
         {product.badge && (
-          <span className="absolute end-3 top-3 rounded-full border border-white/20 bg-black/45 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">
+          <span className="absolute end-3 top-3 rounded-full border border-[var(--gf-line-strong)] bg-black/45 px-2.5 py-1 text-[11px] font-bold text-[var(--gf-text)] backdrop-blur">
             {product.badge}
           </span>
         )}
@@ -82,7 +82,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             {product.name}
           </h3>
           {typeof product.rating === "number" && product.rating > 0 && (
-            <span className="shrink-0 rounded-md bg-white/5 px-1.5 py-0.5 text-[11px] font-bold text-amber-300">
+            <span className="shrink-0 rounded-md bg-[var(--gf-surface-2)] px-1.5 py-0.5 text-[11px] font-bold text-amber-300">
               ★ {Number(product.rating).toFixed(1)}
             </span>
           )}

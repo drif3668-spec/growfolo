@@ -92,9 +92,9 @@ const STATUS: Record<string, { label: string; color: string; bg: string }> = {
   pending_proof: { label: "بانتظار الدفع",     color: "text-yellow-400", bg: "bg-yellow-500/15" },
   processing:    { label: "قيد المعالجة",      color: "text-orange-400", bg: "bg-orange-500/15" },
   confirmed:     { label: "تأكيد الدفع",       color: "text-cyan-400",   bg: "bg-cyan-500/15" },
-  activated:     { label: "تم التفعيل ✓",      color: "text-lime-400",   bg: "bg-lime-500/15" },
+  activated:     { label: "تم التفعيل ✓",      color: "text-[var(--gf-brand)]",   bg: "bg-lime-500/15" },
   rejected:      { label: "مرفوض",             color: "text-red-400",    bg: "bg-red-500/15" },
-  expired:       { label: "منتهي الوقت",       color: "text-white/40",   bg: "bg-white/8" },
+  expired:       { label: "منتهي الوقت",       color: "text-[var(--gf-text-muted)]",   bg: "bg-[var(--gf-surface-2)]" },
 };
 
 function getProofUrls(order: Order): string[] {
@@ -533,20 +533,20 @@ export function AdminDashboard() {
   ];
 
   return (
-    <main className="flex min-h-screen bg-[#0d0b14] text-white">
+    <main className="flex min-h-screen bg-[var(--gf-surface)] text-[var(--gf-text)]">
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 right-0 w-64 border-l border-white/8 bg-[#09080f] p-5">
+      <aside className="fixed inset-y-0 right-0 w-64 border-l border-white/8 bg-[var(--gf-surface)] p-5">
         <div className="pixel-logo mb-8 text-2xl font-black">
-          <span className="text-purple-500">GROW</span><span className="text-lime-400">FOLO</span>
-          <span className="mt-0.5 block text-xs font-normal text-white/40">لوحة التحكم</span>
+          <span className="text-[var(--gf-brand)]">GROW</span><span className="text-[var(--gf-brand)]">FOLO</span>
+          <span className="mt-0.5 block text-xs font-normal text-[var(--gf-text-muted)]">لوحة التحكم</span>
         </div>
         <nav className="grid gap-1 text-sm">
           {NAV.map(({ id, label, icon: Icon, badge }) => (
             <button key={id} onClick={() => setNav(id)}
-              className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-right font-semibold transition-colors ${nav === id ? "bg-purple-600/20 text-purple-300" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+              className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-right font-semibold transition-colors ${nav === id ? "bg-[var(--gf-brand)]/20 text-[var(--gf-brand)]" : "text-white/80 hover:bg-[var(--gf-surface-2)] hover:text-white"}`}
             >
               <Icon size={17} /> {label}
-              {badge > 0 && <span className="mr-auto grid size-5 place-items-center rounded-full bg-purple-600 text-[10px] font-bold">{badge}</span>}
+              {badge > 0 && <span className="mr-auto grid size-5 place-items-center rounded-full bg-[var(--gf-brand)] text-[10px] font-bold">{badge}</span>}
             </button>
           ))}
         </nav>
@@ -561,7 +561,7 @@ export function AdminDashboard() {
             <>
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-black">إدارة الطلبات</h2>
-                <button onClick={loadOrders} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                <button onClick={loadOrders} className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-sm text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)]">
                   <RefreshCw size={14} className={ordersLoading ? "animate-spin" : ""} /> تحديث
                 </button>
               </div>
@@ -569,13 +569,13 @@ export function AdminDashboard() {
               {/* Stats row */}
               <div className="mb-6 grid gap-4 md:grid-cols-4">
                 {[
-                  { label: "الكل", val: orders.length, color: "text-white" },
+                  { label: "الكل", val: orders.length, color: "text-[var(--gf-text)]" },
                   { label: "قيد المعالجة", val: orders.filter((o) => o.status === "processing").length, color: "text-orange-400" },
-                  { label: "مفعّل", val: orders.filter((o) => o.status === "activated").length, color: "text-lime-400" },
+                  { label: "مفعّل", val: orders.filter((o) => o.status === "activated").length, color: "text-[var(--gf-brand)]" },
                   { label: "مرفوض", val: orders.filter((o) => o.status === "rejected").length, color: "text-red-400" },
                 ].map(({ label, val, color }) => (
-                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
-                    <p className="text-xs text-white/45">{label}</p>
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[var(--gf-surface)] p-4">
+                    <p className="text-xs text-[var(--gf-text)]/45">{label}</p>
                     <p className={`mt-1 text-3xl font-black ${color}`}>{val}</p>
                   </div>
                 ))}
@@ -584,12 +584,12 @@ export function AdminDashboard() {
               {/* Orders table + detail panel */}
               <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
                 {/* Table */}
-                <div className="rounded-3xl border border-white/8 bg-[#0d0b14] overflow-hidden">
-                  <div className="border-b border-white/8 px-5 py-4 text-sm font-black text-white/70">
+                <div className="rounded-3xl border border-white/8 bg-[var(--gf-surface)] overflow-hidden">
+                  <div className="border-b border-white/8 px-5 py-4 text-sm font-black text-[var(--gf-text-muted)]">
                     {orders.length} طلب
                   </div>
                   {orders.length === 0 && !ordersLoading && (
-                    <div className="py-12 text-center text-sm text-white/30">لا توجد طلبات بعد</div>
+                    <div className="py-12 text-center text-sm text-[var(--gf-text)]/30">لا توجد طلبات بعد</div>
                   )}
                   {orders.map((order) => {
                     const s = STATUS[order.status] ?? STATUS.new;
@@ -598,24 +598,24 @@ export function AdminDashboard() {
                       <button
                         key={order.id}
                         onClick={() => { setSelectedOrder(order); setTrackingStage(order.tracking_stage || 1); setTrackingNote(""); }}
-                        className={`flex w-full items-center gap-3 border-b border-white/5 px-5 py-4 text-right transition-colors hover:bg-white/4 ${selectedOrder?.id === order.id ? "bg-purple-600/10" : ""}`}
+                        className={`flex w-full items-center gap-3 border-b border-[var(--gf-line)] px-5 py-4 text-right transition-colors hover:bg-white/4 ${selectedOrder?.id === order.id ? "bg-[var(--gf-brand)]/10" : ""}`}
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-black text-white truncate">{order.customer_name}</span>
+                            <span className="font-black text-[var(--gf-text)] truncate">{order.customer_name}</span>
                             <span className={`shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-bold ${s.bg} ${s.color}`}>{s.label}</span>
                             {order.payment_method === "whatsapp" && (
                               <span className="shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-black bg-[#25D366]/15 text-[#25D366]">💬 واتساب</span>
                             )}
                           </div>
-                          <p className="mt-0.5 truncate text-xs text-white/40">{order.product_name} · {order.customer_email}</p>
-                          <p className="text-[10px] text-white/25 mt-0.5">{fmt(order.created_at)} {order.customer_country ? `· ${order.customer_country}` : ""}</p>
+                          <p className="mt-0.5 truncate text-xs text-[var(--gf-text-muted)]">{order.product_name} · {order.customer_email}</p>
+                          <p className="text-[10px] text-[var(--gf-text)]/25 mt-0.5">{fmt(order.created_at)} {order.customer_country ? `· ${order.customer_country}` : ""}</p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="font-black text-white">{order.product_price}$</p>
-                          {proofUrls.length > 0 && <span className="text-[10px] text-lime-400">{proofUrls.length} وصل مرفوع ✓</span>}
+                          <p className="font-black text-[var(--gf-text)]">{order.product_price}$</p>
+                          {proofUrls.length > 0 && <span className="text-[10px] text-[var(--gf-brand)]">{proofUrls.length} وصل مرفوع ✓</span>}
                         </div>
-                        <Eye size={14} className="shrink-0 text-white/25" />
+                        <Eye size={14} className="shrink-0 text-[var(--gf-text)]/25" />
                       </button>
                     );
                   })}
@@ -626,13 +626,13 @@ export function AdminDashboard() {
                   const proofUrls = getProofUrls(selectedOrder);
                   const instaCode = selectedOrder.customer_notes?.match(/\[رمز الطلب: ([A-Z]+-[A-Z0-9]+)\]/)?.[1] ?? null;
                   return (
-                  <div className="rounded-3xl border border-white/8 bg-[#0d0b14] p-5 overflow-y-auto" style={{ maxHeight: 600 }}>
+                  <div className="rounded-3xl border border-white/8 bg-[var(--gf-surface)] p-5 overflow-y-auto" style={{ maxHeight: 600 }}>
                     <div className="mb-4 flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-mono text-xs text-white/35">#{selectedOrder.id.slice(0, 8).toUpperCase()}</p>
-                        <h3 className="font-black text-white">{selectedOrder.customer_name}</h3>
+                        <p className="font-mono text-xs text-[var(--gf-text)]/35">#{selectedOrder.id.slice(0, 8).toUpperCase()}</p>
+                        <h3 className="font-black text-[var(--gf-text)]">{selectedOrder.customer_name}</h3>
                       </div>
-                      <span className={`rounded-xl px-2.5 py-1 text-xs font-bold ${STATUS[selectedOrder.status]?.bg ?? "bg-white/8"} ${STATUS[selectedOrder.status]?.color ?? "text-white"}`}>
+                      <span className={`rounded-xl px-2.5 py-1 text-xs font-bold ${STATUS[selectedOrder.status]?.bg ?? "bg-[var(--gf-surface-2)]"} ${STATUS[selectedOrder.status]?.color ?? "text-[var(--gf-text)]"}`}>
                         {STATUS[selectedOrder.status]?.label ?? selectedOrder.status}
                       </span>
                     </div>
@@ -651,8 +651,8 @@ export function AdminDashboard() {
                         { l: "Telegram", v: selectedOrder.customer_telegram ?? "—" },
                       ].map(({ l, v }) => (
                         <div key={l} className="flex justify-between gap-2">
-                          <span className="text-white/45">{l}</span>
-                          <span className="font-semibold text-white text-left truncate max-w-[60%]">{v}</span>
+                          <span className="text-[var(--gf-text)]/45">{l}</span>
+                          <span className="font-semibold text-[var(--gf-text)] text-left truncate max-w-[60%]">{v}</span>
                         </div>
                       ))}
                       {instaCode && (
@@ -662,7 +662,7 @@ export function AdminDashboard() {
                         </div>
                       )}
                       {selectedOrder.customer_notes && (
-                        <div className="mt-1 rounded-xl bg-white/5 px-3 py-2 text-xs text-white/55">
+                        <div className="mt-1 rounded-xl bg-[var(--gf-surface-2)] px-3 py-2 text-xs text-[var(--gf-text)]/55">
                           {selectedOrder.customer_notes.replace(/\[رمز الطلب: [A-Z]+-[A-Z0-9]+\]\s*\|?\s*/, "").trim() || selectedOrder.customer_notes}
                         </div>
                       )}
@@ -671,7 +671,7 @@ export function AdminDashboard() {
                     {/* Proof links */}
                     {proofUrls.length > 0 && (
                       <div className="mb-4 grid gap-2">
-                        <p className="text-xs font-black text-white/45">إيصالات الدفع ({proofUrls.length})</p>
+                        <p className="text-xs font-black text-[var(--gf-text)]/45">إيصالات الدفع ({proofUrls.length})</p>
                         {proofUrls.map((url, index) => {
                           const fullUrl = buildProofUrl(url);
                           const type = getFileType(url);
@@ -698,18 +698,18 @@ export function AdminDashboard() {
                                 </div>
                               )}
                               <div className="p-3">
-                                <p className="mb-2 truncate text-[10px] text-white/35 font-mono">{filename}</p>
+                                <p className="mb-2 truncate text-[10px] text-[var(--gf-text)]/35 font-mono">{filename}</p>
                                 <div className="flex gap-2">
                                   <button
                                     onClick={() => setProofModal(fullUrl)}
-                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-lime-500/15 px-2 py-2 text-xs font-bold text-lime-400 hover:bg-lime-500/25 transition-colors"
+                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-lime-500/15 px-2 py-2 text-xs font-bold text-[var(--gf-brand)] hover:bg-lime-500/25 transition-colors"
                                   >
                                     <ZoomIn size={11} /> عرض
                                   </button>
                                   <a
                                     href={fullUrl}
                                     download={filename}
-                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/8 px-2 py-2 text-xs font-bold text-white/60 hover:bg-white/15 transition-colors"
+                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--gf-surface-2)] px-2 py-2 text-xs font-bold text-[var(--gf-text-muted)] hover:bg-white/15 transition-colors"
                                   >
                                     <Download size={11} /> تنزيل
                                   </a>
@@ -717,7 +717,7 @@ export function AdminDashboard() {
                                     href={fullUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center justify-center rounded-xl bg-white/5 px-2.5 py-2 text-white/40 hover:bg-white/10 transition-colors"
+                                    className="flex items-center justify-center rounded-xl bg-[var(--gf-surface-2)] px-2.5 py-2 text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] transition-colors"
                                     title="فتح في تبويب جديد"
                                   >
                                     <ExternalLink size={11} />
@@ -731,8 +731,8 @@ export function AdminDashboard() {
                     )}
 
                     {/* ── Tracking stage ────────────────────────────── */}
-                    <div className="mb-4 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
-                      <div className="mb-3 flex items-center gap-2 text-xs font-black text-purple-300">
+                    <div className="mb-4 rounded-2xl border border-purple-500/20 bg-[var(--gf-brand)]/5 p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-black text-[var(--gf-brand)]">
                         <Truck size={14} /> مرحلة تتبع الطلب
                       </div>
                       <div className="mb-2 flex gap-1.5">
@@ -746,7 +746,7 @@ export function AdminDashboard() {
                                 ? (n === 5 ? "rgba(200,230,0,0.3)" : "rgba(168,85,247,0.4)")
                                 : (selectedOrder.tracking_stage >= n ? "rgba(168,85,247,0.15)" : "rgba(255,255,255,0.05)"),
                               color: trackingStage === n
-                                ? (n === 5 ? "#c8e600" : "#c084fc")
+                                ? (n === 5 ? "var(--gf-brand)" : "#c084fc")
                                 : (selectedOrder.tracking_stage >= n ? "rgba(192,132,252,0.7)" : "rgba(255,255,255,0.25)"),
                               border: `1px solid ${trackingStage === n ? "rgba(168,85,247,0.5)" : "rgba(255,255,255,0.06)"}`,
                             }}
@@ -755,7 +755,7 @@ export function AdminDashboard() {
                           </button>
                         ))}
                       </div>
-                      <div className="mb-2 text-[10px] text-center text-white/35">
+                      <div className="mb-2 text-[10px] text-center text-[var(--gf-text)]/35">
                         الحالية: المرحلة {selectedOrder.tracking_stage} ← المختارة: {trackingStage}
                       </div>
                       <textarea
@@ -763,7 +763,7 @@ export function AdminDashboard() {
                         value={trackingNote}
                         onChange={(e) => setTrackingNote(e.target.value)}
                         placeholder="ملاحظة للمتابعة (اختياري)..."
-                        className="mb-2 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/25 focus:border-purple-500/40"
+                        className="mb-2 w-full resize-none rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-xs text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-[var(--gf-brand)]"
                       />
                       <button
                         onClick={() => updateTracking(selectedOrder.id)}
@@ -774,21 +774,21 @@ export function AdminDashboard() {
                         {updatingTracking ? "جارٍ التحديث..." : "تحديث مرحلة التتبع"}
                       </button>
                       {selectedOrder.tracking_notes && (
-                        <div className="mt-2 rounded-xl bg-white/4 px-3 py-2 text-[10px] text-white/45">
+                        <div className="mt-2 rounded-xl bg-white/4 px-3 py-2 text-[10px] text-[var(--gf-text)]/45">
                           📝 {selectedOrder.tracking_notes}
                         </div>
                       )}
                     </div>
 
                     {/* Admin notes */}
-                    <label className="mb-3 grid gap-1.5 text-xs font-semibold text-white/55">
+                    <label className="mb-3 grid gap-1.5 text-xs font-semibold text-[var(--gf-text)]/55">
                       ملاحظات الأدمن (تُرسل في الإيميل)
                       <textarea
                         rows={3}
                         value={statusNote}
                         onChange={(e) => setStatusNote(e.target.value)}
                         placeholder="مثال: تم تفعيل حسابك على البريد الإلكتروني..."
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-purple-500/50 resize-none"
+                        className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25 focus:border-purple-500/50 resize-none"
                       />
                     </label>
 
@@ -797,7 +797,7 @@ export function AdminDashboard() {
                       {[
                         { s: "processing", label: "قيد المعالجة", cls: "border-orange-500/30 text-orange-400 hover:bg-orange-500/10" },
                         { s: "confirmed",  label: "تأكيد الدفع",  cls: "border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" },
-                        { s: "activated",  label: "✓ تفعيل + إيميل", cls: "border-lime-500/40 text-lime-400 hover:bg-lime-500/15 font-black" },
+                        { s: "activated",  label: "✓ تفعيل + إيميل", cls: "border-lime-500/40 text-[var(--gf-brand)] hover:bg-lime-500/15 font-black" },
                         { s: "rejected",   label: "✗ رفض + إيميل",  cls: "border-red-500/30 text-red-400 hover:bg-red-500/10" },
                       ].map(({ s, label, cls }) => (
                         <button
@@ -812,14 +812,14 @@ export function AdminDashboard() {
                     </div>
 
                     {selectedOrder.admin_notes && (
-                      <div className="mt-3 rounded-xl bg-white/4 px-3 py-2 text-xs text-white/45">
+                      <div className="mt-3 rounded-xl bg-white/4 px-3 py-2 text-xs text-[var(--gf-text)]/45">
                         آخر ملاحظة: {selectedOrder.admin_notes}
                       </div>
                     )}
                   </div>
                   );
                 })() : (
-                  <div className="flex items-center justify-center rounded-3xl border border-white/8 bg-[#0d0b14] text-sm text-white/25" style={{ minHeight: 200 }}>
+                  <div className="flex items-center justify-center rounded-3xl border border-white/8 bg-[var(--gf-surface)] text-sm text-[var(--gf-text)]/25" style={{ minHeight: 200 }}>
                     اختر طلباً لعرض التفاصيل
                   </div>
                 )}
@@ -833,26 +833,26 @@ export function AdminDashboard() {
               {/* Modal Form */}
               {showForm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur">
-                  <div className="w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0d0b14] p-6" style={{ maxHeight: "90vh" }}>
+                  <div className="w-full max-w-lg overflow-y-auto rounded-3xl border border-[var(--gf-line)] bg-[var(--gf-surface)] p-6" style={{ maxHeight: "90vh" }}>
                     <div className="mb-5 flex items-center justify-between">
-                      <h3 className="font-black text-white">{editingId ? "تعديل الشريحة" : "إضافة شريحة جديدة"}</h3>
-                      <button onClick={() => setShowForm(false)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15"><X size={16} /></button>
+                      <h3 className="font-black text-[var(--gf-text)]">{editingId ? "تعديل الشريحة" : "إضافة شريحة جديدة"}</h3>
+                      <button onClick={() => setShowForm(false)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15"><X size={16} /></button>
                     </div>
                     <div className="grid gap-3 text-sm">
                       {/* Image */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         الصورة {!editingId && <span className="text-red-400">*</span>}
                         <div
                           onClick={() => imageInputRef.current?.click()}
                           className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/3 py-5 text-center hover:bg-white/6"
                         >
                           {bannerForm.imageFile ? (
-                            <span className="text-xs text-lime-400">{bannerForm.imageFile.name}</span>
+                            <span className="text-xs text-[var(--gf-brand)]">{bannerForm.imageFile.name}</span>
                           ) : (
                             <>
-                              <ImageIcon size={28} className="text-white/25" />
-                              <span className="text-xs text-white/40">انقر لاختيار صورة (WebP / JPG / PNG)</span>
-                              <span className="text-[10px] text-white/25">الأفضل: 1920×640 بكسل · أقل من 250KB</span>
+                              <ImageIcon size={28} className="text-[var(--gf-text)]/25" />
+                              <span className="text-xs text-[var(--gf-text-muted)]">انقر لاختيار صورة (WebP / JPG / PNG)</span>
+                              <span className="text-[10px] text-[var(--gf-text)]/25">الأفضل: 1920×640 بكسل · أقل من 250KB</span>
                             </>
                           )}
                         </div>
@@ -860,61 +860,61 @@ export function AdminDashboard() {
                           onChange={(e) => { const f = e.target.files?.[0]; if (f) setBannerForm((p) => ({ ...p, imageFile: f })); }} />
                       </label>
                       {/* Title */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         العنوان (اختياري)
                         <input value={bannerForm.title} onChange={(e) => setBannerForm((p) => ({ ...p, title: e.target.value }))}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="مثال: عروض الصيف 🔥" />
+                          className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" placeholder="مثال: عروض الصيف 🔥" />
                       </label>
                       {/* Description */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         وصف قصير (اختياري)
                         <input value={bannerForm.description} onChange={(e) => setBannerForm((p) => ({ ...p, description: e.target.value }))}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="وصف العرض أو المنتج" />
+                          className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" placeholder="وصف العرض أو المنتج" />
                       </label>
                       {/* Button text + link */}
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           نص الزر
                           <input value={bannerForm.button_text} onChange={(e) => setBannerForm((p) => ({ ...p, button_text: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                         </label>
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           رابط الوجهة
                           <input value={bannerForm.link_url} onChange={(e) => setBannerForm((p) => ({ ...p, link_url: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" placeholder="/checkout" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" placeholder="/checkout" />
                         </label>
                       </div>
                       {/* Alt + Order */}
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           نص Alt (للسيو)
                           <input value={bannerForm.alt_text} onChange={(e) => setBannerForm((p) => ({ ...p, alt_text: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                         </label>
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           الترتيب
                           <input type="number" value={bannerForm.sort_order} onChange={(e) => setBannerForm((p) => ({ ...p, sort_order: Number(e.target.value) }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                         </label>
                       </div>
                       {/* Dates */}
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           تاريخ البدء (اختياري)
                           <input type="datetime-local" value={bannerForm.start_date} onChange={(e) => setBannerForm((p) => ({ ...p, start_date: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                         </label>
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           تاريخ الانتهاء (اختياري)
                           <input type="datetime-local" value={bannerForm.end_date} onChange={(e) => setBannerForm((p) => ({ ...p, end_date: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-purple-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                         </label>
                       </div>
                       {/* Active toggle */}
                       <label className="flex cursor-pointer items-center gap-3">
-                        <span className="text-sm font-semibold text-white/55">مفعّلة</span>
+                        <span className="text-sm font-semibold text-[var(--gf-text)]/55">مفعّلة</span>
                         <button type="button" onClick={() => setBannerForm((p) => ({ ...p, is_active: !p.is_active }))}>
-                          {bannerForm.is_active ? <ToggleRight size={28} className="text-lime-400" /> : <ToggleLeft size={28} className="text-white/30" />}
+                          {bannerForm.is_active ? <ToggleRight size={28} className="text-[var(--gf-brand)]" /> : <ToggleLeft size={28} className="text-[var(--gf-text)]/30" />}
                         </button>
                       </label>
                       {/* Save */}
@@ -931,7 +931,7 @@ export function AdminDashboard() {
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-black">إدارة البانرات الإعلانية</h2>
                 <div className="flex gap-2">
-                  <button onClick={loadSlides} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                  <button onClick={loadSlides} className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-sm text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)]">
                     <RefreshCw size={14} className={slidesLoading ? "animate-spin" : ""} /> تحديث
                   </button>
                   <button onClick={openAddForm} className="neon-button flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black">
@@ -943,12 +943,12 @@ export function AdminDashboard() {
               {/* Stats */}
               <div className="mb-5 grid gap-3 sm:grid-cols-3">
                 {[
-                  { label: "إجمالي الشرائح", val: slides.length, color: "text-white" },
-                  { label: "مفعّلة", val: slides.filter((s) => s.is_active).length, color: "text-lime-400" },
-                  { label: "معطّلة", val: slides.filter((s) => !s.is_active).length, color: "text-white/40" },
+                  { label: "إجمالي الشرائح", val: slides.length, color: "text-[var(--gf-text)]" },
+                  { label: "مفعّلة", val: slides.filter((s) => s.is_active).length, color: "text-[var(--gf-brand)]" },
+                  { label: "معطّلة", val: slides.filter((s) => !s.is_active).length, color: "text-[var(--gf-text-muted)]" },
                 ].map(({ label, val, color }) => (
-                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
-                    <p className="text-xs text-white/40">{label}</p>
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[var(--gf-surface)] p-4">
+                    <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
                     <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
                   </div>
                 ))}
@@ -957,27 +957,27 @@ export function AdminDashboard() {
               {/* Slides list */}
               <div className="grid gap-4">
                 {slides.length === 0 && !slidesLoading && (
-                  <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                  <div className="rounded-3xl border border-dashed border-[var(--gf-line)] py-16 text-center text-sm text-[var(--gf-text)]/30">
                     لا توجد شرائح — اضغط "إضافة بانر" للبدء
                   </div>
                 )}
                 {slides.map((slide, idx) => (
-                  <div key={slide.id} className={`flex gap-4 rounded-3xl border p-4 ${slide.is_active ? "border-white/10 bg-white/3" : "border-white/5 bg-white/1.5 opacity-60"}`}>
+                  <div key={slide.id} className={`flex gap-4 rounded-3xl border p-4 ${slide.is_active ? "border-[var(--gf-line)] bg-white/3" : "border-[var(--gf-line)] bg-white/1.5 opacity-60"}`}>
                     {/* Thumbnail */}
-                    <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-2xl bg-white/5">
+                    <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-2xl bg-[var(--gf-surface-2)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={`${API_URL}${slide.image_url}`} alt={slide.alt_text ?? ""} className="h-full w-full object-cover" loading="lazy" />
                     </div>
                     {/* Info */}
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <div className="flex items-start gap-2">
-                        <span className="flex-1 truncate font-bold text-white">{slide.title || <span className="text-white/30 italic">بدون عنوان</span>}</span>
-                        <span className={`shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-bold ${slide.is_active ? "bg-lime-500/15 text-lime-400" : "bg-white/8 text-white/40"}`}>
+                        <span className="flex-1 truncate font-bold text-[var(--gf-text)]">{slide.title || <span className="text-[var(--gf-text)]/30 italic">بدون عنوان</span>}</span>
+                        <span className={`shrink-0 rounded-xl px-2 py-0.5 text-[10px] font-bold ${slide.is_active ? "bg-lime-500/15 text-[var(--gf-brand)]" : "bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)]"}`}>
                           {slide.is_active ? "مفعّل" : "معطّل"}
                         </span>
                       </div>
-                      {slide.description && <p className="truncate text-xs text-white/45">{slide.description}</p>}
-                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-white/30">
+                      {slide.description && <p className="truncate text-xs text-[var(--gf-text)]/45">{slide.description}</p>}
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-[var(--gf-text)]/30">
                         <span>زر: {slide.button_text}</span>
                         <span>رابط: {slide.link_url}</span>
                         <span>ترتيب: {slide.sort_order}</span>
@@ -985,12 +985,12 @@ export function AdminDashboard() {
                     </div>
                     {/* Actions */}
                     <div className="flex shrink-0 flex-col gap-1.5">
-                      <button onClick={() => openEditForm(slide)} className="grid size-8 place-items-center rounded-xl bg-purple-500/15 text-purple-400 hover:bg-purple-500/25" title="تعديل"><Pencil size={13} /></button>
-                      <button onClick={() => toggleBanner(slide.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15" title="تفعيل/تعطيل">
-                        {slide.is_active ? <ToggleRight size={13} className="text-lime-400" /> : <ToggleLeft size={13} />}
+                      <button onClick={() => openEditForm(slide)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-brand)]/15 text-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/25" title="تعديل"><Pencil size={13} /></button>
+                      <button onClick={() => toggleBanner(slide.id)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15" title="تفعيل/تعطيل">
+                        {slide.is_active ? <ToggleRight size={13} className="text-[var(--gf-brand)]" /> : <ToggleLeft size={13} />}
                       </button>
-                      <button onClick={() => moveSlide(slide.id, "up")} disabled={idx === 0} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 disabled:opacity-25" title="أعلى"><ArrowUp size={13} /></button>
-                      <button onClick={() => moveSlide(slide.id, "down")} disabled={idx === slides.length - 1} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 disabled:opacity-25" title="أسفل"><ArrowDown size={13} /></button>
+                      <button onClick={() => moveSlide(slide.id, "up")} disabled={idx === 0} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15 disabled:opacity-25" title="أعلى"><ArrowUp size={13} /></button>
+                      <button onClick={() => moveSlide(slide.id, "down")} disabled={idx === slides.length - 1} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15 disabled:opacity-25" title="أسفل"><ArrowDown size={13} /></button>
                       <button onClick={() => deleteBanner(slide.id)} className="grid size-8 place-items-center rounded-xl bg-red-500/15 text-red-400 hover:bg-red-500/25" title="حذف"><Trash2 size={13} /></button>
                     </div>
                   </div>
@@ -1005,33 +1005,33 @@ export function AdminDashboard() {
               <h2 className="mb-6 text-2xl font-black">الشات المباشر</h2>
               <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
                 <div className="flex flex-col gap-2">
-                  <button onClick={loadSessions} className="mb-1 rounded-xl bg-white/5 px-3 py-1.5 text-xs text-white/50 hover:bg-white/8 text-right">
+                  <button onClick={loadSessions} className="mb-1 rounded-xl bg-[var(--gf-surface-2)] px-3 py-1.5 text-xs text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] text-right">
                     تحديث ↻
                   </button>
-                  {sessions.length === 0 && <div className="rounded-2xl border border-white/8 p-5 text-center text-sm text-white/40">لا توجد محادثات</div>}
+                  {sessions.length === 0 && <div className="rounded-2xl border border-white/8 p-5 text-center text-sm text-[var(--gf-text-muted)]">لا توجد محادثات</div>}
                   {sessions.map((s) => (
                     <button key={s.id} onClick={() => openSession(s)}
-                      className={`flex flex-col gap-1 rounded-2xl border p-4 text-right transition-colors ${activeSession?.id === s.id ? "border-purple-500/40 bg-purple-600/10" : "border-white/8 bg-white/3 hover:bg-white/6"}`}
+                      className={`flex flex-col gap-1 rounded-2xl border p-4 text-right transition-colors ${activeSession?.id === s.id ? "border-[var(--gf-brand)] bg-[var(--gf-brand)]/10" : "border-white/8 bg-white/3 hover:bg-white/6"}`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-bold text-white">{s.name}</span>
-                        {s.is_resolved ? <CheckCircle size={13} className="shrink-0 text-lime-400" /> : <span className="size-2 shrink-0 rounded-full bg-purple-400" />}
+                        <span className="truncate text-sm font-bold text-[var(--gf-text)]">{s.name}</span>
+                        {s.is_resolved ? <CheckCircle size={13} className="shrink-0 text-[var(--gf-brand)]" /> : <span className="size-2 shrink-0 rounded-full bg-purple-400" />}
                       </div>
-                      <span className="truncate text-xs text-white/40">{s.email}</span>
-                      {s.last_message && <span className="truncate text-xs text-white/55">{s.last_message}</span>}
+                      <span className="truncate text-xs text-[var(--gf-text-muted)]">{s.email}</span>
+                      {s.last_message && <span className="truncate text-xs text-[var(--gf-text)]/55">{s.last_message}</span>}
                     </button>
                   ))}
                 </div>
 
                 {activeSession ? (
-                  <div className="flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-[#0d0b14]">
+                  <div className="flex flex-col overflow-hidden rounded-3xl border border-white/8 bg-[var(--gf-surface)]">
                     <div className="flex items-center justify-between gap-3 border-b border-white/8 px-5 py-4">
                       <div>
                         <h3 className="font-black">{activeSession.name}</h3>
-                        <p className="text-xs text-white/45">{activeSession.email} · {activeSession.whatsapp}</p>
+                        <p className="text-xs text-[var(--gf-text)]/45">{activeSession.email} · {activeSession.whatsapp}</p>
                       </div>
                       {!activeSession.is_resolved && (
-                        <button onClick={() => resolveSession(activeSession.id)} className="flex items-center gap-1.5 rounded-xl bg-lime-500/15 px-3 py-1.5 text-xs font-bold text-lime-400 hover:bg-lime-500/25">
+                        <button onClick={() => resolveSession(activeSession.id)} className="flex items-center gap-1.5 rounded-xl bg-lime-500/15 px-3 py-1.5 text-xs font-bold text-[var(--gf-brand)] hover:bg-lime-500/25">
                           <CheckCircle size={13} /> إغلاق
                         </button>
                       )}
@@ -1039,7 +1039,7 @@ export function AdminDashboard() {
                     <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-5" style={{ maxHeight: 380 }}>
                       {messages.map((m) => (
                         <div key={m.id} className={`flex ${m.is_admin ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm leading-6 ${m.is_admin ? "rounded-tl-sm bg-purple-600/80" : "rounded-tr-sm bg-white/8"}`}>
+                          <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm leading-6 ${m.is_admin ? "rounded-tl-sm bg-[var(--gf-brand)]/80" : "rounded-tr-sm bg-[var(--gf-surface-2)]"}`}>
                             {m.content}
                           </div>
                         </div>
@@ -1050,17 +1050,17 @@ export function AdminDashboard() {
                       <div className="flex gap-2 border-t border-white/8 p-4">
                         <input value={reply} onChange={(e) => setReply(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendReply(); } }}
-                          className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/35 focus:border-purple-500/50"
+                          className="min-w-0 flex-1 rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-4 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/35 focus:border-purple-500/50"
                           placeholder="اكتب ردك..." autoFocus
                         />
-                        <button onClick={() => void sendReply()} disabled={!reply.trim()} className="grid size-10 shrink-0 place-items-center rounded-2xl bg-purple-600 text-white disabled:opacity-40">
+                        <button onClick={() => void sendReply()} disabled={!reply.trim()} className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[var(--gf-brand)] text-white disabled:opacity-40">
                           <Send size={16} />
                         </button>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center rounded-3xl border border-white/8 text-sm text-white/25" style={{ minHeight: 300 }}>
+                  <div className="flex items-center justify-center rounded-3xl border border-white/8 text-sm text-[var(--gf-text)]/25" style={{ minHeight: 300 }}>
                     اختر محادثة للبدء
                   </div>
                 )}
@@ -1070,7 +1070,7 @@ export function AdminDashboard() {
 
           {nav === "products" && <ProductsAdmin />}
           {nav === "settings" && (
-            <div className="py-12 text-center text-white/30">قسم الإعدادات — قريباً</div>
+            <div className="py-12 text-center text-[var(--gf-text)]/30">قسم الإعدادات — قريباً</div>
           )}
 
           {/* ── BLOG ─────────────────────────────────────────────────── */}
@@ -1079,71 +1079,71 @@ export function AdminDashboard() {
               {/* Blog form modal */}
               {showBlogForm && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur">
-                  <div className="my-8 w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0d0b14] p-6">
+                  <div className="my-8 w-full max-w-2xl rounded-3xl border border-[var(--gf-line)] bg-[var(--gf-surface)] p-6">
                     <div className="mb-5 flex items-center justify-between">
-                      <h3 className="font-black text-white">{editingBlogId ? "تعديل المقال" : "مقال جديد"}</h3>
-                      <button onClick={() => setShowBlogForm(false)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15"><X size={16} /></button>
+                      <h3 className="font-black text-[var(--gf-text)]">{editingBlogId ? "تعديل المقال" : "مقال جديد"}</h3>
+                      <button onClick={() => setShowBlogForm(false)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15"><X size={16} /></button>
                     </div>
                     <div className="grid gap-3 text-sm">
                       {/* Title */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         العنوان <span className="text-red-400">*</span>
                         <input value={blogForm.title} onChange={e => {
                           const t = e.target.value;
                           setBlogForm(p => ({ ...p, title: t, slug: p.slug || t.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 80) }));
                         }}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="عنوان المقال..." />
+                          className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-lime-500/50" placeholder="عنوان المقال..." />
                       </label>
                       {/* Slug */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         الـ Slug (رابط المقال)
                         <input value={blogForm.slug} onChange={e => setBlogForm(p => ({ ...p, slug: e.target.value }))}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-sm text-white outline-none focus:border-lime-500/50" placeholder="auto-generated-if-empty" />
+                          className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 font-mono text-sm text-[var(--gf-text)] outline-none focus:border-lime-500/50" placeholder="auto-generated-if-empty" />
                       </label>
                       {/* Category + Author */}
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           التصنيف
                           <select value={blogForm.category} onChange={e => setBlogForm(p => ({ ...p, category: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-[#0d0b14] px-3 py-2.5 text-white outline-none focus:border-lime-500/50">
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-lime-500/50">
                             {BLOG_CATS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                           </select>
                         </label>
-                        <label className="grid gap-1.5 font-semibold text-white/55">
+                        <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                           الكاتب
                           <input value={blogForm.author} onChange={e => setBlogForm(p => ({ ...p, author: e.target.value }))}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" />
+                            className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-lime-500/50" />
                         </label>
                       </div>
                       {/* Excerpt */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         المقتطف (وصف قصير)
                         <textarea rows={2} value={blogForm.excerpt} onChange={e => setBlogForm(p => ({ ...p, excerpt: e.target.value }))}
-                          className="resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="وصف مختصر للمقال..." />
+                          className="resize-none rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-lime-500/50" placeholder="وصف مختصر للمقال..." />
                       </label>
                       {/* Content */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         محتوى المقال (HTML مسموح)
                         <textarea rows={12} value={blogForm.content} onChange={e => setBlogForm(p => ({ ...p, content: e.target.value }))}
-                          className="resize-y rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 font-mono text-xs text-white outline-none focus:border-lime-500/50" placeholder="<h2>عنوان...</h2><p>محتوى المقال هنا...</p>" />
+                          className="resize-y rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 font-mono text-xs text-[var(--gf-text)] outline-none focus:border-lime-500/50" placeholder="<h2>عنوان...</h2><p>محتوى المقال هنا...</p>" />
                       </label>
                       {/* Tags */}
-                      <label className="grid gap-1.5 font-semibold text-white/55">
+                      <label className="grid gap-1.5 font-semibold text-[var(--gf-text)]/55">
                         الوسوم (مفصولة بفاصلة)
                         <input value={blogForm.tags} onChange={e => setBlogForm(p => ({ ...p, tags: e.target.value }))}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white outline-none focus:border-lime-500/50" placeholder="ذكاء اصطناعي, Claude, GPT" />
+                          className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-[var(--gf-text)] outline-none focus:border-lime-500/50" placeholder="ذكاء اصطناعي, Claude, GPT" />
                       </label>
                       {/* Toggles */}
                       <div className="flex gap-4">
-                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-white/55">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[var(--gf-text)]/55">
                           <button type="button" onClick={() => setBlogForm(p => ({ ...p, published: !p.published }))}>
-                            {blogForm.published ? <ToggleRight size={26} className="text-lime-400" /> : <ToggleLeft size={26} className="text-white/30" />}
+                            {blogForm.published ? <ToggleRight size={26} className="text-[var(--gf-brand)]" /> : <ToggleLeft size={26} className="text-[var(--gf-text)]/30" />}
                           </button>
                           منشور
                         </label>
-                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-white/55">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[var(--gf-text)]/55">
                           <button type="button" onClick={() => setBlogForm(p => ({ ...p, featured: !p.featured }))}>
-                            {blogForm.featured ? <Star size={20} className="text-yellow-400 fill-yellow-400" /> : <Star size={20} className="text-white/25" />}
+                            {blogForm.featured ? <Star size={20} className="text-yellow-400 fill-yellow-400" /> : <Star size={20} className="text-[var(--gf-text)]/25" />}
                           </button>
                           مميز
                         </label>
@@ -1162,10 +1162,10 @@ export function AdminDashboard() {
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-black">إدارة المدونة</h2>
                 <div className="flex gap-2">
-                  <button onClick={loadBlogPosts} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                  <button onClick={loadBlogPosts} className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-sm text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)]">
                     <RefreshCw size={14} className={blogLoading ? "animate-spin" : ""} /> تحديث
                   </button>
-                  <a href="/blog" target="_blank" className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                  <a href="/blog" target="_blank" className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-sm text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)]">
                     <Eye size={14} /> معاينة
                   </a>
                   <button onClick={openBlogAdd} className="neon-button flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black">
@@ -1177,13 +1177,13 @@ export function AdminDashboard() {
               {/* Stats */}
               <div className="mb-5 grid gap-3 sm:grid-cols-4">
                 {[
-                  { label: "إجمالي المقالات", val: blogPosts.length, color: "text-white" },
-                  { label: "منشورة", val: blogPosts.filter(p => p.published).length, color: "text-lime-400" },
+                  { label: "إجمالي المقالات", val: blogPosts.length, color: "text-[var(--gf-text)]" },
+                  { label: "منشورة", val: blogPosts.filter(p => p.published).length, color: "text-[var(--gf-brand)]" },
                   { label: "مسودة", val: blogPosts.filter(p => !p.published).length, color: "text-yellow-400" },
-                  { label: "مميزة", val: blogPosts.filter(p => p.featured).length, color: "text-purple-400" },
+                  { label: "مميزة", val: blogPosts.filter(p => p.featured).length, color: "text-[var(--gf-brand)]" },
                 ].map(({ label, val, color }) => (
-                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
-                    <p className="text-xs text-white/40">{label}</p>
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[var(--gf-surface)] p-4">
+                    <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
                     <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
                   </div>
                 ))}
@@ -1191,7 +1191,7 @@ export function AdminDashboard() {
 
               {/* Posts list */}
               {blogPosts.length === 0 && !blogLoading && (
-                <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                <div className="rounded-3xl border border-dashed border-[var(--gf-line)] py-16 text-center text-sm text-[var(--gf-text)]/30">
                   لا توجد مقالات — اضغط "مقال جديد" للبدء
                 </div>
               )}
@@ -1202,7 +1202,7 @@ export function AdminDashboard() {
                     <div key={post.id} className="flex flex-wrap items-start gap-4 rounded-3xl border border-white/8 bg-white/3 p-4">
                       {/* Status badges */}
                       <div className="flex flex-col gap-1.5">
-                        <span className={`rounded-xl px-2 py-1 text-[10px] font-black ${post.published ? "bg-lime-500/15 text-lime-400" : "bg-yellow-500/15 text-yellow-400"}`}>
+                        <span className={`rounded-xl px-2 py-1 text-[10px] font-black ${post.published ? "bg-lime-500/15 text-[var(--gf-brand)]" : "bg-yellow-500/15 text-yellow-400"}`}>
                           {post.published ? "● منشور" : "○ مسودة"}
                         </span>
                         {post.featured && <span className="rounded-xl bg-yellow-400/15 px-2 py-1 text-[10px] font-black text-yellow-400">★ مميز</span>}
@@ -1210,27 +1210,27 @@ export function AdminDashboard() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-black text-white">{post.title}</p>
-                          {catConf && <span className="rounded-lg bg-white/8 px-2 py-0.5 text-[10px] text-white/50">{catConf.label}</span>}
+                          <p className="font-black text-[var(--gf-text)]">{post.title}</p>
+                          {catConf && <span className="rounded-lg bg-[var(--gf-surface-2)] px-2 py-0.5 text-[10px] text-[var(--gf-text-muted)]">{catConf.label}</span>}
                         </div>
-                        <p className="mt-1 truncate text-xs text-white/40">{post.excerpt}</p>
-                        <div className="mt-1.5 flex flex-wrap gap-x-4 text-[10px] text-white/30">
+                        <p className="mt-1 truncate text-xs text-[var(--gf-text-muted)]">{post.excerpt}</p>
+                        <div className="mt-1.5 flex flex-wrap gap-x-4 text-[10px] text-[var(--gf-text)]/30">
                           <span>{post.author}</span>
                           <span>{new Date(post.created_at).toLocaleDateString("ar")}</span>
                           <span className="flex items-center gap-0.5"><Eye size={10} /> {post.views}</span>
-                          <span className="font-mono text-white/20">/blog/{post.slug}</span>
+                          <span className="font-mono text-[var(--gf-text)]/20">/blog/{post.slug}</span>
                         </div>
                       </div>
                       {/* Actions */}
                       <div className="flex shrink-0 gap-2">
-                        <button onClick={() => toggleBlogFeatured(post.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 hover:bg-yellow-500/15" title="تمييز">
-                          <Star size={13} className={post.featured ? "fill-yellow-400 text-yellow-400" : "text-white/40"} />
+                        <button onClick={() => toggleBlogFeatured(post.id)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] hover:bg-yellow-500/15" title="تمييز">
+                          <Star size={13} className={post.featured ? "fill-yellow-400 text-yellow-400" : "text-[var(--gf-text-muted)]"} />
                         </button>
-                        <button onClick={() => openBlogEdit(post)} className="grid size-8 place-items-center rounded-xl bg-purple-500/15 text-purple-400 hover:bg-purple-500/25" title="تعديل">
+                        <button onClick={() => openBlogEdit(post)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-brand)]/15 text-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/25" title="تعديل">
                           <Pencil size={13} />
                         </button>
-                        <button onClick={() => toggleBlogPublish(post.id)} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15" title={post.published ? "إلغاء النشر" : "نشر"}>
-                          {post.published ? <ToggleRight size={13} className="text-lime-400" /> : <ToggleLeft size={13} />}
+                        <button onClick={() => toggleBlogPublish(post.id)} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15" title={post.published ? "إلغاء النشر" : "نشر"}>
+                          {post.published ? <ToggleRight size={13} className="text-[var(--gf-brand)]" /> : <ToggleLeft size={13} />}
                         </button>
                         <button onClick={() => deleteBlogPost(post.id)} className="grid size-8 place-items-center rounded-xl bg-red-500/12 text-red-400 hover:bg-red-500/22" title="حذف">
                           <Trash2 size={13} />
@@ -1248,7 +1248,7 @@ export function AdminDashboard() {
             <>
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-black">أكواد الخصم</h2>
-                <button onClick={loadDiscounts} className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white">
+                <button onClick={loadDiscounts} className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-sm text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)]">
                   <RefreshCw size={14} className={discountsLoading ? "animate-spin" : ""} /> تحديث
                 </button>
               </div>
@@ -1256,13 +1256,13 @@ export function AdminDashboard() {
               {/* Stats */}
               <div className="mb-5 grid gap-3 sm:grid-cols-4">
                 {[
-                  { label: "إجمالي الأكواد", val: discounts.length, color: "text-white" },
-                  { label: "مفعّلة", val: discounts.filter((d) => d.is_active).length, color: "text-lime-400" },
+                  { label: "إجمالي الأكواد", val: discounts.length, color: "text-[var(--gf-text)]" },
+                  { label: "مفعّلة", val: discounts.filter((d) => d.is_active).length, color: "text-[var(--gf-brand)]" },
                   { label: "مستخدمة كلياً", val: discounts.filter((d) => d.used_count >= d.max_uses).length, color: "text-orange-400" },
-                  { label: "مرتبطة بطلبات", val: discounts.filter((d) => d.order_id).length, color: "text-purple-400" },
+                  { label: "مرتبطة بطلبات", val: discounts.filter((d) => d.order_id).length, color: "text-[var(--gf-brand)]" },
                 ].map(({ label, val, color }) => (
-                  <div key={label} className="rounded-2xl border border-white/8 bg-[#0d0b14] p-4">
-                    <p className="text-xs text-white/40">{label}</p>
+                  <div key={label} className="rounded-2xl border border-white/8 bg-[var(--gf-surface)] p-4">
+                    <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
                     <p className={`mt-1 text-2xl font-black ${color}`}>{val}</p>
                   </div>
                 ))}
@@ -1270,71 +1270,71 @@ export function AdminDashboard() {
 
               {/* Create form */}
               <div className="mb-6 rounded-3xl border border-lime-500/15 bg-lime-500/4 p-5">
-                <div className="mb-4 flex items-center gap-2 text-sm font-black text-lime-400">
+                <div className="mb-4 flex items-center gap-2 text-sm font-black text-[var(--gf-brand)]">
                   <Plus size={16} /> إنشاء كود خصم جديد
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     كود الحصول على الخصم (للعميل)
                     <input
                       value={dcForm.redemption_code}
                       onChange={(e) => setDcForm((p) => ({ ...p, redemption_code: e.target.value.toUpperCase() }))}
                       placeholder="WELCOME2026"
-                      className="rounded-xl border border-lime-500/30 bg-lime-500/5 px-3 py-2 text-sm text-lime-300 outline-none placeholder:text-white/20 focus:border-lime-500/60"
+                      className="rounded-xl border border-lime-500/30 bg-lime-500/5 px-3 py-2 text-sm text-[var(--gf-brand)] outline-none placeholder:text-[var(--gf-text)]/20 focus:border-lime-500/60"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     رمز الخصم الفعلي (فارغ = توليد تلقائي)
                     <input
                       value={dcForm.code}
                       onChange={(e) => setDcForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
                       placeholder="GF-SUMMER35"
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/40"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/20 focus:border-lime-500/40"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     نسبة الخصم %
                     <input
                       type="number" min={1} max={100}
                       value={dcForm.percent}
                       onChange={(e) => setDcForm((p) => ({ ...p, percent: Number(e.target.value) }))}
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none focus:border-lime-500/40"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     الحد الأقصى للاستخدام
                     <input
                       type="number" min={1}
                       value={dcForm.max_uses}
                       onChange={(e) => setDcForm((p) => ({ ...p, max_uses: Number(e.target.value) }))}
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none focus:border-lime-500/40"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     رقم الطلب (اختياري)
                     <input
                       value={dcForm.order_id}
                       onChange={(e) => setDcForm((p) => ({ ...p, order_id: e.target.value }))}
                       placeholder="UUID الطلب"
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none placeholder:text-white/20 focus:border-lime-500/40 font-mono"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-xs text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/20 focus:border-lime-500/40 font-mono"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     تاريخ الانتهاء (اختياري)
                     <input
                       type="datetime-local"
                       value={dcForm.expires_at}
                       onChange={(e) => setDcForm((p) => ({ ...p, expires_at: e.target.value }))}
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-lime-500/40"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none focus:border-lime-500/40"
                     />
                   </label>
-                  <label className="grid gap-1 text-xs font-semibold text-white/50">
+                  <label className="grid gap-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                     وصف (اختياري)
                     <input
                       value={dcForm.description}
                       onChange={(e) => setDcForm((p) => ({ ...p, description: e.target.value }))}
                       placeholder="مثال: هدية المرحلة 5"
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-500/40"
+                      className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/20 focus:border-lime-500/40"
                     />
                   </label>
                 </div>
@@ -1349,7 +1349,7 @@ export function AdminDashboard() {
 
               {/* List */}
               {discounts.length === 0 && !discountsLoading && (
-                <div className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-sm text-white/30">
+                <div className="rounded-3xl border border-dashed border-[var(--gf-line)] py-16 text-center text-sm text-[var(--gf-text)]/30">
                   لا توجد أكواد — أنشئ أول كود الآن
                 </div>
               )}
@@ -1357,7 +1357,7 @@ export function AdminDashboard() {
                 {discounts.map((dc) => (
                   <div
                     key={dc.id}
-                    className={`flex flex-wrap items-center gap-4 rounded-3xl border p-4 ${dc.is_active ? "border-white/10 bg-white/3" : "border-white/5 bg-white/1 opacity-50"}`}
+                    className={`flex flex-wrap items-center gap-4 rounded-3xl border p-4 ${dc.is_active ? "border-[var(--gf-line)] bg-white/3" : "border-[var(--gf-line)] bg-white/1 opacity-50"}`}
                   >
                     {/* Code badge */}
                     <div className="flex items-center gap-2">
@@ -1368,16 +1368,16 @@ export function AdminDashboard() {
                           border: `1px solid ${dc.is_active ? "rgba(200,230,0,0.25)" : "rgba(255,255,255,0.08)"}`,
                         }}
                       >
-                        <Tag size={13} className={dc.is_active ? "text-lime-400" : "text-white/30"} />
-                        <span className={`font-mono text-sm font-black tracking-widest ${dc.is_active ? "text-lime-400" : "text-white/40"}`}>
+                        <Tag size={13} className={dc.is_active ? "text-[var(--gf-brand)]" : "text-[var(--gf-text)]/30"} />
+                        <span className={`font-mono text-sm font-black tracking-widest ${dc.is_active ? "text-[var(--gf-brand)]" : "text-[var(--gf-text-muted)]"}`}>
                           {dc.code}
                         </span>
                       </div>
                       <button
                         onClick={() => copyCode(dc.id, dc.code)}
-                        className="grid size-8 place-items-center rounded-xl bg-white/6 text-white/40 hover:bg-white/12"
+                        className="grid size-8 place-items-center rounded-xl bg-white/6 text-[var(--gf-text-muted)] hover:bg-white/12"
                       >
-                        {copiedId === dc.id ? <CheckCircle size={13} className="text-lime-400" /> : <Copy size={13} />}
+                        {copiedId === dc.id ? <CheckCircle size={13} className="text-[var(--gf-brand)]" /> : <Copy size={13} />}
                       </button>
                     </div>
 
@@ -1385,19 +1385,19 @@ export function AdminDashboard() {
                     <div className="flex-1 min-w-0">
                       {dc.redemption_code && (
                         <div className="mb-1 flex items-center gap-1.5">
-                          <span className="text-[10px] text-white/35">كود الحصول:</span>
-                          <span className="font-mono text-xs font-bold text-lime-400/80">{dc.redemption_code}</span>
+                          <span className="text-[10px] text-[var(--gf-text)]/35">كود الحصول:</span>
+                          <span className="font-mono text-xs font-bold text-[var(--gf-brand)]/80">{dc.redemption_code}</span>
                         </div>
                       )}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                        <span className="font-black text-white"><Percent size={11} className="inline mb-0.5" /> {dc.percent}%</span>
-                        <span className="text-white/40">الاستخدام: {dc.used_count}/{dc.max_uses}</span>
-                        {dc.order_id && <span className="font-mono text-white/35 text-[10px] truncate max-w-[120px]">📦 {dc.order_id.slice(0, 12)}...</span>}
-                        {dc.expires_at && <span className="text-white/35">ينتهي: {new Date(dc.expires_at).toLocaleDateString("ar-DZ")}</span>}
-                        {dc.description && <span className="text-white/50 italic">{dc.description}</span>}
+                        <span className="font-black text-[var(--gf-text)]"><Percent size={11} className="inline mb-0.5" /> {dc.percent}%</span>
+                        <span className="text-[var(--gf-text-muted)]">الاستخدام: {dc.used_count}/{dc.max_uses}</span>
+                        {dc.order_id && <span className="font-mono text-[var(--gf-text)]/35 text-[10px] truncate max-w-[120px]">📦 {dc.order_id.slice(0, 12)}...</span>}
+                        {dc.expires_at && <span className="text-[var(--gf-text)]/35">ينتهي: {new Date(dc.expires_at).toLocaleDateString("ar-DZ")}</span>}
+                        {dc.description && <span className="text-[var(--gf-text-muted)] italic">{dc.description}</span>}
                       </div>
                       <div className="mt-0.5 flex items-center gap-3">
-                        <span className={`text-[10px] font-bold ${dc.is_active ? "text-lime-400" : "text-white/30"}`}>
+                        <span className={`text-[10px] font-bold ${dc.is_active ? "text-[var(--gf-brand)]" : "text-[var(--gf-text)]/30"}`}>
                           {dc.is_active ? "● مفعّل" : "○ معطّل"}
                         </span>
                         {dc.used_count >= dc.max_uses && <span className="text-[10px] text-orange-400">✦ استُنفد</span>}
@@ -1408,9 +1408,9 @@ export function AdminDashboard() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => toggleDiscount(dc.id)}
-                        className="rounded-xl bg-white/8 px-3 py-1.5 text-xs text-white/60 hover:bg-white/15 hover:text-white"
+                        className="rounded-xl bg-[var(--gf-surface-2)] px-3 py-1.5 text-xs text-[var(--gf-text-muted)] hover:bg-white/15 hover:text-[var(--gf-text)]"
                       >
-                        {dc.is_active ? <ToggleRight size={15} className="text-lime-400" /> : <ToggleLeft size={15} />}
+                        {dc.is_active ? <ToggleRight size={15} className="text-[var(--gf-brand)]" /> : <ToggleLeft size={15} />}
                       </button>
                       <button
                         onClick={() => deleteDiscount(dc.id)}
@@ -1439,12 +1439,12 @@ export function AdminDashboard() {
           >
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-3">
-              <span className="truncate text-xs font-mono text-white/40">{getFilename(proofModal)}</span>
+              <span className="truncate text-xs font-mono text-[var(--gf-text-muted)]">{getFilename(proofModal)}</span>
               <div className="flex shrink-0 items-center gap-2">
                 <a
                   href={proofModal}
                   download={getFilename(proofModal)}
-                  className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 transition-colors"
+                  className="flex items-center gap-2 rounded-xl bg-[var(--gf-surface-2)] px-4 py-2 text-xs font-bold text-[var(--gf-text)] hover:bg-white/20 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Download size={13} /> تنزيل
@@ -1453,14 +1453,14 @@ export function AdminDashboard() {
                   href={proofModal}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-xl bg-lime-500/20 px-4 py-2 text-xs font-bold text-lime-400 hover:bg-lime-500/30 transition-colors"
+                  className="flex items-center gap-2 rounded-xl bg-lime-500/20 px-4 py-2 text-xs font-bold text-[var(--gf-brand)] hover:bg-lime-500/30 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink size={13} /> فتح في تبويب
                 </a>
                 <button
                   onClick={() => setProofModal(null)}
-                  className="grid size-9 place-items-center rounded-xl bg-white/10 text-white hover:bg-red-500/30 hover:text-red-400 transition-colors"
+                  className="grid size-9 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text)] hover:bg-red-500/30 hover:text-red-400 transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -1482,14 +1482,14 @@ export function AdminDashboard() {
                   className="h-[78vh] w-full rounded-2xl"
                 />
               ) : (
-                <div className="flex flex-col items-center gap-4 p-16 text-white/40">
+                <div className="flex flex-col items-center gap-4 p-16 text-[var(--gf-text-muted)]">
                   <ImageIcon size={48} />
                   <p className="text-sm">لا يمكن معاينة هذا الملف مباشرة.</p>
                   <a
                     href={proofModal}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-bold text-lime-400 underline"
+                    className="text-sm font-bold text-[var(--gf-brand)] underline"
                   >
                     افتح الملف في تبويب جديد
                   </a>
@@ -1532,7 +1532,7 @@ const EMPTY_PROD: ProdForm = {
   name: "", slug: "", subtitle: "", logo: "📦",
   description: "", full_description: "", usage_details: "",
   requirements: "", benefits: "", price: "", old_price: "",
-  discount: "", buyers: "", accent_color: "#a855f7",
+  discount: "", buyers: "", accent_color: "var(--gf-brand)",
   logo_color: "from-purple-500 to-purple-900",
   category: "AI", badge: "", rating: "4.9", reviews_count: "0",
   partners_json: "", features_json: "", specs_json: "", faq_json: "",
@@ -1690,10 +1690,10 @@ function ProductsAdmin() {
       {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur">
-          <div className="my-8 w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0d0b14] p-6">
+          <div className="my-8 w-full max-w-2xl rounded-3xl border border-[var(--gf-line)] bg-[var(--gf-surface)] p-6">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-black text-white">{creating ? "منتج جديد" : "تعديل المنتج"}</h2>
-              <button onClick={closeModal} className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/60 hover:bg-white/15">
+              <h2 className="text-xl font-black text-[var(--gf-text)]">{creating ? "منتج جديد" : "تعديل المنتج"}</h2>
+              <button onClick={closeModal} className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15">
                 <X size={16} />
               </button>
             </div>
@@ -1702,70 +1702,70 @@ function ProductsAdmin() {
               {/* Row 1: name + slug */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">الاسم *</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">الاسم *</span>
                   <input value={form.name} onChange={(e) => setF("name", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">Slug *</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">Slug *</span>
                   <input value={form.slug} onChange={(e) => setF("slug", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
                 </label>
               </div>
 
               {/* Row 2: subtitle + logo */}
               <div className="grid gap-3 sm:grid-cols-[1fr_120px]">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">العنوان الفرعي</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">العنوان الفرعي</span>
                   <input value={form.subtitle} onChange={(e) => setF("subtitle", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">اللوغو (emoji)</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">اللوغو (emoji)</span>
                   <input value={form.logo} onChange={(e) => setF("logo", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 text-center text-xl" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 text-center text-xl" />
                 </label>
               </div>
 
               {/* Row 3: price + old_price + discount + buyers */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">السعر $ *</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">السعر $ *</span>
                   <input type="number" value={form.price} onChange={(e) => setF("price", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">السعر القديم</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">السعر القديم</span>
                   <input type="number" value={form.old_price} onChange={(e) => setF("old_price", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">الخصم (نص)</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">الخصم (نص)</span>
                   <input value={form.discount} onChange={(e) => setF("discount", e.target.value)} placeholder="-70%"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">المشترين</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">المشترين</span>
                   <input value={form.buyers} onChange={(e) => setF("buyers", e.target.value)} placeholder="18K"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
                 </label>
               </div>
 
               {/* Row 4: accent_color + category + badge */}
               <div className="grid gap-3 sm:grid-cols-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">لون التمييز (hex)</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">لون التمييز (hex)</span>
                   <div className="flex items-center gap-2">
                     <input type="color" value={form.accent_color} onChange={(e) => setF("accent_color", e.target.value)}
-                      className="size-9 shrink-0 cursor-pointer rounded-lg border border-white/10 bg-transparent p-0.5" />
+                      className="size-9 shrink-0 cursor-pointer rounded-lg border border-[var(--gf-line)] bg-transparent p-0.5" />
                     <input value={form.accent_color} onChange={(e) => setF("accent_color", e.target.value)}
-                      className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-white outline-none" dir="ltr" />
+                      className="flex-1 rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-xs text-[var(--gf-text)] outline-none" dir="ltr" />
                   </div>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">التصنيف</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">التصنيف</span>
                   <select value={form.category} onChange={(e) => setF("category", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-[#0d0b14] px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50">
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50">
                     <option value="AI">ذكاء اصطناعي</option>
                     <option value="Entertainment">ترفيه</option>
                     <option value="Content">محتوى</option>
@@ -1773,36 +1773,36 @@ function ProductsAdmin() {
                   </select>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">الشارة (badge)</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">الشارة (badge)</span>
                   <input value={form.badge} onChange={(e) => setF("badge", e.target.value)} placeholder="LIFETIME DEAL"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" />
                 </label>
               </div>
 
               {/* Row 5: rating + reviews + sort_order + published */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">التقييم</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">التقييم</span>
                   <input type="number" step="0.1" max="5" value={form.rating} onChange={(e) => setF("rating", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">عدد التقييمات</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">عدد التقييمات</span>
                   <input type="number" value={form.reviews_count} onChange={(e) => setF("reviews_count", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">الترتيب</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">الترتيب</span>
                   <input type="number" value={form.sort_order} onChange={(e) => setF("sort_order", e.target.value)}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none" dir="ltr" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none" dir="ltr" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">منشور</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">منشور</span>
                   <button
                     type="button"
                     onClick={() => setF("is_published", !form.is_published)}
                     className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition-colors ${
-                      form.is_published ? "border-green-500/30 bg-green-500/10 text-green-400" : "border-white/10 bg-white/5 text-white/40"
+                      form.is_published ? "border-green-500/30 bg-green-500/10 text-green-400" : "border-[var(--gf-line)] bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)]"
                     }`}
                   >
                     {form.is_published ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
@@ -1813,76 +1813,76 @@ function ProductsAdmin() {
 
               {/* Description */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">الوصف القصير</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">الوصف القصير</span>
                 <textarea value={form.description} onChange={(e) => setF("description", e.target.value)} rows={2}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none" />
               </label>
 
               {/* Partners */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">الشركاء (فاصلة بين كل شريك)</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">الشركاء (فاصلة بين كل شريك)</span>
                 <input value={form.partners_json} onChange={(e) => setF("partners_json", e.target.value)} placeholder="Anthropic, OpenRouter"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50" dir="ltr" />
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50" dir="ltr" />
               </label>
 
               {/* Features */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">المميزات (سطر لكل ميزة)</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">المميزات (سطر لكل ميزة)</span>
                 <textarea value={form.features_json} onChange={(e) => setF("features_json", e.target.value)} rows={4}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none"
                   placeholder={"ميزة 1\nميزة 2\nميزة 3"} />
               </label>
 
               {/* Specs */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">المواصفات (كل سطر: الاسم: القيمة)</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">المواصفات (كل سطر: الاسم: القيمة)</span>
                 <textarea value={form.specs_json} onChange={(e) => setF("specs_json", e.target.value)} rows={3}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none"
                   placeholder={"Context Window: 1,000,000\nStorage: 2 TB\nAccess: Lifetime"} dir="ltr" />
               </label>
 
               {/* FAQ */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">الأسئلة الشائعة (افصل بينها بـ ---)</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">الأسئلة الشائعة (افصل بينها بـ ---)</span>
                 <textarea value={form.faq_json} onChange={(e) => setF("faq_json", e.target.value)} rows={4}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none"
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none"
                   placeholder={"س: السؤال الأول\nج: الجواب الأول\n---\nس: السؤال الثاني\nج: الجواب الثاني"} />
               </label>
 
               {/* Full description */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">الوصف الكامل (اختياري)</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">الوصف الكامل (اختياري)</span>
                 <textarea value={form.full_description} onChange={(e) => setF("full_description", e.target.value)} rows={3}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none" />
               </label>
 
               {/* Usage details + requirements */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">طريقة الاستخدام</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">طريقة الاستخدام</span>
                   <textarea value={form.usage_details} onChange={(e) => setF("usage_details", e.target.value)} rows={2}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-white/50">المتطلبات</span>
+                  <span className="text-xs font-bold text-[var(--gf-text-muted)]">المتطلبات</span>
                   <textarea value={form.requirements} onChange={(e) => setF("requirements", e.target.value)} rows={2}
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                    className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none" />
                 </label>
               </div>
 
               {/* Benefits */}
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-white/50">لماذا تختاره؟</span>
+                <span className="text-xs font-bold text-[var(--gf-text-muted)]">لماذا تختاره؟</span>
                 <textarea value={form.benefits} onChange={(e) => setF("benefits", e.target.value)} rows={2}
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-purple-500/50 resize-none" />
+                  className="rounded-xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none focus:border-purple-500/50 resize-none" />
               </label>
 
               <div className="flex justify-end gap-3 pt-2">
-                <button onClick={closeModal} className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-bold text-white/60 hover:bg-white/5">
+                <button onClick={closeModal} className="rounded-xl border border-[var(--gf-line)] px-5 py-2.5 text-sm font-bold text-[var(--gf-text-muted)] hover:bg-[var(--gf-surface-2)]">
                   إلغاء
                 </button>
                 <button onClick={save} disabled={saving}
-                  className="rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-black text-white hover:bg-purple-500 disabled:opacity-50">
+                  className="rounded-xl bg-[var(--gf-brand)] px-6 py-2.5 text-sm font-black text-white hover:bg-[var(--gf-brand)] disabled:opacity-50">
                   {saving ? "جاري الحفظ…" : "حفظ"}
                 </button>
               </div>
@@ -1901,9 +1901,9 @@ function ProductsAdmin() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-black text-white">إدارة المنتجات</h2>
+        <h2 className="text-xl font-black text-[var(--gf-text)]">إدارة المنتجات</h2>
         <button onClick={startCreate}
-          className="flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-500">
+          className="flex items-center gap-2 rounded-xl bg-[var(--gf-brand)] px-4 py-2 text-sm font-bold text-white hover:bg-[var(--gf-brand)]">
           <Plus size={15} /> منتج جديد
         </button>
       </div>
@@ -1911,17 +1911,17 @@ function ProductsAdmin() {
       {loading ? (
         <div className="grid gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/5" />
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-[var(--gf-surface-2)]" />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="py-16 text-center text-white/30">لا توجد منتجات</div>
+        <div className="py-16 text-center text-[var(--gf-text)]/30">لا توجد منتجات</div>
       ) : (
         <div className="grid gap-3">
           {products.map((p) => (
             <div key={p.id}
               className={`flex items-center gap-4 rounded-2xl border p-4 transition-all ${
-                p.is_published ? "border-white/8 bg-[#0d0b14]" : "border-white/5 bg-[#0d0b14]/50 opacity-60"
+                p.is_published ? "border-white/8 bg-[var(--gf-surface)]" : "border-[var(--gf-line)] bg-[var(--gf-surface)]/50 opacity-60"
               }`}
             >
               {/* Logo */}
@@ -1935,9 +1935,9 @@ function ProductsAdmin() {
               {/* Info */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate font-bold text-white">{p.name}</p>
+                  <p className="truncate font-bold text-[var(--gf-text)]">{p.name}</p>
                   {!p.is_published && (
-                    <span className="rounded-md bg-white/8 px-1.5 py-0.5 text-[10px] font-bold text-white/40">مخفي</span>
+                    <span className="rounded-md bg-[var(--gf-surface-2)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--gf-text-muted)]">مخفي</span>
                   )}
                   {p.badge && (
                     <span className="rounded-md px-1.5 py-0.5 text-[10px] font-black text-black" style={{ background: p.accent_color }}>
@@ -1945,14 +1945,14 @@ function ProductsAdmin() {
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-white/40">{p.category} · ${p.price} · {p.reviews_count} تقييم</p>
+                <p className="mt-0.5 text-xs text-[var(--gf-text-muted)]">{p.category} · ${p.price} · {p.reviews_count} تقييم</p>
               </div>
 
               {/* Actions */}
               <div className="flex shrink-0 items-center gap-2">
                 {/* View */}
                 <a href={`/products/${p.id}`} target="_blank"
-                  className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 hover:text-white"
+                  className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15 hover:text-[var(--gf-text)]"
                   title="عرض الصفحة">
                   <Eye size={13} />
                 </a>
@@ -1960,7 +1960,7 @@ function ProductsAdmin() {
                 {/* Upload image */}
                 <button
                   onClick={() => { setUploadingId(p.id); fileRef.current?.click(); }}
-                  className="grid size-8 place-items-center rounded-xl bg-white/8 text-white/50 hover:bg-white/15 hover:text-white"
+                  className="grid size-8 place-items-center rounded-xl bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-white/15 hover:text-[var(--gf-text)]"
                   title="رفع صورة"
                 >
                   {uploadingId === p.id ? <RefreshCw size={13} className="animate-spin" /> : <ImageIcon size={13} />}
@@ -1969,7 +1969,7 @@ function ProductsAdmin() {
                 {/* Toggle published */}
                 <button onClick={() => togglePublish(p.id)}
                   className={`grid size-8 place-items-center rounded-xl transition-colors ${
-                    p.is_published ? "bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400" : "bg-white/8 text-white/40 hover:bg-green-500/15 hover:text-green-400"
+                    p.is_published ? "bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400" : "bg-[var(--gf-surface-2)] text-[var(--gf-text-muted)] hover:bg-green-500/15 hover:text-green-400"
                   }`}
                   title={p.is_published ? "إخفاء" : "نشر"}
                 >
@@ -1978,7 +1978,7 @@ function ProductsAdmin() {
 
                 {/* Edit */}
                 <button onClick={() => startEdit(p)}
-                  className="grid size-8 place-items-center rounded-xl bg-purple-500/12 text-purple-400 hover:bg-purple-500/22"
+                  className="grid size-8 place-items-center rounded-xl bg-[var(--gf-brand)]/12 text-[var(--gf-brand)] hover:bg-[var(--gf-brand)]/22"
                   title="تعديل">
                   <Pencil size={13} />
                 </button>

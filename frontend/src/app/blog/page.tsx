@@ -14,8 +14,8 @@ interface Post {
 }
 
 const CATS = [
-  { id: "all",       label: "الكل",              icon: Sparkles,  color: "#c8e600", bg: "rgba(200,230,0,0.12)"  },
-  { id: "ai",        label: "الذكاء الاصطناعي",  icon: Brain,     color: "#a855f7", bg: "rgba(168,85,247,0.12)" },
+  { id: "all",       label: "الكل",              icon: Sparkles,  color: "var(--gf-brand)", bg: "rgba(200,230,0,0.12)"  },
+  { id: "ai",        label: "الذكاء الاصطناعي",  icon: Brain,     color: "var(--gf-brand)", bg: "rgba(168,85,247,0.12)" },
   { id: "services",  label: "الخدمات",           icon: Package,   color: "#10b981", bg: "rgba(16,185,129,0.12)" },
   { id: "companies", label: "الشركات العالمية",  icon: TrendingUp,color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
   { id: "tutorials", label: "الشروحات",          icon: BookOpen,  color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
@@ -78,12 +78,12 @@ function FeaturedCard({ post }: { post: Post }) {
       {/* Content */}
       <div className="flex flex-1 flex-col justify-between p-7">
         <div>
-          <h2 className="text-xl font-black leading-8 text-white transition-colors group-hover:text-lime-400 md:text-2xl">
+          <h2 className="text-xl font-black leading-8 text-[var(--gf-text)] transition-colors group-hover:text-[var(--gf-brand)] md:text-2xl">
             {post.title}
           </h2>
-          <p className="mt-3 text-sm leading-7 text-white/60">{post.excerpt}</p>
+          <p className="mt-3 text-sm leading-7 text-[var(--gf-text-muted)]">{post.excerpt}</p>
         </div>
-        <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-white/40">
+        <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-[var(--gf-text-muted)]">
           <span className="flex items-center gap-1"><Clock size={12} /> {readTime(post.content)} دقائق قراءة</span>
           <span className="flex items-center gap-1"><Eye size={12} /> {post.views} مشاهدة</span>
           <span>{post.author}</span>
@@ -143,16 +143,16 @@ function PostCard({ post }: { post: Post }) {
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-5 pt-3">
-        <h3 className="text-base font-black leading-7 text-white transition-colors group-hover:text-lime-400">
+        <h3 className="text-base font-black leading-7 text-[var(--gf-text)] transition-colors group-hover:text-[var(--gf-brand)]">
           {post.title}
         </h3>
-        <p className="mt-2 flex-1 text-sm leading-6 text-white/55 line-clamp-3">{post.excerpt}</p>
+        <p className="mt-2 flex-1 text-sm leading-6 text-[var(--gf-text)]/55 line-clamp-3">{post.excerpt}</p>
 
         {/* Tags */}
         {post.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {post.tags.slice(0, 3).map(t => (
-              <span key={t} className="rounded-lg bg-white/6 px-2 py-0.5 text-[10px] text-white/45">
+              <span key={t} className="rounded-lg bg-white/6 px-2 py-0.5 text-[10px] text-[var(--gf-text)]/45">
                 #{t}
               </span>
             ))}
@@ -160,7 +160,7 @@ function PostCard({ post }: { post: Post }) {
         )}
 
         {/* Meta */}
-        <div className="mt-4 flex items-center justify-between text-[11px] text-white/35">
+        <div className="mt-4 flex items-center justify-between text-[11px] text-[var(--gf-text)]/35">
           <span className="flex items-center gap-3">
             <span className="flex items-center gap-1"><Clock size={11} /> {readTime(post.content)} د</span>
             <span className="flex items-center gap-1"><Eye size={11} /> {post.views}</span>
@@ -168,7 +168,7 @@ function PostCard({ post }: { post: Post }) {
           <span>{fmtDate(post.created_at)}</span>
         </div>
         <div className="mt-1 flex items-center justify-between">
-          <span className="text-[11px] text-white/35">{post.author}</span>
+          <span className="text-[11px] text-[var(--gf-text)]/35">{post.author}</span>
           <span className="text-[11px] font-bold" style={{ color: cat.color }}>اقرأ المزيد ←</span>
         </div>
       </div>
@@ -209,13 +209,13 @@ export default function BlogPage() {
   const rest      = posts.filter(p => !p.featured);
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
 
       {/* Glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute right-1/4 top-0 size-[600px] rounded-full bg-lime-400/5 blur-[150px]" />
-        <div className="absolute left-1/4 top-32 size-[400px] rounded-full bg-purple-600/8 blur-[120px]" />
+        <div className="absolute right-1/4 top-0 size-[600px] rounded-full bg-[var(--gf-brand)]/5 blur-[150px]" />
+        <div className="absolute left-1/4 top-32 size-[400px] rounded-full bg-[var(--gf-brand)]/8 blur-[120px]" />
         <div className="absolute bottom-1/3 right-1/3 size-[300px] rounded-full bg-blue-500/6 blur-[100px]" />
       </div>
 
@@ -231,15 +231,15 @@ export default function BlogPage() {
               transform: "perspective(500px) rotateX(8deg)",
             }}
           >
-            <BookOpen size={38} className="text-lime-400 drop-shadow-[0_0_18px_rgba(200,230,0,0.7)]" />
+            <BookOpen size={38} className="text-[var(--gf-brand)] drop-shadow-[0_0_18px_rgba(200,230,0,0.7)]" />
           </div>
           <div className="pixel-logo mb-3 text-2xl font-black">
-            <span className="text-purple-500">GROW</span><span className="text-lime-400">FOLO</span>
+            <span className="text-[var(--gf-brand)]">GROW</span><span className="text-[var(--gf-brand)]">FOLO</span>
           </div>
           <h1 className="text-4xl font-black md:text-6xl">
             <span className="bg-gradient-to-l from-lime-400 to-green-500 bg-clip-text text-transparent">المدونة</span>
           </h1>
-          <p className="mt-3 text-sm text-white/50">
+          <p className="mt-3 text-sm text-[var(--gf-text-muted)]">
             أحدث المقالات حول الذكاء الاصطناعي، الخدمات الرقمية، والشركات التقنية العالمية
           </p>
 
@@ -251,8 +251,8 @@ export default function BlogPage() {
               { val: "أسبوعياً", label: "تحديث" },
             ].map(({ val, label }) => (
               <div key={label} className="text-center">
-                <p className="text-xl font-black text-white">{val}</p>
-                <p className="text-xs text-white/40">{label}</p>
+                <p className="text-xl font-black text-[var(--gf-text)]">{val}</p>
+                <p className="text-xs text-[var(--gf-text-muted)]">{label}</p>
               </div>
             ))}
           </div>
@@ -260,12 +260,12 @@ export default function BlogPage() {
 
         {/* ── Search ────────────────────────────────────────────────── */}
         <div className="relative mb-8 mx-auto max-w-xl">
-          <Search size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/35" />
+          <Search size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--gf-text)]/35" />
           <input
             value={search}
             onChange={e => handleSearch(e.target.value)}
             placeholder="ابحث في المقالات..."
-            className="w-full rounded-2xl border border-white/10 bg-white/5 py-3.5 pr-11 pl-5 text-sm text-white outline-none placeholder:text-white/30 focus:border-lime-500/50"
+            className="w-full rounded-2xl border border-[var(--gf-line)] bg-[var(--gf-surface-2)] py-3.5 pr-11 pl-5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/30 focus:border-lime-500/50"
             style={{ backdropFilter: "blur(10px)" }}
           />
         </div>
@@ -303,15 +303,15 @@ export default function BlogPage() {
         {/* ── Empty ─────────────────────────────────────────────────── */}
         {!loading && posts.length === 0 && (
           <div className="py-20 text-center">
-            <BookOpen size={40} className="mx-auto mb-3 text-white/20" />
-            <p className="text-white/40">لا توجد مقالات حالياً</p>
+            <BookOpen size={40} className="mx-auto mb-3 text-[var(--gf-text)]/20" />
+            <p className="text-[var(--gf-text-muted)]">لا توجد مقالات حالياً</p>
           </div>
         )}
 
         {/* ── Featured ──────────────────────────────────────────────── */}
         {!loading && featured.length > 0 && !query && cat === "all" && (
           <div className="mb-10">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-white">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[var(--gf-text)]">
               <Star size={18} className="text-yellow-400" /> المقالات المميزة
             </h2>
             <div className="flex flex-col gap-4">
@@ -324,8 +324,8 @@ export default function BlogPage() {
         {!loading && rest.length > 0 && (
           <div>
             {featured.length > 0 && !query && cat === "all" && (
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-white">
-                <Wrench size={18} className="text-lime-400" /> جميع المقالات
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-black text-[var(--gf-text)]">
+                <Wrench size={18} className="text-[var(--gf-brand)]" /> جميع المقالات
               </h2>
             )}
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

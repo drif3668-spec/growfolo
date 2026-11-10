@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: { params: Params }) {
               <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
             ) : (
               <span
-                className="grid h-24 w-24 place-items-center rounded-3xl text-4xl font-black text-white shadow-xl"
+                className="grid h-24 w-24 place-items-center rounded-3xl text-4xl font-black text-[var(--gf-text)] shadow-xl"
                 style={{ background: `linear-gradient(135deg, ${accent}, ${accent}77)` }}
                 aria-hidden="true"
               >
@@ -129,7 +129,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                   <span className="text-base font-semibold text-[var(--gf-text-muted)] line-through">
                     {oldPrice.toFixed(2)} $
                   </span>
-                  <span className="rounded-full bg-[var(--gf-danger)] px-2 py-0.5 text-xs font-bold text-white">
+                  <span className="rounded-full bg-[var(--gf-danger)] px-2 py-0.5 text-xs font-bold text-[var(--gf-text)]">
                     −{percent}%
                   </span>
                 </>

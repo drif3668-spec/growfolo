@@ -8,11 +8,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /* ── Tracking stages ─────────────────────────────────────────────────── */
 const STAGES = [
-  { id: 1, label: "قيد المعالجة",          icon: Clock,    color: "#a855f7" },
+  { id: 1, label: "قيد المعالجة",          icon: Clock,    color: "var(--gf-brand)" },
   { id: 2, label: "يتم المراجعة",           icon: Search,   color: "#6366f1" },
   { id: 3, label: "جارٍ البحث عن الوكيل",  icon: Package,  color: "#3b82f6" },
   { id: 4, label: "تم تأكيد الطلب",         icon: CheckCircle2, color: "#10b981" },
-  { id: 5, label: "تم إرسال الطلب",         icon: Truck,    color: "#c8e600" },
+  { id: 5, label: "تم إرسال الطلب",         icon: Truck,    color: "var(--gf-brand)" },
 ];
 
 type TrackingData = {
@@ -30,7 +30,7 @@ function Confetti({ active }: { active: boolean }) {
     x: Math.random() * 100,
     delay: Math.random() * 1.5,
     dur: 1.5 + Math.random() * 2,
-    color: ["#c8e600", "#a855f7", "#3b82f6", "#f59e0b", "#ec4899", "#10b981"][Math.floor(Math.random() * 6)],
+    color: ["var(--gf-brand)", "var(--gf-brand)", "#3b82f6", "#f59e0b", "#ec4899", "#10b981"][Math.floor(Math.random() * 6)],
     size: 6 + Math.random() * 10,
     rotate: Math.random() * 360,
   }));
@@ -110,19 +110,19 @@ export default function TrackOrderPage() {
   const stage = data?.tracking_stage ?? 0;
 
   return (
-    <main className="min-h-screen bg-[#050508] text-white" dir="rtl">
+    <main className="min-h-screen bg-[var(--gf-bg)] text-[var(--gf-text)]" dir="rtl">
       <SiteHeader />
       <Confetti active={confetti} />
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pb-10 pt-14">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/3 top-0 size-[600px] -translate-x-1/2 rounded-full bg-purple-600/12 blur-[140px]" />
-          <div className="absolute right-1/4 top-24 size-[400px] rounded-full bg-lime-400/7 blur-[100px]" />
+          <div className="absolute left-1/3 top-0 size-[600px] -translate-x-1/2 rounded-full bg-[var(--gf-brand)]/12 blur-[140px]" />
+          <div className="absolute right-1/4 top-24 size-[400px] rounded-full bg-[var(--gf-brand)]/7 blur-[100px]" />
         </div>
 
         <div className="relative mx-auto max-w-2xl px-4 text-center">
-          <a href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">
+          <a href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-[var(--gf-text-muted)] hover:text-[var(--gf-text)] transition-colors">
             <ArrowRight size={15} /> العودة للرئيسية
           </a>
 
@@ -134,16 +134,16 @@ export default function TrackOrderPage() {
               boxShadow: "0 0 0 1px rgba(168,85,247,0.1), 0 0 60px rgba(168,85,247,0.25), 0 20px 60px rgba(0,0,0,0.5)",
               transform: "perspective(600px) rotateX(8deg)",
             }}>
-            <Truck size={42} className="text-purple-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]" />
+            <Truck size={42} className="text-[var(--gf-brand)] drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]" />
           </div>
 
-          <h1 className="text-4xl font-black text-white md:text-5xl">
+          <h1 className="text-4xl font-black text-[var(--gf-text)] md:text-5xl">
             تتبع{" "}
             <span className="bg-gradient-to-l from-lime-400 to-purple-400 bg-clip-text text-transparent">
               طلبك
             </span>
           </h1>
-          <p className="mt-3 text-sm text-white/50">أدخل رقم الطلب الخاص بك لمتابعة حالته لحظةً بلحظة</p>
+          <p className="mt-3 text-sm text-[var(--gf-text-muted)]">أدخل رقم الطلب الخاص بك لمتابعة حالته لحظةً بلحظة</p>
         </div>
       </section>
 
@@ -163,13 +163,13 @@ export default function TrackOrderPage() {
             onChange={(e) => setOrderId(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && trackOrder()}
             placeholder="ادخل رقم الطلب..."
-            className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25"
+            className="flex-1 bg-transparent px-3 py-2.5 text-sm text-[var(--gf-text)] outline-none placeholder:text-[var(--gf-text)]/25"
           />
           <button
             onClick={trackOrder}
             disabled={loading}
             className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-black text-black transition-all hover:opacity-90 active:scale-[.98] disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)", boxShadow: "0 4px 18px rgba(200,230,0,0.4)" }}
+            style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)", boxShadow: "0 4px 18px rgba(200,230,0,0.4)" }}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             تتبع الطلب
@@ -199,15 +199,15 @@ export default function TrackOrderPage() {
           >
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs text-white/40">رقم الطلب</p>
-                <p className="mt-0.5 font-mono text-xs text-white/60">{data.id}</p>
-                <p className="mt-2 font-black text-white">{data.product_name}</p>
+                <p className="text-xs text-[var(--gf-text-muted)]">رقم الطلب</p>
+                <p className="mt-0.5 font-mono text-xs text-[var(--gf-text-muted)]">{data.id}</p>
+                <p className="mt-2 font-black text-[var(--gf-text)]">{data.product_name}</p>
               </div>
               <div
                 className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold"
                 style={{
                   background: stage >= 5 ? "rgba(200,230,0,0.15)" : "rgba(168,85,247,0.15)",
-                  color: stage >= 5 ? "#c8e600" : "#a855f7",
+                  color: stage >= 5 ? "var(--gf-brand)" : "var(--gf-brand)",
                   border: `1px solid ${stage >= 5 ? "rgba(200,230,0,0.3)" : "rgba(168,85,247,0.3)"}`,
                 }}
               >
@@ -216,7 +216,7 @@ export default function TrackOrderPage() {
             </div>
 
             {data.tracking_notes && (
-              <div className="mb-5 rounded-2xl border border-white/8 bg-white/4 px-4 py-3 text-sm leading-7 text-white/70">
+              <div className="mb-5 rounded-2xl border border-white/8 bg-white/4 px-4 py-3 text-sm leading-7 text-[var(--gf-text-muted)]">
                 📝 {data.tracking_notes}
               </div>
             )}
@@ -224,12 +224,12 @@ export default function TrackOrderPage() {
             {/* ── Timeline ─────────────────────────────────────────── */}
             <div className="relative">
               {/* Connector line */}
-              <div className="absolute right-[19px] top-8 h-[calc(100%-48px)] w-0.5 bg-white/8" />
+              <div className="absolute right-[19px] top-8 h-[calc(100%-48px)] w-0.5 bg-[var(--gf-surface-2)]" />
               <div
                 className="absolute right-[19px] top-8 w-0.5 transition-all duration-1000"
                 style={{
                   height: `${Math.min(((stage - 1) / 4) * 100, 100)}%`,
-                  background: "linear-gradient(to bottom, #a855f7, #c8e600)",
+                  background: "linear-gradient(to bottom, var(--gf-brand), var(--gf-brand))",
                 }}
               />
 
@@ -258,11 +258,11 @@ export default function TrackOrderPage() {
                         }}
                       >
                         {done ? (
-                          <CheckCircle2 size={18} className="text-white" />
+                          <CheckCircle2 size={18} className="text-[var(--gf-text)]" />
                         ) : current ? (
                           <Icon size={18} style={{ color: s.color }} className={current ? "animate-pulse" : ""} />
                         ) : (
-                          <Icon size={18} className="text-white/20" />
+                          <Icon size={18} className="text-[var(--gf-text)]/20" />
                         )}
                       </div>
 
@@ -301,15 +301,15 @@ export default function TrackOrderPage() {
               }}
             >
               <div className="text-5xl">🎉</div>
-              <h2 className="mt-3 text-2xl font-black text-white">مبروك!</h2>
-              <p className="mt-2 text-sm text-white/60">تم إرسال طلبك بنجاح. شكراً لثقتك بـ Growfolo!</p>
+              <h2 className="mt-3 text-2xl font-black text-[var(--gf-text)]">مبروك!</h2>
+              <p className="mt-2 text-sm text-[var(--gf-text-muted)]">تم إرسال طلبك بنجاح. شكراً لثقتك بـ Growfolo!</p>
 
               {/* Discount code */}
               {discount ? (
                 <div className="mt-5">
-                  <p className="mb-3 text-sm text-white/50">
+                  <p className="mb-3 text-sm text-[var(--gf-text-muted)]">
                     🎁 هدية منّا إليك — كود خصم
-                    <span className="font-black text-lime-400"> {discount.percent}%</span>
+                    <span className="font-black text-[var(--gf-brand)]"> {discount.percent}%</span>
                   </p>
                   <div
                     className="inline-flex items-center gap-3 rounded-2xl px-5 py-3"
@@ -318,19 +318,19 @@ export default function TrackOrderPage() {
                       border: "1px solid rgba(200,230,0,0.3)",
                     }}
                   >
-                    <span className="font-mono text-lg font-black tracking-widest text-lime-400">
+                    <span className="font-mono text-lg font-black tracking-widest text-[var(--gf-brand)]">
                       {discount.code}
                     </span>
                     <button
                       onClick={copyCode}
-                      className="grid size-8 place-items-center rounded-xl bg-lime-400/20 text-lime-400 transition-all hover:bg-lime-400/30"
+                      className="grid size-8 place-items-center rounded-xl bg-[var(--gf-brand)]/20 text-[var(--gf-brand)] transition-all hover:bg-[var(--gf-brand)]/30"
                     >
                       {copied ? <Star size={15} className="fill-lime-400" /> : <Copy size={15} />}
                     </button>
                   </div>
-                  {copied && <p className="mt-2 text-xs text-lime-400">✓ تم النسخ!</p>}
+                  {copied && <p className="mt-2 text-xs text-[var(--gf-brand)]">✓ تم النسخ!</p>}
                   {discount.expires_at && (
-                    <p className="mt-2 text-xs text-white/35">
+                    <p className="mt-2 text-xs text-[var(--gf-text)]/35">
                       صالح حتى: {new Date(discount.expires_at).toLocaleDateString("ar-DZ")}
                     </p>
                   )}
@@ -338,15 +338,15 @@ export default function TrackOrderPage() {
               ) : (
                 <div className="mt-4">
                   {discountErr
-                    ? <p className="text-xs text-white/40">{discountErr}</p>
-                    : <p className="flex items-center justify-center gap-2 text-xs text-white/40"><Loader2 size={12} className="animate-spin" /> جارٍ تحميل كود الخصم...</p>
+                    ? <p className="text-xs text-[var(--gf-text-muted)]">{discountErr}</p>
+                    : <p className="flex items-center justify-center gap-2 text-xs text-[var(--gf-text-muted)]"><Loader2 size={12} className="animate-spin" /> جارٍ تحميل كود الخصم...</p>
                   }
                 </div>
               )}
 
               <a href="/"
                 className="mt-5 inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-black transition-all hover:opacity-90"
-                style={{ background: "linear-gradient(135deg, #c8e600, #a3bd00)" }}>
+                style={{ background: "linear-gradient(135deg, var(--gf-brand), #a3bd00)" }}>
                 <Gift size={16} /> تسوّق مجدداً
               </a>
             </div>
