@@ -60,6 +60,20 @@ export async function getProducts(): Promise<Product[]> {
   return Array.isArray(data) ? data : [];
 }
 
+export type ProductDetail = Product & {
+  partners?: unknown[];
+  features?: unknown[];
+  specs?: { label?: string; value?: string }[];
+  faq?: { question?: string; answer?: string }[];
+  usage_details?: string | null;
+  requirements?: string | null;
+  benefits?: string | null;
+};
+
+export async function getProduct(id: string): Promise<ProductDetail | null> {
+  return getJson<ProductDetail>(`/api/v1/products/${encodeURIComponent(id)}`);
+}
+
 export async function getBanners(): Promise<Banner[]> {
   const data = await getJson<Banner[]>("/api/v1/banners");
   return Array.isArray(data) ? data : [];
