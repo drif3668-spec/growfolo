@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ProductCard } from "@/components/store/product-card";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
+import { productCover } from "@/lib/product-media";
 import { getProduct, getProducts, serverApiBase } from "@/lib/server-api";
 
 export const revalidate = 300;
@@ -75,9 +76,13 @@ export default async function ProductPage({ params }: { params: Params }) {
               background: `radial-gradient(120% 120% at 20% 0%, ${accent}33, transparent 55%), linear-gradient(160deg, ${accent}22, #0b1220 70%)`,
             }}
           >
-            {product.image_url && product.image_url.startsWith("http") ? (
+            {productCover(product.slug, product.image_url) ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+              <img
+                src={productCover(product.slug, product.image_url) as string}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <span
                 className="grid h-24 w-24 place-items-center rounded-3xl text-4xl font-black text-[var(--gf-text)] shadow-xl"

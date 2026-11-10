@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="Growfolo product artwork">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D946EF"/>
+      <stop offset="100%" stop-color="#4A044E"/>
+    </linearGradient>
+    <radialGradient id="glow5" cx="70%" cy="10%" r="75%">
+      <stop offset="0%" stop-color="#FDE68A" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bg5)"/>
+  <rect width="800" height="500" fill="url(#glow5)"/>
+  <circle cx="500" cy="150" r="120" fill="none" stroke="#FDE68A" stroke-opacity="0.16" stroke-width="2"/><circle cx="500" cy="150" r="178" fill="none" stroke="#FDE68A" stroke-opacity="0.13" stroke-width="2"/><circle cx="500" cy="150" r="236" fill="none" stroke="#FDE68A" stroke-opacity="0.10" stroke-width="2"/><circle cx="500" cy="150" r="294" fill="none" stroke="#FDE68A" stroke-opacity="0.07" stroke-width="2"/>
+  <rect x="72" y="332" width="10" height="88" rx="5" fill="#ffffff" fill-opacity="0.06"/><rect x="98" y="388" width="10" height="32" rx="5" fill="#ffffff" fill-opacity="0.09"/><rect x="124" y="346" width="10" height="74" rx="5" fill="#ffffff" fill-opacity="0.12"/><rect x="150" y="402" width="10" height="18" rx="5" fill="#ffffff" fill-opacity="0.06"/><rect x="176" y="360" width="10" height="60" rx="5" fill="#ffffff" fill-opacity="0.09"/><rect x="202" y="318" width="10" height="102" rx="5" fill="#ffffff" fill-opacity="0.12"/><rect x="228" y="374" width="10" height="46" rx="5" fill="#ffffff" fill-opacity="0.06"/><rect x="254" y="332" width="10" height="88" rx="5" fill="#ffffff" fill-opacity="0.09"/><rect x="280" y="388" width="10" height="32" rx="5" fill="#ffffff" fill-opacity="0.12"/>
+  <rect y="0" width="800" height="240" fill="url(#sheen5)"/>
+  <circle cx="86" cy="86" r="34" fill="#ffffff" fill-opacity="0.12"/>
+  <circle cx="86" cy="86" r="10" fill="#ffffff" fill-opacity="0.9"/>
+  <text x="86" y="330" font-family="Cairo, Tajawal, system-ui, sans-serif" font-size="128" font-weight="800" fill="#ffffff" fill-opacity="0.95" letter-spacing="-4">20</text>
+  <text x="86" y="392" font-family="Tajawal, system-ui, sans-serif" font-size="26" font-weight="600" fill="#ffffff" fill-opacity="0.72" letter-spacing="2">GROWFOLO</text>
+</svg>

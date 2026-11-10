@@ -218,3 +218,68 @@ input {
   from { width: 0%; }
   to   { width: 100%; }
 }
+
+/* ── Growfolo motion system ────────────────────────────────────────────────
+   Small, compositor-friendly transitions only. Everything is disabled by the
+   prefers-reduced-motion block above. */
+
+@keyframes gf-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes gf-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes gf-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.gf-reveal { animation: gf-fade-up 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.gf-reveal[data-delay="1"] { animation-delay: 0.05s; }
+.gf-reveal[data-delay="2"] { animation-delay: 0.1s; }
+.gf-reveal[data-delay="3"] { animation-delay: 0.15s; }
+.gf-reveal[data-delay="4"] { animation-delay: 0.2s; }
+.gf-reveal[data-delay="5"] { animation-delay: 0.25s; }
+.gf-reveal[data-delay="6"] { animation-delay: 0.3s; }
+
+.gf-card {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.gf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gf-shadow);
+  border-color: var(--gf-line-strong);
+}
+.gf-card:active { transform: translateY(-1px) scale(0.997); }
+
+.gf-press { transition: transform 0.15s ease; }
+.gf-press:active { transform: scale(0.97); }
+
+.gf-lift { transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease; }
+.gf-lift:hover { transform: translateY(-1px); }
+
+.gf-pop { animation: gf-pop 0.3s ease both; }
+
+.gf-skeleton {
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
+  background-size: 200% 100%;
+  animation: gf-shimmer 1.4s linear infinite;
+}
+
+/* Entrance animation for page sections, and smooth anchor scrolling. */
+html { scroll-behavior: smooth; }
+main > section { animation: gf-fade-up 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+
+/* Focus-visible halo for interactive cards. */
+a.gf-card:focus-visible {
+  outline: 2px solid var(--gf-brand);
+  outline-offset: 3px;
+  transform: translateY(-2px);
+}
