@@ -193,7 +193,9 @@ export function CartSidebar() {
       paymentMethod: payMethod,
     };
     try { localStorage.setItem("gf_checkout_data", JSON.stringify(checkoutData)); } catch {}
-    window.location.href = payMethod === "whatsapp" ? "/checkout?method=whatsapp" : "/checkout/pay";
+    // Single checkout entry point: /checkout resolves the cart (one product per
+    // order) and lets the customer choose the payment method there.
+    window.location.href = "/checkout";
   }
 
   const filteredCurrencies = currencies.filter(c =>

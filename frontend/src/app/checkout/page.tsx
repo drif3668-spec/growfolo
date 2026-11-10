@@ -1,5 +1,8 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { CheckoutWizard } from "@/features/checkout/checkout-wizard";
+import { CheckoutEntry } from "@/features/checkout/checkout-entry";
+
+export const metadata = { title: "إتمام الطلب" };
 
 export default async function CheckoutPage({
   searchParams,
@@ -18,11 +21,15 @@ export default async function CheckoutPage({
   const defaultMethod = params.method ?? null;
 
   return (
-    <main className="min-h-screen bg-[#050508]">
+    <main className="min-h-screen bg-[var(--gf-bg)]">
       <SiteHeader />
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-8 text-3xl font-black text-white">إتمام الطلب</h1>
-        <CheckoutWizard product={product} defaultMethod={defaultMethod} />
+        <h1 className="mb-8 text-3xl font-black text-[var(--gf-text)]">إتمام الطلب</h1>
+        {product ? (
+          <CheckoutWizard product={product} defaultMethod={defaultMethod} />
+        ) : (
+          <CheckoutEntry />
+        )}
       </div>
     </main>
   );

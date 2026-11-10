@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Copy, Upload, Clock, CheckCircle, MessageCircle } from "lucide-react";
+import { useCart } from "@/context/cart-context";import { Check, Copy, Upload, Clock, CheckCircle, MessageCircle } from "lucide-react";
 import { PaymentMethodImage } from "@/components/payments/payment-method-image";
 import { PaymentMethodShowcase } from "@/components/payments/payment-method-showcase";
 import { PAYMENT_METHODS } from "@/lib/payment-methods";
@@ -262,6 +262,7 @@ export function CheckoutWizard({
   defaultMethod?: string | null;
 }) {
   const defaultProduct = product ?? { name: "Claude Pro", price: 19 };
+  const { clear: clearCart } = useCart();
 
   const [step,      setStep]      = useState(1);
   const [orderId,   setOrderId]   = useState<string | null>(null);
@@ -338,6 +339,7 @@ export function CheckoutWizard({
       setStartedAt(ts);
       setExpiresAt(data.expires_at ?? null);
       setStep(3);
+      clearCart();
       persist({ step: 3, orderId: data.id, customer, method, startedAt: ts, expiresAt: data.expires_at ?? null });
     } catch {
       setErr("فشل إنشاء الطلب، حاول مرة أخرى");
