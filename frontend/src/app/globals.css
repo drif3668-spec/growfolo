@@ -3,41 +3,41 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  background: #050508;
-  color: #ffffff;
+  color-scheme: light;
+  background: #f8fafc;
+  color: #0f172a;
   --bg-dark: #050508;
-  --panel: rgba(14, 11, 24, 0.82);
-  --panel-soft: rgba(18, 14, 30, 0.72);
-  --purple: #a855f7;
-  --purple-deep: #7c3aed;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-soft: rgba(248, 250, 252, 0.9);
+  --purple: #7c3aed;
+  --purple-deep: #6d28d9;
   --green: #84cc16;
   --green-bright: #4ade80;
-  --line: rgba(168, 85, 247, 0.22);
+  --line: rgba(15, 23, 42, 0.08);
 
   /* ── Growfolo design tokens (single source of truth) ─────────────────── */
-  --gf-bg: #070b14;
-  --gf-surface: #0e1524;
-  --gf-surface-2: #131c2e;
-  --gf-line: rgba(255, 255, 255, 0.08);
-  --gf-line-strong: rgba(255, 255, 255, 0.16);
-  --gf-text: #f8fafc;
-  --gf-text-muted: #94a3b8;
-  --gf-brand: #10b981;
-  --gf-brand-strong: #059669;
-  --gf-brand-soft: rgba(16, 185, 129, 0.12);
-  --gf-accent: #38bdf8;
-  --gf-danger: #f43f5e;
-  --gf-warning: #f59e0b;
+  --gf-bg: #f8fafc;
+  --gf-surface: #ffffff;
+  --gf-surface-2: #f1f5f9;
+  --gf-line: rgba(15, 23, 42, 0.08);
+  --gf-line-strong: rgba(15, 23, 42, 0.16);
+  --gf-text: #0f172a;
+  --gf-text-muted: #64748b;
+  --gf-brand: #7c3aed;
+  --gf-brand-strong: #6d28d9;
+  --gf-brand-soft: rgba(124, 58, 237, 0.10);
+  --gf-accent: #06b6d4;
+  --gf-danger: #e11d48;
+  --gf-warning: #d97706;
 
   --gf-radius-sm: 10px;
   --gf-radius: 14px;
   --gf-radius-lg: 20px;
   --gf-radius-pill: 9999px;
 
-  --gf-shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.4);
-  --gf-shadow: 0 8px 24px rgba(2, 6, 23, 0.45);
-  --gf-shadow-lg: 0 24px 60px rgba(2, 6, 23, 0.55);
+  --gf-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --gf-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --gf-shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.12);
 
   --gf-font-body: "Tajawal", system-ui, -apple-system, "Segoe UI", sans-serif;
   --gf-font-display: "Cairo", "Tajawal", system-ui, sans-serif;
@@ -50,12 +50,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(124, 58, 237, 0.24), transparent 28rem),
-    radial-gradient(circle at 80% 12%, rgba(132, 204, 22, 0.14), transparent 24rem),
-    radial-gradient(circle at 50% 56%, rgba(168, 85, 247, 0.1), transparent 30rem),
-    #050508;
-  color: #ffffff;
+  background: var(--gf-bg);
+  color: var(--gf-text);
   font-family: var(--gf-font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

@@ -2,14 +2,25 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Search, ShoppingCart, Sparkle, UserRound, ChevronDown, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  Search,
+  ShoppingCart,
+  UserRound,
+  ChevronDown,
+  LayoutDashboard,
+} from "lucide-react";
 import { SidebarMenu } from "@/components/layout/sidebar-menu";
 import { useCart } from "@/context/cart-context";
 import { useCurrency } from "@/context/currency-context";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-interface AuthUser { name: string | null; is_admin: boolean; picture: string | null }
+interface AuthUser {
+  name: string | null;
+  is_admin: boolean;
+  picture: string | null;
+}
 
 export function SiteHeader() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,15 +41,28 @@ export function SiteHeader() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Load logged-in user info from token
   useEffect(() => {
     const token = localStorage.getItem("gf_token");
     if (!token) return;
     void fetch(`${API_URL}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : null)
-      .then((u: { full_name?: string | null; username?: string | null; is_admin?: boolean; profile_picture?: string | null } | null) => {
-        if (u) setAuthUser({ name: u.full_name ?? u.username ?? null, is_admin: u.is_admin ?? false, picture: u.profile_picture ?? null });
-      })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(
+        (
+          u: {
+            full_name?: string | null;
+            username?: string | null;
+            is_admin?: boolean;
+            profile_picture?: string | null;
+          } | null
+        ) => {
+          if (u)
+            setAuthUser({
+              name: u.full_name ?? u.username ?? null,
+              is_admin: u.is_admin ?? false,
+              picture: u.profile_picture ?? null,
+            });
+        }
+      )
       .catch(() => {});
   }, []);
 
@@ -46,67 +70,68 @@ export function SiteHeader() {
     <>
       <SidebarMenu open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <header className="sticky top-0 z-40 bg-[#050508]/88 px-4 pb-3 pt-1 backdrop-blur-xl">
-        <div className="mx-auto mb-2 flex max-w-7xl justify-center">
-          <div className="glass-panel flex min-h-9 w-full max-w-xl items-center justify-center gap-3 rounded-full px-4 text-xs text-white md:text-sm">
-            <Sparkle size={16} className="text-purple-400" />
-            <span>
-              خصم خاص عند الشراء استخدم الكود: <strong className="text-white">KN13</strong>
-            </span>
-          </div>
-        </div>
-
-        <div className="glass-panel mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-3xl px-5 py-4">
-          <div className="flex items-center gap-3 md:gap-5">
+      <header className="sticky top-0 z-40 border-b border-[var(--gf-line)] bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="grid size-11 place-items-center rounded-2xl border border-white/10 text-white hover:bg-white/5 transition-colors"
-              aria-label="القائمة"
+              className="grid size-10 place-items-center rounded-full text-[var(--gf-text)] transition hover:bg-[var(--gf-surface-2)]"
+              aria-label="فتح القائمة"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
-            <button className="hidden items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white sm:flex hover:bg-white/5 transition-colors">
-              الأقسام
-            </button>
-            <button className="grid size-11 place-items-center rounded-2xl text-white hover:bg-white/5 transition-colors" aria-label="البحث">
-              <Search size={22} />
-            </button>
+            <Link
+              href="/products"
+              className="grid size-10 place-items-center rounded-full text-[var(--gf-text)] transition hover:bg-[var(--gf-surface-2)]"
+              aria-label="البحث في المتجر"
+            >
+              <Search size={19} />
+            </Link>
           </div>
 
-          <Link href="/" className="flex items-center gap-3" aria-label="GROWFOLO">
-            <span className="grid size-12 place-items-center rounded-xl border border-purple-400/40 bg-purple-500/20 shadow-[0_0_28px_rgba(168,85,247,0.55)]">
-              <span className="size-7 rounded-md bg-gradient-to-br from-purple-500 to-lime-400" />
+          <Link href="/" className="flex items-center gap-2" aria-label="Growfolo — الصفحة الرئيسية">
+            <span className="grid size-9 place-items-center rounded-xl bg-[var(--gf-brand)] text-sm font-black text-white">
+              G
             </span>
-            <span className="pixel-logo hidden text-3xl font-black md:inline">
-              <span className="text-purple-500">GROW</span>
-              <span className="text-lime-400">FOLO</span>
+            <span className="text-lg font-black tracking-tight text-[var(--gf-text)]">
+              Growfolo
             </span>
           </Link>
 
-          <nav className="flex items-center gap-3 md:gap-5">
-            {/* Currency button */}
+          <nav className="flex items-center gap-1">
             <div className="relative" ref={currencyDropRef}>
               <button
-                onClick={() => setCurrencyDropOpen(v => !v)}
-                className="hidden items-center gap-1.5 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10 transition-colors sm:flex"
+                onClick={() => setCurrencyDropOpen((v) => !v)}
+                className="hidden items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-bold text-[var(--gf-text-muted)] transition hover:bg-[var(--gf-surface-2)] hover:text-[var(--gf-text)] sm:flex"
                 aria-label="العملة"
+                aria-expanded={currencyDropOpen}
               >
                 <span>{selected.flag}</span>
                 <span>{selected.code}</span>
-                <ChevronDown size={14} className={`transition-transform ${currencyDropOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={13}
+                  className={`transition-transform ${currencyDropOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {currencyDropOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 w-56 rounded-2xl border border-white/10 bg-[#12101a] shadow-2xl overflow-hidden">
+                <div className="absolute end-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-surface)] shadow-[var(--gf-shadow)]">
                   <div className="max-h-64 overflow-y-auto py-1">
-                    {currencies.map(c => (
+                    {currencies.map((c) => (
                       <button
                         key={c.code}
-                        onClick={() => { setSelected(c); setCurrencyDropOpen(false); }}
-                        className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-white/8 ${selected.code === c.code ? "text-purple-400" : "text-white/80"}`}
+                        onClick={() => {
+                          setSelected(c);
+                          setCurrencyDropOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-[var(--gf-surface-2)] ${
+                          selected.code === c.code
+                            ? "font-bold text-[var(--gf-brand)]"
+                            : "text-[var(--gf-text)]"
+                        }`}
                       >
                         <span>{c.flag}</span>
                         <span className="font-mono font-bold">{c.code}</span>
-                        <span className="text-white/50 text-xs">{c.name}</span>
+                        <span className="text-xs text-[var(--gf-text-muted)]">{c.name}</span>
                       </button>
                     ))}
                   </div>
@@ -114,47 +139,49 @@ export function SiteHeader() {
               )}
             </div>
 
-            {/* Cart button */}
             <button
               onClick={openSidebar}
-              className="relative flex items-center gap-2 text-sm font-semibold text-white"
-              aria-label="السلة"
+              className="relative grid size-10 place-items-center rounded-full text-[var(--gf-text)] transition hover:bg-[var(--gf-surface-2)]"
+              aria-label={`السلة (${count})`}
             >
-              <span className="relative">
-                <ShoppingCart size={25} />
-                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-lime-400 text-xs text-black font-bold">
+              <ShoppingCart size={20} />
+              {count > 0 && (
+                <span className="absolute -end-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-[var(--gf-brand)] px-1 text-[10px] font-black text-white">
                   {count}
                 </span>
-              </span>
+              )}
             </button>
 
             {authUser ? (
-              /* Logged-in: show avatar + dashboard link */
-              <a
+              <Link
                 href={authUser.is_admin ? "/admin" : "/dashboard"}
-                className="flex items-center gap-2 rounded-2xl border border-purple-500/35 bg-purple-500/12 px-3 py-2 text-sm font-semibold text-purple-300 hover:bg-purple-500/22 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-[var(--gf-line)] py-1 pe-3 ps-1 transition hover:border-[var(--gf-brand)]"
                 aria-label="حسابي"
               >
                 {authUser.picture ? (
-                  <img src={authUser.picture} alt="avatar" className="size-6 rounded-full object-cover" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={authUser.picture}
+                    alt=""
+                    className="size-8 rounded-full object-cover"
+                  />
                 ) : (
-                  <div className="grid size-6 place-items-center rounded-full bg-purple-600 text-[10px] font-black text-white">
+                  <span className="grid size-8 place-items-center rounded-full bg-[var(--gf-brand-soft)] text-xs font-black text-[var(--gf-brand)]">
                     {(authUser.name ?? "U").slice(0, 1).toUpperCase()}
-                  </div>
+                  </span>
                 )}
-                <span className="hidden sm:inline max-w-[90px] truncate">
+                <span className="hidden max-w-[90px] truncate text-xs font-bold text-[var(--gf-text)] sm:inline">
                   {authUser.name ?? "حسابي"}
                 </span>
-                <LayoutDashboard size={14} className="hidden sm:block opacity-60" />
-              </a>
+                <LayoutDashboard size={13} className="hidden text-[var(--gf-text-muted)] sm:block" />
+              </Link>
             ) : (
-              /* Guest: show login link */
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-sm font-semibold text-white hover:text-purple-300 transition-colors"
+                className="flex items-center gap-2 rounded-full px-2 py-1.5 text-xs font-bold text-[var(--gf-text)] transition hover:bg-[var(--gf-surface-2)]"
               >
-                <UserRound size={24} />
-                <span className="hidden sm:inline">تسجيل الدخول</span>
+                <UserRound size={19} />
+                <span className="hidden sm:inline">دخول</span>
               </Link>
             )}
           </nav>

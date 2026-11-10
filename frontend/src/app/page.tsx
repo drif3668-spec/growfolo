@@ -69,7 +69,7 @@ export default async function HomePage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--gf-brand)]" />
                 تفعيل بعد التحقق · دعم عربي
               </p>
-              <h1 className="text-4xl font-black leading-[1.15] text-[var(--gf-text)] md:text-5xl">
+              <h1 className="text-2xl font-black leading-[1.35] text-[var(--gf-text)] sm:text-3xl lg:text-4xl">
                 اشتراكات وأدوات رقمية
                 <span className="text-[var(--gf-brand)]"> بسعر واضح </span>
                 وتفعيل مضمون
