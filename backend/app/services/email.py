@@ -208,8 +208,13 @@ def generate_otp(length: int = 6) -> str:
 
 def send_otp_email(email: str, name: str, otp: str) -> None:
     """Send 6-digit OTP for email verification."""
-    print(f"[AUTH] OTP for {email}: {otp}")  # always log for debugging
     if not settings.resend_api_key:
+        # Never print the OTP in production logs: anyone with log access could
+        # complete verification or password reset for any account.
+        if settings.app_env != "production":
+            print(f"[DEV] RESEND_API_KEY missing - OTP for {email}: {otp}")
+        else:
+            print("[WARN] RESEND_API_KEY is not configured; OTP email was not sent")
         return
     body = f"""
     <p style="color:rgba(255,255,255,.75);margin-bottom:24px;line-height:1.7">

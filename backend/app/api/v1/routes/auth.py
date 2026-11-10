@@ -91,8 +91,14 @@ def verify_otp(payload: VerifyOtpRequest, db: Session = Depends(get_db)) -> dict
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "البريد الإلكتروني غير موجود")
     if user.is_verified:
-        return {"access_token": create_access_token(str(user.id), {"is_admin": user.is_admin}), "token_type": "bearer"}
-    if user.otp_code != payload.otp:
+        # Security: never mint a session for an already-verified account on this
+        # endpoint. Doing so lets anyone who knows an email address obtain a
+        # valid JWT without proving ownership of the account.
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "هذا الحساب موثّق بالفعل. الرجاء تسجيل الدخول.",
+        )
+    if not user.otp_code or not payload.otp or user.otp_code != payload.otp:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "رمز التحقق غير صحيح")
     if not user.otp_expires_at or datetime.utcnow() > user.otp_expires_at:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "انتهت صلاحية الرمز، اطلب رمزاً جديداً")
