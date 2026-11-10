@@ -63,13 +63,13 @@ export default async function HomePage() {
                 "radial-gradient(60% 80% at 80% 0%, rgba(16,185,129,.18), transparent 60%), radial-gradient(50% 70% at 10% 10%, rgba(56,189,248,.12), transparent 60%)",
             }}
           />
-          <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
-            <div>
+          <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 [&>*]:min-w-0 md:grid-cols-2 md:items-center md:py-24">
+            <div className="min-w-0">
               <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--gf-line-strong)] bg-[var(--gf-surface-2)] px-3 py-1 text-xs font-semibold text-[var(--gf-text-muted)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--gf-brand)]" />
                 تفعيل بعد التحقق · دعم عربي
               </p>
-              <h1 className="text-2xl font-black leading-[1.35] text-[var(--gf-text)] sm:text-3xl lg:text-4xl">
+              <h1 className="text-2xl font-black leading-[1.35] text-[var(--gf-text)] break-words sm:text-3xl lg:text-4xl">
                 اشتراكات وأدوات رقمية
                 <span className="text-[var(--gf-brand)]"> بسعر واضح </span>
                 وتفعيل مضمون
