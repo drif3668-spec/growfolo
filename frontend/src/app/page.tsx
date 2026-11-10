@@ -1,586 +1,300 @@
-"use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import {
-  Brain, Code2, Gamepad2, Headphones, Mail, Medal,
-  PenTool, Play, ShieldCheck, ShoppingBag, ShoppingCart, Star,
-  Users, Wrench, Zap, BadgeCheck, Globe, Rocket, FileCheck2
-} from "lucide-react";
-import { HeroScene } from "@/components/three/hero-scene";
+import Link from "next/link";
 import { SiteHeader } from "@/components/layout/site-header";
-import { PaymentMethodImage } from "@/components/payments/payment-method-image";
-import { PAYMENT_METHODS } from "@/lib/payment-methods";
-import { ReviewsCarousel } from "@/components/sections/reviews-carousel";
-import { BannerCarousel } from "@/components/sections/banner-carousel";
-import { AdsShowcase } from "@/components/sections/ads-showcase";
-import { AdsSectionSlider } from "@/components/sections/ads-section-slider";
-import { useCart } from "@/context/cart-context";
-import { useNotifications } from "@/context/notifications-context";
-import { PRODUCTS } from "@/data/products";
-import { CERTIFICATES } from "@/data/certificates";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { ProductCard } from "@/components/store/product-card";
+import { NewsletterForm } from "@/components/home/newsletter-form";
+import { getProducts, groupByCategory } from "@/lib/server-api";
 
-const features = [
-  { title: "تسليم فوري", text: "تسليم الخدمة بسرعة 1 دقيقة", icon: Zap },
-  { title: "ضمان كامل", text: "ضمان الاسترجاع الحق حتى 35 يوم", icon: ShieldCheck },
-  { title: "دعم 24/7", text: "فريق دعم على مدار الساعة", icon: Headphones },
-  { title: "أسعار مميزة", text: "أفضل الأسعار في السوق", icon: Medal },
+export const revalidate = 300;
+
+const steps = [
+  { n: "1", t: "اختر الاشتراك", d: "تصفّح الكتالوج واختر الأداة أو الاشتراك المناسب." },
+  { n: "2", t: "أكمل الطلب", d: "أدخل بريدك وطريقة الدفع، وسيظهر لك السعر النهائي قبل التأكيد." },
+  { n: "3", t: "أرسل الإثبات", d: "ارفع صورة إثبات الدفع من صفحة الطلب." },
+  { n: "4", t: "استلم التفعيل", d: "نتحقق من الدفع ونفعّل حسابك، وتتابع الحالة من لوحة العميل." },
 ];
 
-const categories = [
-  { title: "الذكاء الاصطناعي", icon: Brain },
-  { title: "الأدوات الرقمية", icon: Wrench },
-  { title: "الترفيه والمشاهدة", icon: Play },
-  { title: "الإبداع والتصميم", icon: PenTool },
-  { title: "البرامج والتطبيقات", icon: Code2 },
-  { title: "الألعاب والبطاقات", icon: Gamepad2 },
+const guarantees = [
+  { title: "سعر واضح قبل الدفع", body: "السعر يُحسب من كتالوج المتجر، ويظهر كاملاً في صفحة المراجعة." },
+  { title: "تتبّع بدون حساب", body: "تستطيع متابعة طلبك برقم الطلب دون إنشاء حساب." },
+  { title: "دعم عربي مباشر", body: "فريق الدعم يجيبك داخل الموقع أو على واتساب." },
+  { title: "ضمان موثّق", body: "سياسة الاستبدال والاسترجاع مكتوبة وواضحة قبل الشراء." },
 ];
 
-const products = PRODUCTS.map(p => ({
-  id: p.id, name: p.name, logo: p.logo, discount: p.discount,
-  price: `$${p.price}`, price_num: p.price, oldPrice: `$${p.oldPrice}`,
-  buyers: p.buyers, color: p.color, rating: p.rating,
-}));
-
-const EXCLUSIVE_SHOWCASE_SLIDES = [
+const faqs = [
   {
-    productId: "claude-max-5x-yearly",
-    image: "/exclusive-offers/claude-max-5x.jpg",
-    alt: "Claude Max 5x",
-    accent: "#a855f7",
+    q: "كيف يتم التفعيل بعد الدفع؟",
+    a: "بعد رفع إثبات الدفع يتحقق فريقنا من العملية، ثم تُحدَّث حالة الطلب إلى مفعّل وتصلك بيانات التفعيل على بريدك.",
   },
   {
-    productId: "claude-max-20x-yearly",
-    image: "/exclusive-offers/claude-max-20x.jpg",
-    alt: "Claude Max 20x",
-    accent: "#f97316",
+    q: "هل أحتاج إلى حساب للشراء؟",
+    a: "لا. يمكنك إتمام الطلب ببريدك الإلكتروني، ويمكنك إنشاء حساب لاحقاً لمتابعة كل طلباتك في مكان واحد.",
   },
   {
-    productId: "claude-pro-yearly",
-    image: "/exclusive-offers/claude-pro.jpg",
-    alt: "Claude Pro",
-    accent: "#8b5cf6",
+    q: "ما طرق الدفع المتاحة؟",
+    a: "طرق الدفع المعروضة في صفحة إتمام الطلب هي الطرق المفعّلة فعلياً في المتجر في تلك اللحظة، ولا نعرض أي وسيلة غير متاحة.",
+  },
+  {
+    q: "ماذا لو لم يعمل الاشتراك؟",
+    a: "راجع سياسة الاسترجاع، أو تواصل مع الدعم من نفس صفحة الطلب مع رقم العملية وسنعالج الحالة.",
   },
 ];
 
-const globalStats = [
-  { value: "+250,000", label: "عميل سعيد", icon: Users },
-  { value: "4.98 ⭐", label: "تقييم العملاء", icon: Star },
-  { value: "+650,000", label: "طلب مكتمل", icon: Rocket },
-  { value: "+90", label: "دولة حول العالم", icon: Globe },
-];
+export default async function HomePage() {
+  const products = await getProducts();
+  const categories = groupByCategory(products);
+  const featured = products.slice(0, 8);
+  const onSale = products
+    .filter((p) => typeof p.old_price === "number" && Number(p.old_price) > Number(p.price))
+    .slice(0, 4);
 
-const NEWSLETTER_STRIP_IMAGES = [
-  { src: "/newsletter-strip/figma.jpg", alt: "Figma" },
-  { src: "/newsletter-strip/gemini.jpg", alt: "Gemini" },
-  { src: "/newsletter-strip/chatgpt.jpg", alt: "ChatGPT" },
-  { src: "/newsletter-strip/netflix.jpg", alt: "Netflix" },
-  { src: "/newsletter-strip/grok.jpg", alt: "Grok" },
-  { src: "/newsletter-strip/spotify.jpg", alt: "Spotify" },
-  { src: "/newsletter-strip/perplexity.jpg", alt: "Perplexity" },
-  { src: "/newsletter-strip/adobe.jpg", alt: "Adobe" },
-  { src: "/newsletter-strip/ai-cloud.jpg", alt: "AI Cloud" },
-  { src: "/newsletter-strip/claude.jpg", alt: "Claude" },
-];
-
-
-export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#050508] text-white">
+    <>
       <SiteHeader />
-      <BannerCarousel />
-      <AdsShowcase />
-      <div className="mx-auto max-w-7xl px-4 pb-10">
-        <HeroSection />
-        <FeatureStrip />
-        <CategoriesSection />
-        <StatsSection />
-        <CertificatesSection />
-        <ReviewsCarousel />
-        <ExclusiveOfferShowcase />
-        <TrustSection />
-        <BrandsStrip />
-        <NewsletterSection />
-        <Footer />
-      </div>
-    </main>
-  );
-}
 
-function CertificatesSection() {
-  return (
-    <section className="py-10">
-      <div className="mb-5 text-right">
-        <p className="mb-2 text-sm font-black text-lime-300">الشهادات</p>
-        <h2 className="text-2xl font-black text-white md:text-3xl">وثائق وشهادات Growfolo</h2>
-      </div>
-      <div className="grid gap-3">
-        {CERTIFICATES.map((certificate, index) => (
-          <a
-            key={certificate.slug}
-            href={`/certificates/${certificate.slug}`}
-            className="group relative flex min-h-16 items-center gap-4 overflow-hidden rounded-3xl border border-white/12 bg-white/[0.055] px-5 py-4 text-right shadow-[0_18px_55px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-lime-300/45 hover:bg-white/[0.08] hover:shadow-[0_22px_70px_rgba(132,204,22,0.13)]"
-            style={{ animationDelay: `${index * 120}ms` }}
-          >
-            <span
-              className="grid size-11 shrink-0 place-items-center rounded-2xl border bg-black/25 transition-transform duration-300 group-hover:scale-110"
-              style={{ borderColor: `${certificate.accent}66`, color: certificate.accent }}
-            >
-              <FileCheck2 size={21} />
-            </span>
-            <span className="flex-1 font-black text-white">{certificate.buttonLabel}</span>
-            <span className="text-lg text-white/35 transition-transform duration-300 group-hover:-translate-x-1">←</span>
-            <span
-              className="pointer-events-none absolute inset-y-0 right-0 w-1 opacity-80"
-              style={{ background: certificate.accent }}
-            />
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-}
+      <main>
+        {/* ── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden border-b border-[var(--gf-line)]">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(60% 80% at 80% 0%, rgba(16,185,129,.18), transparent 60%), radial-gradient(50% 70% at 10% 10%, rgba(56,189,248,.12), transparent 60%)",
+            }}
+          />
+          <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
+            <div>
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--gf-line-strong)] bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--gf-text-muted)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--gf-brand)]" />
+                تفعيل بعد التحقق · دعم عربي
+              </p>
+              <h1 className="text-4xl font-black leading-[1.15] text-[var(--gf-text)] md:text-5xl">
+                اشتراكات وأدوات رقمية
+                <span className="text-[var(--gf-brand)]"> بسعر واضح </span>
+                وتفعيل مضمون
+              </h1>
+              <p className="mt-5 max-w-lg text-base leading-8 text-[var(--gf-text-muted)]">
+                اختر من كتالوج محدّث، ادفع بالطريقة التي تناسبك، وارفع إثبات الدفع.
+                نحن نتحقق ونفعّل، وتتابع كل خطوة من صفحة الطلب.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/products"
+                  className="rounded-[var(--gf-radius-sm)] bg-[var(--gf-brand)] px-6 py-3 text-sm font-bold text-[#052e1c] transition hover:bg-[var(--gf-brand-strong)] hover:text-white"
+                >
+                  تصفّح المتجر
+                </Link>
+                <Link
+                  href="/track-order"
+                  className="rounded-[var(--gf-radius-sm)] border border-[var(--gf-line-strong)] px-6 py-3 text-sm font-bold text-[var(--gf-text)] transition hover:border-[var(--gf-brand)] hover:text-[var(--gf-brand)]"
+                >
+                  تتبّع طلبك
+                </Link>
+              </div>
+              <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-[var(--gf-line)] pt-6">
+                <div>
+                  <dt className="text-xs text-[var(--gf-text-muted)]">منتجات متاحة</dt>
+                  <dd className="text-xl font-black text-[var(--gf-text)]">{products.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-[var(--gf-text-muted)]">تصنيفات</dt>
+                  <dd className="text-xl font-black text-[var(--gf-text)]">{categories.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-[var(--gf-text-muted)]">تتبّع</dt>
+                  <dd className="text-xl font-black text-[var(--gf-text)]">بدون حساب</dd>
+                </div>
+              </dl>
+            </div>
 
-function ExclusiveOfferShowcase() {
-  const [current, setCurrent] = useState(0);
-  const [dragStart, setDragStart] = useState<number | null>(null);
-  const [dragDelta, setDragDelta] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const { addItem } = useCart();
-  const { addNotification } = useNotifications();
-
-  const goTo = useCallback((index: number) => {
-    setCurrent((index + EXCLUSIVE_SHOWCASE_SLIDES.length) % EXCLUSIVE_SHOWCASE_SLIDES.length);
-  }, []);
-
-  const next = useCallback(() => goTo(current + 1), [current, goTo]);
-  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
-
-  useEffect(() => {
-    if (paused) return;
-    const timer = window.setInterval(next, 5000);
-    return () => window.clearInterval(timer);
-  }, [next, paused]);
-
-  function buyProduct(productId: string) {
-    const product = products.find((p) => p.id === productId);
-    if (!product) return;
-    addItem({ id: product.id, name: product.name, price: product.price_num, logo: product.logo, color: product.color });
-    addNotification({
-      title: "تمت الإضافة إلى السلة",
-      description: `تم إضافة "${product.name}" إلى سلة المشتريات`,
-      type: "cart",
-    });
-  }
-
-  return (
-    <section
-      className="py-10"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <div
-        className="relative mx-auto min-h-[560px] max-w-5xl touch-pan-y overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] px-4 py-7 shadow-[0_30px_90px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:min-h-[660px] sm:px-8"
-        style={{ perspective: "1400px" }}
-        onPointerDown={(e) => {
-          setPaused(true);
-          setDragStart(e.clientX);
-          setDragDelta(0);
-          e.currentTarget.setPointerCapture(e.pointerId);
-        }}
-        onPointerMove={(e) => {
-          if (dragStart === null) return;
-          setDragDelta(e.clientX - dragStart);
-        }}
-        onPointerUp={(e) => {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-          if (dragDelta > 70) prev();
-          if (dragDelta < -70) next();
-          setDragStart(null);
-          setDragDelta(0);
-          setPaused(false);
-        }}
-        onPointerCancel={() => {
-          setDragStart(null);
-          setDragDelta(0);
-          setPaused(false);
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.18),transparent_42%),radial-gradient(circle_at_12%_100%,rgba(200,230,0,0.10),transparent_35%)]" />
-
-        {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => {
-
-          const offset = ((index - current + EXCLUSIVE_SHOWCASE_SLIDES.length + 1) % EXCLUSIVE_SHOWCASE_SLIDES.length) - 1;
-          const isActive = offset === 0;
-          const product = products.find((p) => p.id === slide.productId);
-
-          return (
-            <article
-              key={slide.productId}
-              className="absolute inset-x-4 top-7 transition-all duration-700 ease-out sm:inset-x-8"
-              style={{
-                opacity: isActive ? 1 : 0.38,
-                transform: `translateX(${offset * 68 + (isActive ? dragDelta / 18 : 0)}%) rotateY(${offset * -18}deg) scale(${isActive ? 1 : 0.86})`,
-                zIndex: isActive ? 3 : 1,
-                pointerEvents: isActive ? "auto" : "none",
-              }}
-            >
-              <div
-                className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border bg-black/35 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl transition-transform duration-300 hover:-translate-y-1 sm:p-4"
-                style={{
-                  borderColor: `${slide.accent}55`,
-                  boxShadow: `0 0 42px ${slide.accent}24, 0 28px 80px rgba(0,0,0,0.55)`,
-                }}
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.alt}
-                  draggable={false}
-                  className="mx-auto max-h-[430px] w-full select-none rounded-2xl object-contain sm:max-h-[540px]"
-                />
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={() => buyProduct(slide.productId)}
-                    className="group inline-flex min-h-14 items-center gap-3 rounded-2xl border px-7 py-3 font-black text-white backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] active:scale-95"
-                    style={{
-                      borderColor: `${slide.accent}70`,
-                      background: `linear-gradient(135deg, ${slide.accent}33, rgba(255,255,255,0.08))`,
-                      boxShadow: `0 0 28px ${slide.accent}33`,
-                    }}
-                  >
-                    <ShoppingCart size={19} className="transition-transform group-hover:-translate-y-0.5" />
-                    {product ? `شراء ${product.name}` : "شراء الآن"}
-                  </button>
+            <div className="relative">
+              <div className="rounded-[var(--gf-radius-lg)] border border-[var(--gf-line)] bg-[var(--gf-surface)] p-5 shadow-[var(--gf-shadow-lg)]">
+                <p className="mb-4 text-xs font-bold text-[var(--gf-text-muted)]">الأكثر طلباً</p>
+                <div className="grid gap-3">
+                  {featured.slice(0, 3).map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/products/${p.id}`}
+                      className="flex items-center justify-between gap-3 rounded-[var(--gf-radius-sm)] border border-[var(--gf-line)] bg-[var(--gf-bg)] p-3 transition hover:border-[var(--gf-brand)]"
+                    >
+                      <span className="line-clamp-1 text-sm font-bold text-[var(--gf-text)]">
+                        {p.name}
+                      </span>
+                      <span className="shrink-0 text-sm font-black text-[var(--gf-brand)]">
+                        {Number(p.price).toFixed(2)} $
+                      </span>
+                    </Link>
+                  ))}
+                  {featured.length === 0 && (
+                    <p className="text-sm text-[var(--gf-text-muted)]">
+                      لا توجد منتجات منشورة حالياً.
+                    </p>
+                  )}
                 </div>
               </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {/* Pagination dots — outside overflow-hidden container */}
-      <div className="mt-5 flex items-center justify-center gap-3">
-        {EXCLUSIVE_SHOWCASE_SLIDES.map((slide, index) => (
-          <button
-            key={slide.productId}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => goTo(index)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: index === current ? 28 : 10,
-              height: 10,
-              background: index === current ? slide.accent : "rgba(255,255,255,0.22)",
-              boxShadow: index === current ? `0 0 10px ${slide.accent}88` : "none",
-            }}
-            aria-label={`عرض ${slide.alt}`}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="grid min-h-[520px] items-center gap-8 py-8 md:grid-cols-[1.02fr_0.98fr] md:py-12">
-      <div className="order-2 md:order-none md:col-start-2 md:row-start-1">
-        <HeroScene />
-      </div>
-      <div className="order-1 text-right md:order-none md:col-start-1 md:row-start-1">
-        <h1 className="text-5xl font-black leading-[1.25] text-white md:text-7xl">
-          كل ما تحتاجه في
-          <span className="neon-text mt-1 block">مكان واحد</span>
-        </h1>
-        <p className="mt-5 max-w-xl text-lg leading-9 text-white/70">
-          اشتراكات أصلية، أدوات ذكية. خدمات رقمية بأسعار تنافسية وخدمة موثوقة
-        </p>
-        <div className="mt-8 flex flex-wrap gap-4">
-          <a href="#products" className="neon-button inline-flex items-center gap-3 rounded-2xl px-7 py-4 font-bold text-black">
-            تصفح المنتجات <ShoppingBag size={20} />
-          </a>
-          <a href="#about" className="inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-black/45 px-7 py-4 font-bold text-white shadow-[0_0_24px_rgba(168,85,247,0.16)]">
-            تعرف علينا
-            <span className="grid size-7 place-items-center rounded-full border border-white/30"><Play size={14} fill="white" /></span>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeatureStrip() {
-  return (
-    <section className="glass-panel grid gap-4 rounded-3xl p-5 md:grid-cols-4">
-      {features.map((f) => <IconBlock key={f.title} {...f} />)}
-    </section>
-  );
-}
-
-function CategoriesSection() {
-  return (
-    <section className="py-10">
-      <SectionTitle title="تصفح الأقسام" />
-      <div className="relative mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        {categories.map((c) => (
-          <article key={c.title} className="glass-panel group grid min-h-40 place-items-center rounded-3xl p-5 text-center">
-            <c.icon className="mb-5 size-14 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.75)] group-hover:text-lime-400" />
-            <h3 className="font-bold text-white">{c.title}</h3>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function StatsSection() {
-  return (
-    <section className="glass-panel grid gap-5 rounded-3xl p-6 md:grid-cols-4">
-      {globalStats.map((s) => (
-        <div key={s.label} className="flex items-center gap-4">
-          <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-purple-500/20 bg-purple-500/10">
-            <s.icon className="size-8 text-lime-400 drop-shadow-[0_0_12px_rgba(132,204,22,0.75)]" />
+            </div>
           </div>
-          <div>
-            <strong className="block text-2xl text-white">{s.value}</strong>
-            <span className="text-sm text-white/60">{s.label}</span>
+        </section>
+
+        {/* ── Categories ───────────────────────────────────────────────── */}
+        {categories.length > 0 && (
+          <section className="mx-auto max-w-6xl px-4 py-14" aria-labelledby="categories-title">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <h2 id="categories-title" className="text-2xl font-black text-[var(--gf-text)]">
+                  تصفّح حسب التصنيف
+                </h2>
+                <p className="mt-1 text-sm text-[var(--gf-text-muted)]">
+                  كل تصنيف يعرض عدد المنتجات المتاحة فيه.
+                </p>
+              </div>
+              <Link href="/products" className="text-sm font-bold text-[var(--gf-brand)]">
+                عرض الكل
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => (
+                <Link
+                  key={c.name}
+                  href="/products"
+                  className="rounded-full border border-[var(--gf-line)] bg-[var(--gf-surface)] px-4 py-2 text-sm font-semibold text-[var(--gf-text)] transition hover:border-[var(--gf-brand)] hover:text-[var(--gf-brand)]"
+                >
+                  {c.name}
+                  <span className="ms-2 text-xs text-[var(--gf-text-muted)]">{c.count}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Featured ─────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 pb-14" aria-labelledby="featured-title">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 id="featured-title" className="text-2xl font-black text-[var(--gf-text)]">
+              منتجات مختارة
+            </h2>
+            <Link href="/products" className="text-sm font-bold text-[var(--gf-brand)]">
+              كل المنتجات
+            </Link>
           </div>
-        </div>
-      ))}
-    </section>
-  );
-}
-
-function TrustSection() {
-  return (
-    <section className="my-10 text-center">
-      <h2 className="text-4xl font-black text-white md:text-5xl">
-        يثق بنا <span className="neon-text">آلاف العملاء</span> حول العالم.
-      </h2>
-      <p className="mt-4 text-white/55">خدمة سريعة · اشتراكات أصلية · دعم 24/7</p>
-      <a href="/checkout" className="neon-button mt-8 inline-flex items-center gap-3 rounded-2xl px-10 py-4 font-black text-black text-lg">
-        ابدأ الآن ←
-      </a>
-      <AdsSectionSlider />
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
-        {["ضمان استرجاع الأموال حتى 30 يوم", "تفعيل فوري خلال دقائق", "دعم على مدار الساعة 24/7", "دفع 100% آمن · حماية بياناتك", "اشتراكات أصلية 100% بدون مشاركة"].map((t) => (
-          <span key={t} className="flex items-center gap-1.5">
-            <BadgeCheck size={15} className="text-lime-400" /> {t}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function BrandsStrip() {
-  const stripRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef({ active: false, x: 0, scrollLeft: 0 });
-
-  useEffect(() => {
-    const strip = stripRef.current;
-    if (!strip) return;
-
-    const timer = window.setInterval(() => {
-      if (dragRef.current.active) return;
-      const next = strip.scrollLeft + 150;
-      strip.scrollTo({
-        left: next >= strip.scrollWidth - strip.clientWidth - 4 ? 0 : next,
-        behavior: "smooth",
-      });
-    }, 5000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return (
-    <section className="glass-panel overflow-hidden rounded-3xl py-5">
-      <style>{`
-        @keyframes newsletter-logo-float {
-          0%, 100% { transform: translateY(0) rotateX(0deg); }
-          50% { transform: translateY(-9px) rotateX(5deg); }
-        }
-      `}</style>
-      <div
-        ref={stripRef}
-        className="flex cursor-grab select-none items-center gap-4 overflow-x-auto px-5 py-3 active:cursor-grabbing [scrollbar-width:none] sm:gap-5 sm:px-6"
-        dir="ltr"
-        style={{ WebkitOverflowScrolling: "touch" }}
-        onPointerDown={(e) => {
-          const strip = stripRef.current;
-          if (!strip) return;
-          dragRef.current = { active: true, x: e.clientX, scrollLeft: strip.scrollLeft };
-          strip.setPointerCapture(e.pointerId);
-        }}
-        onPointerMove={(e) => {
-          const strip = stripRef.current;
-          if (!strip || !dragRef.current.active) return;
-          strip.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.x);
-        }}
-        onPointerUp={(e) => {
-          dragRef.current.active = false;
-          stripRef.current?.releasePointerCapture(e.pointerId);
-        }}
-        onPointerCancel={() => {
-          dragRef.current.active = false;
-        }}
-      >
-        {NEWSLETTER_STRIP_IMAGES.map((image, idx) => (
-          <div
-            key={image.src}
-            className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl border border-white/10 bg-white shadow-[0_14px_38px_rgba(0,0,0,0.32)] transition duration-300 hover:scale-105 hover:border-lime-300/50 hover:shadow-[0_16px_44px_rgba(200,230,0,0.16)] sm:size-24 md:size-28"
-            style={{
-              animation: "newsletter-logo-float 4.6s ease-in-out infinite",
-              animationDelay: `${idx * 120}ms`,
-            }}
-          >
-            <img
-              src={image.src}
-              alt={image.alt}
-              draggable={false}
-              className="size-full object-cover object-center"
-            />
-            <span className="pointer-events-none absolute inset-x-2 top-1 h-1/3 rounded-full bg-white/20 blur-md" />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function NewsletterSection() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-
-  async function handleSubscribe(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setStatus("loading");
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/v1/newsletter/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      setStatus(res.ok ? "done" : "error");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  return (
-    <section className="glass-panel my-8 grid items-center gap-5 rounded-3xl p-6 md:grid-cols-[1fr_1.1fr_auto]">
-      <div>
-        <h2 className="text-2xl font-black">كن أول من يعرف!</h2>
-        <p className="mt-2 text-sm text-white/65">اشترك بنشرتنا البريدية ليصلك كل جديد</p>
-      </div>
-      {status === "done" ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-lime-500/30 bg-lime-500/10 px-4 py-3 text-sm text-lime-400 md:col-span-2">
-          ✓ تم الاشتراك! تفقد بريدك الإلكتروني للحصول على خصم 25%
-        </div>
-      ) : (
-        <>
-          <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 text-white/55">
-            <Mail size={21} className="text-purple-400" />
-            <input
-              className="w-full bg-transparent outline-none placeholder:text-white/45"
-              placeholder="ادخل بريدك الإلكتروني"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              disabled={status === "loading"}
-            />
-          </label>
-          <button
-            onClick={handleSubscribe}
-            disabled={status === "loading" || !email.trim()}
-            className="neon-button min-h-14 rounded-2xl px-9 font-black text-black disabled:opacity-60"
-          >
-            {status === "loading" ? "..." : "اشترك الآن"}
-          </button>
-          {status === "error" && (
-            <p className="text-xs text-red-400 md:col-span-3 -mt-2">حدث خطأ، حاول مرة أخرى</p>
+          {featured.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((p, i) => (
+                <ProductCard key={p.id} product={p} priority={i < 2} />
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-surface)] p-6 text-sm text-[var(--gf-text-muted)]">
+              الكتالوج قيد التحديث. عد قريباً.
+            </p>
           )}
-        </>
-      )}
-    </section>
-  );
-}
+        </section>
 
-function Footer() {
-  return (
-    <footer id="about" className="border-t border-purple-500/15 py-8">
-      <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-        <div>
-          <div className="pixel-logo text-3xl font-black">
-            <span className="text-purple-500">GROW</span><span className="text-lime-400">FOLO</span>
+        {/* ── Offers ───────────────────────────────────────────────────── */}
+        {onSale.length > 0 && (
+          <section className="mx-auto max-w-6xl px-4 pb-14" aria-labelledby="offers-title">
+            <h2 id="offers-title" className="mb-6 text-2xl font-black text-[var(--gf-text)]">
+              عروض سارية
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {onSale.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── How it works ─────────────────────────────────────────────── */}
+        <section className="border-y border-[var(--gf-line)] bg-[var(--gf-surface)]" aria-labelledby="steps-title">
+          <div className="mx-auto max-w-6xl px-4 py-14">
+            <h2 id="steps-title" className="mb-8 text-2xl font-black text-[var(--gf-text)]">
+              كيف تشتري من Growfolo؟
+            </h2>
+            <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {steps.map((s) => (
+                <li
+                  key={s.n}
+                  className="rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-bg)] p-5"
+                >
+                  <span className="mb-3 grid h-9 w-9 place-items-center rounded-full bg-[var(--gf-brand-soft)] text-sm font-black text-[var(--gf-brand)]">
+                    {s.n}
+                  </span>
+                  <h3 className="text-base font-bold text-[var(--gf-text)]">{s.t}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--gf-text-muted)]">{s.d}</p>
+                </li>
+              ))}
+            </ol>
           </div>
-          <p className="mt-4 max-w-sm text-sm leading-8 text-white/65">
-            متجر رقمي يقدم لك أفضل الخدمات والاشتراكات الأصلية، كل ما تحتاج لتجربة رقمية متكاملة ومتميزة
-          </p>
-        </div>
-        <FooterColumn title="روابط سريعة" links={[
-          { label: "المدونة",                href: "/blog" },
-          { label: "الصفحة التعريفية",      href: "#about" },
-          { label: "سياسة الخصوصية",        href: "/privacy" },
-          { label: "الاستبدال والاسترجاع",  href: "/refund-policy" },
-        ]} />
-        <FooterColumn title="خدمة العملاء" links={[
-          { label: "تواصل معنا",    href: "#" },
-          { label: "الأسئلة الشائعة", href: "/faq" },
-          { label: "تتبع الطلب",    href: "/track-order" },
-          { label: "شروط الخدمة",  href: "#" },
-        ]} />
-        <div>
-          <h3 className="mb-4 font-black">طرق الدفع</h3>
-          <div className="grid max-w-64 grid-cols-2 gap-2">
-            {PAYMENT_METHODS.map((method) => (
-              <span key={method.id} className="grid min-h-12 place-items-center rounded-lg border border-white/10 bg-white/5 px-2 py-1.5">
-                <PaymentMethodImage method={method} />
-              </span>
+        </section>
+
+        {/* ── Guarantees ───────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 py-14" aria-labelledby="why-title">
+          <h2 id="why-title" className="mb-8 text-2xl font-black text-[var(--gf-text)]">
+            لماذا Growfolo؟
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {guarantees.map((g) => (
+              <div
+                key={g.title}
+                className="rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-surface)] p-6"
+              >
+                <h3 className="text-base font-bold text-[var(--gf-text)]">{g.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-[var(--gf-text-muted)]">{g.body}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </div>
-      <p className="mt-8 text-center text-xs text-white/35">جميع الحقوق محفوظة GrowFolo © 2026</p>
-    </footer>
-  );
-}
+        </section>
 
-function SectionTitle({ title }: { title: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <h2 className="text-2xl font-black text-white md:text-3xl">{title}</h2>
-      <button className="rounded-2xl bg-white/5 px-5 py-2 text-sm font-bold text-white">عرض الكل</button>
-    </div>
-  );
-}
+        {/* ── FAQ ──────────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-3xl px-4 pb-14" aria-labelledby="faq-title">
+          <h2 id="faq-title" className="mb-6 text-2xl font-black text-[var(--gf-text)]">
+            أسئلة شائعة
+          </h2>
+          <div className="space-y-3">
+            {faqs.map((f) => (
+              <details
+                key={f.q}
+                className="group rounded-[var(--gf-radius)] border border-[var(--gf-line)] bg-[var(--gf-surface)] p-5"
+              >
+                <summary className="cursor-pointer list-none text-sm font-bold text-[var(--gf-text)] marker:hidden">
+                  <span className="flex items-center justify-between gap-3">
+                    {f.q}
+                    <span
+                      aria-hidden="true"
+                      className="text-[var(--gf-brand)] transition group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-7 text-[var(--gf-text-muted)]">{f.a}</p>
+              </details>
+            ))}
+          </div>
+          <Link
+            href="/faq"
+            className="mt-5 inline-block text-sm font-bold text-[var(--gf-brand)]"
+          >
+            كل الأسئلة الشائعة
+          </Link>
+        </section>
 
-function IconBlock({ title, text, icon: Icon }: { title: string; text: string; icon: LucideIcon }) {
-  return (
-    <article className="flex items-center gap-4 border-white/10 md:border-l md:pl-4 last:border-l-0">
-      <div className="grid size-16 shrink-0 place-items-center rounded-2xl border border-purple-500/25 bg-purple-500/10">
-        <Icon className="size-9 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.8)]" />
-      </div>
-      <div>
-        <h3 className="font-black text-white">{title}</h3>
-        <p className="mt-1 text-sm leading-6 text-white/65">{text}</p>
-      </div>
-    </article>
-  );
-}
+        {/* ── Newsletter ───────────────────────────────────────────────── */}
+        <section className="border-t border-[var(--gf-line)] bg-[var(--gf-surface)]">
+          <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-14 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-xl font-black text-[var(--gf-text)]">العروض الجديدة أولاً</h2>
+              <p className="mt-1 text-sm text-[var(--gf-text-muted)]">
+                رسالة واحدة عند نزول عرض جديد. لا رسائل مزعجة.
+              </p>
+            </div>
+            <NewsletterForm />
+          </div>
+        </section>
+      </main>
 
-function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
-  return (
-    <div>
-      <h3 className="mb-4 font-black">{title}</h3>
-      <ul className="grid gap-3 text-sm text-white/62">
-        {links.map((l) => (
-          <li key={l.label}>
-            <a href={l.href} className="transition-colors hover:text-white">{l.label}</a>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <SiteFooter />
+    </>
   );
 }
